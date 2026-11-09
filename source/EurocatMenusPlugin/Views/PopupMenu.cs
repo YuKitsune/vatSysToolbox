@@ -189,15 +189,7 @@ static class PopupMenu
             }
         }
 
-        var panel = new Border
-        {
-            Child = new BeveledBorder
-            {
-                BevelType = BevelType.Raised,
-                BorderThickness = Bevel.BorderThickness,
-                Child = stack
-            }
-        };
+        var panel = new Border { Child = stack };
         panel.SetResourceReference(FrameworkElement.StyleProperty, "PopupMenuPanelStyle");
         return panel;
     }

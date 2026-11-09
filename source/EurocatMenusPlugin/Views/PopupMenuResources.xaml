@@ -10,17 +10,16 @@
         <ResourceDictionary Source="/vatSysToolbox;component/Styles.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <!-- The background and the border of a menu or a submenu -->
+    <!-- The background of a menu or a submenu. The menu has no border, so the buttons fill it. -->
     <Style x:Key="PopupMenuPanelStyle" TargetType="Border">
         <Setter Property="Background" Value="{toolbox:VatSysColour WindowBackground}" />
     </Style>
 
     <!--
         An item in a menu. Each item is a button. An item looks pressed while its submenu is open, or while it is
-        checked in vatSys (for example, a map that is shown).
+        checked in vatSys (for example, a map that is shown). The items have no margin, so there is no gap between them.
     -->
     <Style x:Key="PopupMenuItemStyle" TargetType="ToggleButton" BasedOn="{StaticResource ToggleButtonBaseStyle}">
-        <Setter Property="Margin" Value="2" />
         <Setter Property="MinHeight" Value="24" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     </Style>
@@ -45,6 +44,5 @@
     <Style x:Key="PopupMenuSeparatorStyle" TargetType="controls:BeveledLine">
         <Setter Property="Orientation" Value="Horizontal" />
         <Setter Property="Height" Value="2" />
-        <Setter Property="Margin" Value="2" />
     </Style>
 </ResourceDictionary>
