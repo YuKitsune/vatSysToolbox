@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:EurocatMenusPlugin.Views"
              xmlns:toolbox="clr-namespace:vatSysToolbox;assembly=vatSysToolbox"
              mc:Ignorable="d"
+             Height="80"
              d:DesignHeight="80" d:DesignWidth="1920"
              Background="{toolbox:VatSysColour WindowBackground}">
     <UserControl.Resources>

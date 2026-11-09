@@ -1,3 +1,4 @@
+using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
 using EurocatMenusPlugin.Views;
@@ -5,7 +6,8 @@ using EurocatMenusPlugin.Views;
 namespace EurocatMenusPlugin;
 
 /// <summary>
-/// Hides the vatSys menu bar, and puts the top menu in its place. Puts the bottom menu below the ASD.
+/// Hides the vatSys menu bar. Puts the top menu at the top of the main form, and the bottom menu at the bottom.
+/// The views set the height of the menus. The ASD fills the space between the menus.
 /// The vatSys menu bar can show again above the top menu. The ASD then moves down to make space for it.
 /// </summary>
 public class MenuBarLayout
@@ -27,29 +29,31 @@ public class MenuBarLayout
         _asd = mainForm.Controls[AsdControlName]
             ?? throw new InvalidOperationException("Cannot find the ASD");
 
-        // The ASD starts below the vatSys menu bar. The top menu uses the same space.
+        var topMenu = new TopMenu();
+        var topMenuHeight = GetHeight(topMenu);
         _topMenuHost = new ElementHost
         {
-            Child = new TopMenu(),
+            Child = topMenu,
             Location = new System.Drawing.Point(0, 0),
-            Size = new System.Drawing.Size(mainForm.ClientSize.Width, _vatSysMenu.Height),
+            Size = new System.Drawing.Size(mainForm.ClientSize.Width, topMenuHeight),
             Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
         };
 
         mainForm.Controls.Add(_topMenuHost);
 
-        // The bottom menu uses the bottom of the ASD. It has the same height as the top menu.
-        var bottomMenuHeight = _vatSysMenu.Height;
+        var bottomMenu = new BottomMenu();
+        var bottomMenuHeight = GetHeight(bottomMenu);
         var bottomMenuHost = new ElementHost
         {
-            Child = new BottomMenu(),
+            Child = bottomMenu,
             Location = new System.Drawing.Point(0, _asd.Bottom - bottomMenuHeight),
             Size = new System.Drawing.Size(mainForm.ClientSize.Width, bottomMenuHeight),
             Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
         };
 
         mainForm.Controls.Add(bottomMenuHost);
-        _asd.Height -= bottomMenuHeight;
+
+        _asd.SetBounds(_asd.Left, topMenuHeight, _asd.Width, bottomMenuHost.Top - topMenuHeight);
 
         _vatSysMenu.Visible = false;
         _vatSysMenuVisible = false;
@@ -83,5 +87,11 @@ public class MenuBarLayout
         _asd.SetBounds(_asd.Left, _asd.Top - offset, _asd.Width, _asd.Height + offset);
 
         _vatSysMenuVisible = false;
+    }
+
+    static int GetHeight(FrameworkElement view)
+    {
+        view.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
+        return (int)Math.Ceiling(view.DesiredSize.Height);
     }
 }
