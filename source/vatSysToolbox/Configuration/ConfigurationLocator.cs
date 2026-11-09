@@ -16,7 +16,7 @@ public static class ConfigurationLocator
     /// </list>
     /// </summary>
     /// <exception cref="FileNotFoundException">The file is not in one of the directories.</exception>
-    public static string LocateConfigurationFile(vatsys.IPlugin plugin, string fileName)
+    public static string LocateConfigurationFile(vatsys.Plugin.IPlugin plugin, string fileName)
     {
         return LocateConfigurationFile(plugin.GetType().Assembly, fileName, [plugin.Name]);
     }
