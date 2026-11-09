@@ -1,0 +1,50 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:toolbox="clr-namespace:vatSysToolbox;assembly=vatSysToolbox"
+    xmlns:controls="clr-namespace:vatSysToolbox.Controls;assembly=vatSysToolbox">
+
+    <!-- The styles of the popup menus. PopupMenu adds this dictionary to each menu. -->
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/vatSysToolbox;component/Styles.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <!-- The background and the border of a menu or a submenu -->
+    <Style x:Key="PopupMenuPanelStyle" TargetType="Border">
+        <Setter Property="Background" Value="{toolbox:VatSysColour WindowBackground}" />
+    </Style>
+
+    <!--
+        An item in a menu. Each item is a button. An item looks pressed while its submenu is open, or while it is
+        checked in vatSys (for example, a map that is shown).
+    -->
+    <Style x:Key="PopupMenuItemStyle" TargetType="ToggleButton" BasedOn="{StaticResource ToggleButtonBaseStyle}">
+        <Setter Property="Margin" Value="2" />
+        <Setter Property="MinHeight" Value="24" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+
+    <!-- The content of an item: the header on the left, and the unread count and the chevron on the right -->
+    <Style x:Key="PopupMenuItemContentStyle" TargetType="DockPanel">
+        <Setter Property="Margin" Value="4,0" />
+    </Style>
+
+    <Style x:Key="PopupMenuChevronStyle" TargetType="controls:Chevron">
+        <Setter Property="Direction" Value="Right" />
+        <Setter Property="Margin" Value="8,0,0,0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- vatSys shows the number of unread messages on the right of the item, in the warning colour -->
+    <Style x:Key="PopupMenuUnreadCountStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{toolbox:VatSysColour WindowWarning}" />
+        <Setter Property="Margin" Value="8,0,0,0" />
+    </Style>
+
+    <Style x:Key="PopupMenuSeparatorStyle" TargetType="controls:BeveledLine">
+        <Setter Property="Orientation" Value="Horizontal" />
+        <Setter Property="Height" Value="2" />
+        <Setter Property="Margin" Value="2" />
+    </Style>
+</ResourceDictionary>

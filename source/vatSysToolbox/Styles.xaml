@@ -62,8 +62,8 @@
                     <ContentPresenter
                         Content="{TemplateBinding Content}"
                         ContentTemplate="{TemplateBinding ContentTemplate}"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center">
+                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}">
                         <ContentPresenter.Resources>
                             <Style TargetType="TextBlock" BasedOn="{StaticResource ButtonTextStyle}" />
                         </ContentPresenter.Resources>
@@ -82,8 +82,8 @@
                     <ContentPresenter
                         Content="{TemplateBinding Content}"
                         ContentTemplate="{TemplateBinding ContentTemplate}"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center">
+                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}">
                         <ContentPresenter.Resources>
                             <Style TargetType="TextBlock" BasedOn="{StaticResource ButtonTextStyle}" />
                         </ContentPresenter.Resources>
