@@ -35,9 +35,15 @@
                 <Setter Property="Width" Value="{StaticResource ItemWidth}" />
             </Style>
 
-            <!-- A square button that opens a popup. It looks pressed while the popup is open. -->
-            <Style TargetType="ToggleButton" BasedOn="{StaticResource ToggleButtonBaseStyle}">
+            <!-- A toggle button that fills its space. Use it in a stack. -->
+            <Style x:Key="StackedToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource ToggleButtonBaseStyle}">
                 <Setter Property="Margin" Value="{StaticResource ItemMargin}" />
+            </Style>
+
+            <!--
+                A square button that opens a popup or a window. It looks pressed while the popup or the window is open.
+            -->
+            <Style TargetType="ToggleButton" BasedOn="{StaticResource StackedToggleButtonStyle}">
                 <Setter Property="Width" Value="{StaticResource ItemWidth}" />
             </Style>
 
@@ -78,13 +84,13 @@
             <Button Grid.Row="1" Style="{StaticResource StackedButtonStyle}" IsEnabled="False">Sup ASD</Button>
         </Grid>
         <Button Command="{Binding OpenFlightPlanCommand}">FPL</Button>
-        <Button Command="{Binding OpenHoldSetupCommand}" IsEnabled="{Binding IsHoldSetupAvailable}">HLD SET</Button>
+        <ToggleButton Command="{Binding ToggleHoldSetupCommand}" IsChecked="{Binding IsHoldSetupOpen, Mode=OneWay}" IsEnabled="{Binding IsHoldSetupAvailable}">HLD SET</ToggleButton>
         <Grid Style="{StaticResource StackStyle}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Button Grid.Row="0" Style="{StaticResource StackedButtonStyle}" Command="{Binding OpenStripSetupCommand}">SSTP</Button>
+            <ToggleButton Grid.Row="0" Style="{StaticResource StackedToggleButtonStyle}" Command="{Binding ToggleStripSetupCommand}" IsChecked="{Binding IsStripSetupOpen, Mode=OneWay}">SSTP</ToggleButton>
             <Border Grid.Row="1" Style="{StaticResource IndicatorStyle}">
                 <TextBlock Style="{StaticResource GenericTextStyle}" HorizontalAlignment="Center" Text="{Binding StripSortMode}" />
             </Border>
@@ -102,8 +108,8 @@
                 <TextBlock Style="{StaticResource GenericTextStyle}" HorizontalAlignment="Center">0</TextBlock>
             </Border>
         </Grid>
-        <Button Command="{Binding OpenAdsContractCommand}" IsEnabled="{Binding IsAdsContractAvailable}">ADS Contract</Button>
-        <Button Command="{Binding OpenCpdlcHistoryCommand}" IsEnabled="{Binding IsCpdlcHistoryAvailable}">History CPDLC</Button>
+        <ToggleButton Command="{Binding ToggleAdsContractCommand}" IsChecked="{Binding IsAdsContractOpen, Mode=OneWay}" IsEnabled="{Binding IsAdsContractAvailable}">ADS Contract</ToggleButton>
+        <ToggleButton Command="{Binding ToggleCpdlcHistoryCommand}" IsChecked="{Binding IsCpdlcHistoryOpen, Mode=OneWay}" IsEnabled="{Binding IsCpdlcHistoryAvailable}">History CPDLC</ToggleButton>
         <Button IsEnabled="False">WAYP</Button>
         <Button IsEnabled="False">Tag List</Button>
         <Button IsEnabled="False">Del Tag</Button>
@@ -111,7 +117,7 @@
         <Button IsEnabled="False">LATC</Button>
         <Button Command="{Binding OpenGroundWindowCommand}">Ground</Button>
         <ToggleButton Click="MessagesButton_Click">MSG</ToggleButton>
-        <Button Command="{Binding OpenAtisEditorCommand}" IsEnabled="{Binding IsAtisEditorAvailable}">ATIS Edit</Button>
+        <ToggleButton Command="{Binding ToggleAtisEditorCommand}" IsChecked="{Binding IsAtisEditorOpen, Mode=OneWay}" IsEnabled="{Binding IsAtisEditorAvailable}">ATIS Edit</ToggleButton>
         <ToggleButton Click="AtisViewButton_Click">ATIS View</ToggleButton>
     </StackPanel>
 </UserControl>
