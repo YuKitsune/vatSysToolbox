@@ -281,7 +281,7 @@ public partial class BottomMenuViewModel : ObservableObject
     void RemoveQuickTag() => Click(RemoveQuickTagItem);
 
     /// <summary>
-    /// Turns the Tag List on or off. The Tag List shows only while it is on and one or more quick tags exist.
+    /// Shows or hides the Tag List.
     /// </summary>
     [RelayCommand]
     void ToggleTagList()

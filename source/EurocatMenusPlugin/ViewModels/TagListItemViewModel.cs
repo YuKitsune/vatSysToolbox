@@ -15,7 +15,7 @@ public partial class TagListItemViewModel : ObservableObject
     [ObservableProperty] bool isEditingGlobalOps;
     [ObservableProperty] string globalOpsEditValue = string.Empty;
 
-    // Example data for the XAML designer. Do not use at runtime.
+    // A strip with fixed text, for the XAML designer and for the size of the Tag List
     public TagListItemViewModel(string aircraftId, string codeAndLevel, string globalOps)
     {
         DisplayAircraftId = aircraftId.PadRight(8);

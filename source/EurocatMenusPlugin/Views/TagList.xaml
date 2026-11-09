@@ -22,91 +22,104 @@
                 <!-- A transparent background makes all of the text get the mouse, and not only the characters -->
                 <Setter Property="Background" Value="Transparent" />
             </Style>
+
+            <DataTemplate x:Key="StripTemplate" DataType="viewModels:TagListItemViewModel">
+                <Border
+                    Background="{toolbox:VatSysColour StripBackground}"
+                    BorderBrush="{toolbox:VatSysColour StripText}"
+                    BorderThickness="2"
+                    HorizontalAlignment="Left">
+                    <!--
+                        The minimum height is the height of the designator in the strips of the Hold plugin. Thus,
+                        the strips of the two lists have the same height.
+                    -->
+                    <StackPanel Orientation="Horizontal" Margin="4" MinHeight="16">
+
+                        <!-- ACID. A middle click deletes the quick tag. -->
+                        <TextBlock Style="{StaticResource StripTextStyle}"
+                                   Text="{Binding DisplayAircraftId}"
+                                   MouseDown="Acid_MouseDown" />
+
+                        <!-- SSR code and level -->
+                        <TextBlock Style="{StaticResource StripTextStyle}"
+                                   Text="{Binding DisplayCodeAndLevel}" />
+
+                        <!-- Global ops. A click opens the text box. -->
+                        <Grid MinWidth="120">
+                            <TextBlock Text="{Binding GlobalOps}"
+                                       MouseLeftButtonUp="GlobalOps_MouseLeftButtonUp">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource StripTextStyle}">
+                                        <Style.Triggers>
+                                            <!-- Hidden, and not collapsed, so that the strip keeps its size -->
+                                            <DataTrigger Binding="{Binding IsEditingGlobalOps}" Value="True">
+                                                <Setter Property="Visibility" Value="Hidden" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+
+                            <!--
+                                vatSys uses the same length and casing when the label data is edited on the ASD.
+                                The text box does not make the strip larger:
+                                - The negative margin puts the border of the text box in the space around the text.
+                                - The text box uses the same line height as the text of the strip. By default, a
+                                  text box uses the line height of the font, which is larger.
+                            -->
+                            <TextBox Margin="-2"
+                                     TextBlock.LineStackingStrategy="BlockLineHeight"
+                                     TextBlock.LineHeight="{Binding Source={x:Static toolbox:VatSysFont.Size}, Converter={StaticResource FontSizeToLineHeightConverter}}"
+                                     Text="{Binding GlobalOpsEditValue, UpdateSourceTrigger=PropertyChanged}"
+                                     MaxLength="11"
+                                     CharacterCasing="Upper"
+                                     HorizontalAlignment="Stretch"
+                                     LostFocus="GlobalOpsTextBox_LostFocus"
+                                     IsVisibleChanged="GlobalOpsTextBox_IsVisibleChanged"
+                                     MouseLeave="GlobalOpsTextBox_MouseLeave">
+                                <TextBox.InputBindings>
+                                    <KeyBinding Key="Return" Command="{Binding CommitGlobalOpsEditCommand}" />
+                                    <KeyBinding Key="Escape" Command="{Binding CancelGlobalOpsEditCommand}" />
+                                </TextBox.InputBindings>
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox" BasedOn="{StaticResource TextBoxBaseStyle}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsEditingGlobalOps}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </DataTemplate>
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <ScrollViewer Style="{StaticResource CustomScrollViewerStyle}">
-        <ItemsControl x:Name="StripList" ItemsSource="{Binding Items}">
-            <ItemsControl.ItemContainerStyle>
-                <Style>
-                    <Setter Property="FrameworkElement.Margin" Value="2" />
-                </Style>
-            </ItemsControl.ItemContainerStyle>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="viewModels:TagListItemViewModel">
-                    <Border
-                        Background="{toolbox:VatSysColour StripBackground}"
-                        BorderBrush="{toolbox:VatSysColour StripText}"
-                        BorderThickness="2"
-                        HorizontalAlignment="Left">
-                        <!--
-                            The minimum height is the height of the designator in the strips of the Hold plugin. Thus,
-                            the strips of the two lists have the same height.
-                        -->
-                        <StackPanel Orientation="Horizontal" Margin="4" MinHeight="16">
+    <Grid>
+        <ScrollViewer Style="{StaticResource CustomScrollViewerStyle}">
+            <ItemsControl x:Name="StripList" ItemsSource="{Binding Items}" ItemTemplate="{StaticResource StripTemplate}">
+                <ItemsControl.ItemContainerStyle>
+                    <Style>
+                        <Setter Property="FrameworkElement.Margin" Value="2" />
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
+            </ItemsControl>
+        </ScrollViewer>
 
-                            <!-- ACID. A middle click deletes the quick tag. -->
-                            <TextBlock Style="{StaticResource StripTextStyle}"
-                                       Text="{Binding DisplayAircraftId}"
-                                       MouseDown="Acid_MouseDown" />
-
-                            <!-- SSR code and level -->
-                            <TextBlock Style="{StaticResource StripTextStyle}"
-                                       Text="{Binding DisplayCodeAndLevel}" />
-
-                            <!-- Global ops. A click opens the text box. -->
-                            <Grid MinWidth="120">
-                                <TextBlock Text="{Binding GlobalOps}"
-                                           MouseLeftButtonUp="GlobalOps_MouseLeftButtonUp">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock" BasedOn="{StaticResource StripTextStyle}">
-                                            <Style.Triggers>
-                                                <!-- Hidden, and not collapsed, so that the strip keeps its size -->
-                                                <DataTrigger Binding="{Binding IsEditingGlobalOps}" Value="True">
-                                                    <Setter Property="Visibility" Value="Hidden" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-
-                                <!--
-                                    vatSys uses the same length and casing when the label data is edited on the ASD.
-                                    The text box does not make the strip larger:
-                                    - The negative margin puts the border of the text box in the space around the text.
-                                    - The text box uses the same line height as the text of the strip. By default, a
-                                      text box uses the line height of the font, which is larger.
-                                -->
-                                <TextBox Margin="-2"
-                                         TextBlock.LineStackingStrategy="BlockLineHeight"
-                                         TextBlock.LineHeight="{Binding Source={x:Static toolbox:VatSysFont.Size}, Converter={StaticResource FontSizeToLineHeightConverter}}"
-                                         Text="{Binding GlobalOpsEditValue, UpdateSourceTrigger=PropertyChanged}"
-                                         MaxLength="11"
-                                         CharacterCasing="Upper"
-                                         HorizontalAlignment="Stretch"
-                                         LostFocus="GlobalOpsTextBox_LostFocus"
-                                         IsVisibleChanged="GlobalOpsTextBox_IsVisibleChanged"
-                                         MouseLeave="GlobalOpsTextBox_MouseLeave">
-                                    <TextBox.InputBindings>
-                                        <KeyBinding Key="Return" Command="{Binding CommitGlobalOpsEditCommand}" />
-                                        <KeyBinding Key="Escape" Command="{Binding CancelGlobalOpsEditCommand}" />
-                                    </TextBox.InputBindings>
-                                    <TextBox.Style>
-                                        <Style TargetType="TextBox" BasedOn="{StaticResource TextBoxBaseStyle}">
-                                            <Setter Property="Visibility" Value="Collapsed" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsEditingGlobalOps}" Value="True">
-                                                    <Setter Property="Visibility" Value="Visible" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Style>
-                                </TextBox>
-                            </Grid>
-                        </StackPanel>
-                    </Border>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-    </ScrollViewer>
+        <!--
+            A strip that is not shown. The window uses its size to get its minimum size, also when the list is empty.
+            A canvas does not give a size to its parent, so the strip does not change the layout. The strip is hidden,
+            and not collapsed, so that it has a size.
+        -->
+        <Canvas>
+            <ContentPresenter x:Name="SampleStrip"
+                              ContentTemplate="{StaticResource StripTemplate}"
+                              Margin="2"
+                              Visibility="Hidden" />
+        </Canvas>
+    </Grid>
 </UserControl>

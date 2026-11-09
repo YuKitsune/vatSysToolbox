@@ -9,7 +9,7 @@ using vatSysToolbox.Windows;
 namespace EurocatMenusPlugin;
 
 /// <summary>
-/// Shows the Tag List while it is turned on and one or more quick tags exist.
+/// Shows the Tag List while it is turned on.
 /// </summary>
 /// <remarks>
 /// vatSys does not send events when the quick tags change. Thus, call <see cref="Refresh"/> at an interval.
@@ -26,7 +26,7 @@ public class TagListWindow(WindowManager windowManager, IErrorReporter errorRepo
     bool _hasOpened;
 
     /// <summary>
-    /// <c>true</c> if the Tag List shows when quick tags exist.
+    /// <c>true</c> if the Tag List shows.
     /// </summary>
     public bool IsOn { get; private set; }
 
@@ -41,9 +41,7 @@ public class TagListWindow(WindowManager windowManager, IErrorReporter errorRepo
     /// </summary>
     public void Refresh()
     {
-        var quickTags = RDP.QuickTags;
-
-        if (!IsOn || quickTags.Count == 0)
+        if (!IsOn)
         {
             if (_viewModel is not null)
                 windowManager.CloseWindow(WindowKey);
@@ -51,6 +49,7 @@ public class TagListWindow(WindowManager windowManager, IErrorReporter errorRepo
             return;
         }
 
+        var quickTags = RDP.QuickTags;
         if (_viewModel is null)
             Open(quickTags);
         else
@@ -103,7 +102,8 @@ public class TagListWindow(WindowManager windowManager, IErrorReporter errorRepo
         }
     }
 
-    // The window starts with the size of all the strips. It cannot become smaller than one strip.
+    // The window starts with the size of all the strips. It cannot become smaller than one strip, also when the list is
+    // empty.
     static void SetSize(VatSysForm form, TagList view, bool isFirstOpen)
     {
         var contentSize = view.MeasureContent();
@@ -125,7 +125,7 @@ public class TagListWindow(WindowManager windowManager, IErrorReporter errorRepo
             return;
 
         form.Size = new System.Drawing.Size(
-            (int)Math.Ceiling(contentSize.Width) + borderWidth,
-            (int)Math.Ceiling(contentSize.Height) + borderHeight);
+            (int)Math.Ceiling(Math.Max(contentSize.Width, minimumContentSize.Width)) + borderWidth,
+            (int)Math.Ceiling(Math.Max(contentSize.Height, minimumContentSize.Height)) + borderHeight);
     }
 }

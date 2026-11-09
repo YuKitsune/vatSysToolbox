@@ -14,6 +14,9 @@ public partial class TagList : UserControl
         InitializeComponent();
         DataContext = viewModel;
         _viewModel = viewModel;
+
+        // The text has the same length as the text of a real strip, so that the sample strip has the same size
+        SampleStrip.Content = new TagListItemViewModel(string.Empty, " A0000 000 ", string.Empty);
     }
 
     /// <summary>
@@ -26,19 +29,19 @@ public partial class TagList : UserControl
     }
 
     /// <summary>
-    /// Gets the size that shows only the first strip.
+    /// Gets the size that shows one strip. This size does not change when strips are added or removed.
     /// </summary>
     public Size MeasureOneStrip()
     {
         var contentSize = MeasureContent();
 
-        // The measure makes the strips. Thus, the first strip has its size now.
-        if (StripList.ItemContainerGenerator.ContainerFromIndex(0) is not UIElement firstStrip)
-            return contentSize;
+        // The border and the scroll bar around the strips
+        var frameWidth = contentSize.Width - StripList.DesiredSize.Width;
+        var frameHeight = contentSize.Height - StripList.DesiredSize.Height;
 
-        // The border and the scroll bar around the strips, and the first strip
-        var otherStripsHeight = StripList.DesiredSize.Height - firstStrip.DesiredSize.Height;
-        return new Size(contentSize.Width, contentSize.Height - otherStripsHeight);
+        return new Size(
+            frameWidth + SampleStrip.DesiredSize.Width,
+            frameHeight + SampleStrip.DesiredSize.Height);
     }
 
     void Acid_MouseDown(object sender, MouseButtonEventArgs e)
