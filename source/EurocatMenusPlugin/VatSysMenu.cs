@@ -73,16 +73,41 @@ public class VatSysMenu(MenuStrip menuStrip, IErrorReporter errorReporter)
                 // vatSys puts text fields in some menus (for example, Info, Find). The popup menu shows an item with
                 // the name of the menu (for example, Find...) that opens a text box.
                 case ToolStripControlHost { Control: TextBox textField }:
-                    items.Add(PopupMenuItem.TextInput(
-                        parent.Text + "...",
-                        text => Submit(textField, text),
-                        textField.MaxLength,
-                        textField.CharacterCasing == CharacterCasing.Upper));
+                    items.Add(GetTextInputItem(textField, parent.Text + "...", title: null));
                     break;
             }
         }
 
         return items;
+    }
+
+    /// <summary>
+    /// Makes a text input item from the text field in a vatSys menu item (for example, Windows, ATIS, Request).
+    /// When Enter is pressed, vatSys gets the text, the same as when Enter is pressed in its text field.
+    /// </summary>
+    /// <param name="parent">The vatSys menu item that contains the text field.</param>
+    /// <param name="header">The text of the item.</param>
+    /// <param name="title">The text above the text box, or <c>null</c> for no title.</param>
+    public PopupMenuItem GetTextInputItem(ToolStripMenuItem parent, string header, string? title)
+    {
+        var textField = parent.DropDownItems
+            .OfType<ToolStripControlHost>()
+            .Select(host => host.Control)
+            .OfType<TextBox>()
+            .FirstOrDefault()
+            ?? throw new InvalidOperationException($"Cannot find the text field in the vatSys menu item {parent.Name}");
+
+        return GetTextInputItem(textField, header, title);
+    }
+
+    PopupMenuItem GetTextInputItem(TextBox textField, string header, string? title)
+    {
+        return PopupMenuItem.TextInput(
+            header,
+            title,
+            text => Submit(textField, text),
+            textField.MaxLength,
+            textField.CharacterCasing == CharacterCasing.Upper);
     }
 
     /// <summary>

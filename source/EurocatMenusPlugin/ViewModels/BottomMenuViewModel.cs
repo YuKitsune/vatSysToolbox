@@ -22,11 +22,11 @@ public partial class BottomMenuViewModel : ObservableObject
     const string ToolsItem = "toolsToolStripMenuItem";
     const string WindowsItem = "windowsToolStripMenuItem";
     const string AtisItem = "aTISToolStripMenuItem";
-    const string RemoveQuickTagItem = "removeToolStripMenuItem";
+    const string AtisRequestItem = "requestToolStripMenuItem";
 
-    // vatSys adds an item to the ATIS menu for each online ATIS station. The name of the item is the callsign of the
-    // station, which has this suffix. The text of the item is the ICAO code.
-    const string AtisCallsignSuffix = "_ATIS";
+    // In the vatSys ATIS menu, the online ATIS stations come after this separator
+    const string AtisStationsSeparator = "toolStripSeparator4";
+    const string RemoveQuickTagItem = "removeToolStripMenuItem";
 
     // The menu items of other plugins
     // TODO: Use the messaging system to open the windows of other plugins, and not their menu items.
@@ -40,7 +40,6 @@ public partial class BottomMenuViewModel : ObservableObject
     // The windows that the toggle buttons open. A toggle button is on while its window is open.
     const string StripSetupWindowTypeName = "StripSetupWindow";
     const string HoldSetupWindowTitle = "Hold Setup";
-    const string AtisEditorWindowTitle = "ATIS Editor";
     const string AdsContractWindowTitle = "ADS Contract";
     const string CpdlcHistoryWindowTitle = "CPDLC History";
 
@@ -56,10 +55,8 @@ public partial class BottomMenuViewModel : ObservableObject
     [ObservableProperty] bool isTfmsAvailable;
     [ObservableProperty] bool isAdsContractAvailable;
     [ObservableProperty] bool isCpdlcHistoryAvailable;
-    [ObservableProperty] bool isAtisEditorAvailable;
     [ObservableProperty] bool isHoldSetupOpen;
     [ObservableProperty] bool isStripSetupOpen;
-    [ObservableProperty] bool isAtisEditorOpen;
     [ObservableProperty] bool isAdsContractOpen;
     [ObservableProperty] bool isCpdlcHistoryOpen;
 
@@ -71,7 +68,6 @@ public partial class BottomMenuViewModel : ObservableObject
         IsTfmsAvailable = true;
         IsAdsContractAvailable = true;
         IsCpdlcHistoryAvailable = true;
-        IsAtisEditorAvailable = true;
     }
 
     public BottomMenuViewModel(VatSysMenu vatSysMenu, VatSysInternals vatSysInternals, IErrorReporter errorReporter)
@@ -93,7 +89,6 @@ public partial class BottomMenuViewModel : ObservableObject
         IsTfmsAvailable = _vatSysMenu.FindPluginCategory(TfmsCategory) is not null;
         IsAdsContractAvailable = FindCpdlcItem(AdsContractText) is not null;
         IsCpdlcHistoryAvailable = FindCpdlcItem(CpdlcHistoryText) is not null;
-        IsAtisEditorAvailable = _vatSysMenu.FindPluginItem(WindowsItem, AtisEditorText) is not null;
 
         RefreshWindows();
     }
@@ -126,15 +121,46 @@ public partial class BottomMenuViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Gets an item for each online ATIS station. A click on an item opens the ATIS window for the station.
+    /// Gets the items of the ATIS menu:
+    /// <list type="bullet">
+    /// <item>Edit opens the ATIS Editor.</item>
+    /// <item>
+    /// View has Request, which opens an ATIS window for an airport, and the online ATIS stations, which are the same as
+    /// in the vatSys ATIS menu.
+    /// </item>
+    /// </list>
     /// </summary>
     public IReadOnlyList<PopupMenuItem> GetAtisMenuItems()
     {
-        return GetMenuItems(() => _vatSysMenu.GetItem(AtisItem).DropDownItems
-            .OfType<ToolStripMenuItem>()
-            .Where(item => item.Name.EndsWith(AtisCallsignSuffix))
-            .Select(item => _vatSysMenu.GetPopupMenuItem(item))
-            .ToList());
+        return GetMenuItems(() =>
+        {
+            var atisMenu = _vatSysMenu.GetItem(AtisItem);
+            var atisEditorItem = _vatSysMenu.FindPluginItem(WindowsItem, AtisEditorText);
+
+            // Request puts the ICAO code in the vatSys Request text field. Thus, vatSys opens the ATIS window, the
+            // same as from its own menu.
+            var requestItem = _vatSysMenu.GetTextInputItem(
+                _vatSysMenu.GetItem(AtisRequestItem),
+                "Request",
+                "Request ATIS");
+
+            var stationItems = atisMenu.DropDownItems
+                .Cast<ToolStripItem>()
+                .SkipWhile(item => item.Name != AtisStationsSeparator)
+                .Skip(1)
+                .OfType<ToolStripMenuItem>()
+                .Where(item => item.Available)
+                .Select(item => _vatSysMenu.GetPopupMenuItem(item));
+
+            return
+            [
+                new PopupMenuItem(
+                    "Edit",
+                    () => ClickPluginItem(atisEditorItem),
+                    isEnabled: atisEditorItem is not null),
+                new PopupMenuItem("View", children: [requestItem, ..stationItems])
+            ];
+        });
     }
 
     public IReadOnlyList<PopupMenuItem> GetMessagesMenuItems()
@@ -187,12 +213,6 @@ public partial class BottomMenuViewModel : ObservableObject
         () => ClickPluginItem(FindCpdlcItem(CpdlcHistoryText)),
         isOpen => IsCpdlcHistoryOpen = isOpen);
 
-    [RelayCommand]
-    void ToggleAtisEditor() => ToggleWindow(
-        () => FindAtisEditorWindow(),
-        () => ClickPluginItem(_vatSysMenu.FindPluginItem(WindowsItem, AtisEditorText)),
-        isOpen => IsAtisEditorOpen = isOpen);
-
     // Closes the window if it is open. Otherwise, opens it.
     void ToggleWindow(Func<Form?> findWindow, Action open, Action<bool> setIsOpen)
     {
@@ -224,7 +244,6 @@ public partial class BottomMenuViewModel : ObservableObject
                 // properties do not send a change, and the button shows the wrong state. Thus, send the states again.
                 OnPropertyChanged(nameof(IsHoldSetupOpen));
                 OnPropertyChanged(nameof(IsStripSetupOpen));
-                OnPropertyChanged(nameof(IsAtisEditorOpen));
                 OnPropertyChanged(nameof(IsAdsContractOpen));
                 OnPropertyChanged(nameof(IsCpdlcHistoryOpen));
             }
@@ -238,7 +257,6 @@ public partial class BottomMenuViewModel : ObservableObject
     {
         IsHoldSetupOpen = FindHoldSetupWindow(closingWindow) is not null;
         IsStripSetupOpen = FindStripSetupWindow(closingWindow) is not null;
-        IsAtisEditorOpen = FindAtisEditorWindow(closingWindow) is not null;
         IsAdsContractOpen = FindAdsContractWindow(closingWindow) is not null;
         IsCpdlcHistoryOpen = FindCpdlcHistoryWindow(closingWindow) is not null;
     }
@@ -248,9 +266,6 @@ public partial class BottomMenuViewModel : ObservableObject
 
     Form? FindStripSetupWindow(Form? closingWindow = null) =>
         FindWindow(window => window.GetType().Name == StripSetupWindowTypeName, closingWindow);
-
-    Form? FindAtisEditorWindow(Form? closingWindow = null) =>
-        FindWindow(window => window.Text == AtisEditorWindowTitle, closingWindow);
 
     Form? FindAdsContractWindow(Form? closingWindow = null) =>
         FindWindow(window => window.Text == AdsContractWindowTitle, closingWindow);

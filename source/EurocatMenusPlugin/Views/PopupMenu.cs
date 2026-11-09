@@ -185,7 +185,7 @@ static class PopupMenu
             AllowsTransparency = true
         };
 
-        popup.Child = new TextEntry(item.MaxLength, item.IsUpperCase, submit, () => popup.IsOpen = false);
+        popup.Child = new TextEntry(item.Title, item.MaxLength, item.IsUpperCase, submit, () => popup.IsOpen = false);
 
         BindTarget(target, popup);
         popup.IsOpen = true;

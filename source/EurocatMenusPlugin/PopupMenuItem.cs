@@ -16,10 +16,18 @@ public class PopupMenuItem(
     /// Makes an item that opens a text box. When Enter is pressed, the item sends the text to
     /// <paramref name="submit"/>.
     /// </summary>
-    public static PopupMenuItem TextInput(string header, Action<string> submit, int maxLength, bool isUpperCase)
+    /// <param name="header">The text of the item.</param>
+    /// <param name="title">The text above the text box, or <c>null</c> for no title.</param>
+    public static PopupMenuItem TextInput(
+        string header,
+        string? title,
+        Action<string> submit,
+        int maxLength,
+        bool isUpperCase)
     {
         return new PopupMenuItem(header)
         {
+            Title = title,
             Submit = submit,
             MaxLength = maxLength,
             IsUpperCase = isUpperCase
@@ -40,6 +48,11 @@ public class PopupMenuItem(
     /// The action for the text of a text input item, or <c>null</c> if the item is not a text input item.
     /// </summary>
     public Action<string>? Submit { get; private set; }
+
+    /// <summary>
+    /// The text above the text box of a text input item, or <c>null</c> for no title.
+    /// </summary>
+    public string? Title { get; private set; }
 
     public int MaxLength { get; private set; }
 

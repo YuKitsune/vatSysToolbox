@@ -14,10 +14,16 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <!-- The content of a popup with one text box. The same as the custom period popup in the CPDLC plugin. -->
+    <!--
+        The content of a popup with one text box, and an optional title above it.
+        The same as the custom period popup in the CPDLC plugin.
+    -->
     <Border Background="{toolbox:VatSysColour WindowBackground}">
         <controls:BeveledBorder BevelType="Raised" BorderThickness="{x:Static controls:Bevel.BorderThickness}">
-            <TextBox x:Name="InputBox" Width="80" Height="24" Margin="2" KeyDown="InputBox_KeyDown" />
+            <StackPanel>
+                <TextBlock x:Name="TitleText" Style="{StaticResource GenericTextStyle}" HorizontalAlignment="Center" Margin="2" />
+                <TextBox x:Name="InputBox" Width="80" Height="24" Margin="2" KeyDown="InputBox_KeyDown" />
+            </StackPanel>
         </controls:BeveledBorder>
     </Border>
 </UserControl>
