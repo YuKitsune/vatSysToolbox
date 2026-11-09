@@ -33,17 +33,17 @@ public partial class TopMenu : UserControl
 
     void VelocityVectorLengthButton_Click(object sender, RoutedEventArgs e)
     {
-        PopupMenu.Open((Button)sender, _viewModel.GetVelocityVectorLengthMenuItems(), PlacementMode.Bottom);
+        PopupMenu.Open((Button)sender, _viewModel.GetVelocityVectorLengthMenuItems(), PlacementMode.Bottom, matchTargetWidth: true);
     }
 
     void ShortRouteProbeLengthButton_Click(object sender, RoutedEventArgs e)
     {
-        PopupMenu.Open((Button)sender, _viewModel.GetShortRouteProbeLengthMenuItems(), PlacementMode.Bottom);
+        PopupMenu.Open((Button)sender, _viewModel.GetShortRouteProbeLengthMenuItems(), PlacementMode.Bottom, matchTargetWidth: true);
     }
 
     void HistoryDotCountButton_Click(object sender, RoutedEventArgs e)
     {
-        PopupMenu.Open((Button)sender, _viewModel.GetHistoryDotCountMenuItems(), PlacementMode.Bottom);
+        PopupMenu.Open((Button)sender, _viewModel.GetHistoryDotCountMenuItems(), PlacementMode.Bottom, matchTargetWidth: true);
     }
 
     void AtisWindowButton_Click(object sender, RoutedEventArgs e)
@@ -63,6 +63,7 @@ public partial class TopMenu : UserControl
 
         AtisWindowSeparator.Visibility = AtisWindowList.Children.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         AtisAirportTextBox.Clear();
+        PopupMenu.CloseOnTargetClick((Button)sender, AtisPopup);
         AtisPopup.IsOpen = true;
     }
 

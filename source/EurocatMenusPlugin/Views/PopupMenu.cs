@@ -17,17 +17,22 @@ static class PopupMenu
     /// <c>true</c> to keep the menu open after a click, so that more than one item can be turned on or off
     /// (for example, maps).
     /// </param>
+    /// <param name="matchTargetWidth"><c>true</c> to make the menu the same width as the button.</param>
     public static void Open(
         FrameworkElement target,
         IEnumerable<PopupMenuItem> items,
         PlacementMode placement,
-        bool staysOpenOnClick = false)
+        bool staysOpenOnClick = false,
+        bool matchTargetWidth = false)
     {
         var menu = new ContextMenu
         {
             PlacementTarget = target,
             Placement = placement
         };
+
+        if (matchTargetWidth)
+            menu.Width = target.ActualWidth;
 
         // The menu is not in the logical tree of the view. Thus, it cannot find the toolbox styles in the resources of
         // the view. Copy the styles from the view to the menu.
@@ -39,7 +44,58 @@ static class PopupMenu
         foreach (var item in items)
             menu.Items.Add(CreateItem(menu, item, staysOpenOnClick));
 
+        RemoveAnimation(menu);
+        CloseOnTargetClick(target, menu);
         menu.IsOpen = true;
+    }
+
+    /// <summary>
+    /// Makes a click on the button close the popup, and not open it again.
+    /// </summary>
+    /// <remarks>
+    /// While the popup is open, the button does not get the mouse. Thus, a click on the button is a click outside
+    /// the popup, and the popup closes.
+    /// </remarks>
+    static void CloseOnTargetClick(FrameworkElement target, ContextMenu menu)
+    {
+        target.IsHitTestVisible = false;
+        menu.Closed += (_, _) => target.IsHitTestVisible = true;
+    }
+
+    /// <summary>
+    /// Makes a click on the button close the popup, and not open it again. Call this each time before the popup
+    /// opens.
+    /// </summary>
+    public static void CloseOnTargetClick(FrameworkElement target, Popup popup)
+    {
+        target.IsHitTestVisible = false;
+        popup.Closed += Restore;
+
+        void Restore(object sender, EventArgs e)
+        {
+            popup.Closed -= Restore;
+            target.IsHitTestVisible = true;
+        }
+    }
+
+    // vatSys menus open and close at once. A WPF context menu fades in and out if Windows animates its menus.
+    // The context menu makes its popup when it opens, and gives the popup the Windows menu animation. Thus, make the
+    // popup now, and remove the animation before the menu opens. The method that makes the popup is private.
+    static void RemoveAnimation(ContextMenu menu)
+    {
+        try
+        {
+            Reflection.InvokeMethod(menu, "HookupParentPopup");
+        }
+        catch (MissingMemberException)
+        {
+            // An exception that is not caught on the UI thread stops vatSys. Without the method, the menu still works,
+            // but it fades.
+            return;
+        }
+
+        if (menu.Parent is Popup popup)
+            popup.PopupAnimation = PopupAnimation.None;
     }
 
     static Control CreateItem(ContextMenu menu, PopupMenuItem item, bool staysOpenOnClick)
