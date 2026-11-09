@@ -60,7 +60,7 @@ public class Plugin : IPlugin
             var vatSysInternals = new VatSysInternals(mainForm);
 
             var topMenuViewModel = new TopMenuViewModel(vatSysMenu, vatSysInternals, clock, errorReporter);
-            var bottomMenuViewModel = new BottomMenuViewModel(vatSysMenu, errorReporter);
+            var bottomMenuViewModel = new BottomMenuViewModel(vatSysMenu, vatSysInternals, errorReporter);
 
             var menuBar = new MenuBarLayout(mainForm, new TopMenu(topMenuViewModel), new BottomMenu(bottomMenuViewModel));
 

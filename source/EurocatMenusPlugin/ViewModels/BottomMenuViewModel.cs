@@ -22,7 +22,6 @@ public partial class BottomMenuViewModel : ObservableObject
     const string ToolsItem = "toolsToolStripMenuItem";
     const string WindowsItem = "windowsToolStripMenuItem";
     const string AtisItem = "aTISToolStripMenuItem";
-    const string AddQuickTagItem = "addToolStripMenuItem";
     const string RemoveQuickTagItem = "removeToolStripMenuItem";
 
     // vatSys adds an item to the ATIS menu for each online ATIS station. The name of the item is the callsign of the
@@ -46,6 +45,7 @@ public partial class BottomMenuViewModel : ObservableObject
     const string CpdlcHistoryWindowTitle = "CPDLC History";
 
     readonly VatSysMenu _vatSysMenu = null!;
+    readonly VatSysInternals _vatSysInternals = null!;
     readonly IErrorReporter _errorReporter = null!;
 
     // The open windows that this class listens to, so that a button is turned off as soon as its window closes
@@ -74,9 +74,10 @@ public partial class BottomMenuViewModel : ObservableObject
         IsAtisEditorAvailable = true;
     }
 
-    public BottomMenuViewModel(VatSysMenu vatSysMenu, IErrorReporter errorReporter)
+    public BottomMenuViewModel(VatSysMenu vatSysMenu, VatSysInternals vatSysInternals, IErrorReporter errorReporter)
     {
         _vatSysMenu = vatSysMenu;
+        _vatSysInternals = vatSysInternals;
         _errorReporter = errorReporter;
     }
 
@@ -151,10 +152,10 @@ public partial class BottomMenuViewModel : ObservableObject
     void OpenFlightPlan() => Click(FlightPlanItem);
 
     /// <summary>
-    /// Opens the vatSys Quick Tag window for the selected track, the same as Tools, Quick Tag, Add.
+    /// Opens the vatSys Quick Tag window for the selected track in the middle of the screen.
     /// </summary>
     [RelayCommand]
-    void AddQuickTag() => Click(AddQuickTagItem);
+    void AddQuickTag() => Run(_vatSysInternals.OpenQuickTagWindow);
 
     /// <summary>
     /// Removes the quick tag of the selected track, the same as Tools, Quick Tag, Remove.

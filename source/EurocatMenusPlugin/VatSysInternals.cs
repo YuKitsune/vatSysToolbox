@@ -1,4 +1,6 @@
+using System.Drawing;
 using System.Windows.Forms;
+using vatsys;
 
 namespace EurocatMenusPlugin;
 
@@ -12,6 +14,7 @@ public class VatSysInternals(Form mainForm)
 {
     const string AsdControlName = "ASD";
     const string AirWindowTypeName = "ASDWindow";
+    const string QuickTagWindowTypeName = "vatsys.QuickTagWindow";
 
     /// <summary>
     /// The ASD in the vatSys main form.
@@ -46,6 +49,31 @@ public class VatSysInternals(Form mainForm)
         return airWindow is null
             ? null
             : new AsdDisplay((Control)Reflection.GetField(airWindow, AsdControlName)!);
+    }
+
+    /// <summary>
+    /// Opens the vatSys Quick Tag window for the selected track, the same as Tools, Quick Tag, Add. The window opens in
+    /// the middle of the screen of the main form, and not at the mouse position.
+    /// </summary>
+    public void OpenQuickTagWindow()
+    {
+        // The same check as Tools, Quick Tag, Add. A quick tag is only for a radar track.
+        var selectedTrack = MMI.SelectedTrack;
+        if (selectedTrack?.SourceData is not RDP.RadarTrack)
+            return;
+
+        using var window = (Form)Reflection.CreateInstance(
+            typeof(MMI).Assembly,
+            QuickTagWindowTypeName,
+            selectedTrack.GetRadarTrack());
+
+        var screen = Screen.FromControl(mainForm).WorkingArea;
+        window.StartPosition = FormStartPosition.Manual;
+        window.Location = new Point(
+            screen.Left + (screen.Width - window.Width) / 2,
+            screen.Top + (screen.Height - window.Height) / 2);
+
+        window.ShowDialog();
     }
 
     /// <summary>
