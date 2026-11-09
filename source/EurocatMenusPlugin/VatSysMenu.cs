@@ -70,9 +70,11 @@ public class VatSysMenu(MenuStrip menuStrip, IErrorReporter errorReporter)
                     items.Add(GetPopupMenuItem(menuItem));
                     break;
 
-                // vatSys puts text fields in some menus (for example, Info, Find)
+                // vatSys puts text fields in some menus (for example, Info, Find). The popup menu shows an item with
+                // the name of the menu (for example, Find...) that opens a text box.
                 case ToolStripControlHost { Control: TextBox textField }:
                     items.Add(PopupMenuItem.TextInput(
+                        parent.Text + "...",
                         text => Submit(textField, text),
                         textField.MaxLength,
                         textField.CharacterCasing == CharacterCasing.Upper));

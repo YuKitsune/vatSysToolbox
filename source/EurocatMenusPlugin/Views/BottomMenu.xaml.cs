@@ -20,27 +20,27 @@ public partial class BottomMenu : UserControl
 
     void SetUpButton_Click(object sender, RoutedEventArgs e)
     {
-        PopupMenu.Open((Button)sender, _viewModel.GetSetUpMenuItems(), PlacementMode.Top);
+        PopupMenu.Open((ToggleButton)sender, _viewModel.GetSetUpMenuItems(), PlacementMode.Top);
     }
 
     void MapButton_Click(object sender, RoutedEventArgs e)
     {
         // vatSys keeps the Maps menu open after a click, so that more than one map can be turned on or off
-        PopupMenu.Open((Button)sender, _viewModel.GetMapMenuItems(), PlacementMode.Top, staysOpenOnClick: true);
+        PopupMenu.Open((ToggleButton)sender, _viewModel.GetMapMenuItems(), PlacementMode.Top, staysOpenOnClick: true);
     }
 
     void InfoButton_Click(object sender, RoutedEventArgs e)
     {
-        PopupMenu.Open((Button)sender, _viewModel.GetInfoMenuItems(), PlacementMode.Top);
+        PopupMenu.Open((ToggleButton)sender, _viewModel.GetInfoMenuItems(), PlacementMode.Top);
     }
 
     void TfmsButton_Click(object sender, RoutedEventArgs e)
     {
-        PopupMenu.Open((Button)sender, _viewModel.GetTfmsMenuItems(), PlacementMode.Top);
+        PopupMenu.Open((ToggleButton)sender, _viewModel.GetTfmsMenuItems(), PlacementMode.Top);
     }
 
     void MessagesButton_Click(object sender, RoutedEventArgs e)
     {
-        PopupMenu.Open((Button)sender, _viewModel.GetMessagesMenuItems(), PlacementMode.Top);
+        PopupMenu.Open((ToggleButton)sender, _viewModel.GetMessagesMenuItems(), PlacementMode.Top);
     }
 }

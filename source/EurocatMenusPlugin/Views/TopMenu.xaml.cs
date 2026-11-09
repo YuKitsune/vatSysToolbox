@@ -1,9 +1,7 @@
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using System.Windows.Interop;
 using EurocatMenusPlugin.ViewModels;
 
 namespace EurocatMenusPlugin.Views;
@@ -23,27 +21,27 @@ public partial class TopMenu : UserControl
 
     void PositionButton_Click(object sender, RoutedEventArgs e)
     {
-        PopupMenu.Open((Button)sender, _viewModel.GetPositionMenuItems(), PlacementMode.Bottom);
+        PopupMenu.Open((ToggleButton)sender, _viewModel.GetPositionMenuItems(), PlacementMode.Bottom);
     }
 
     void VisibilityCentersButton_Click(object sender, RoutedEventArgs e)
     {
-        PopupMenu.Open((Button)sender, _viewModel.GetVisibilityCentersMenuItems(), PlacementMode.Bottom);
+        PopupMenu.Open((ToggleButton)sender, _viewModel.GetVisibilityCentersMenuItems(), PlacementMode.Bottom);
     }
 
     void VelocityVectorLengthButton_Click(object sender, RoutedEventArgs e)
     {
-        PopupMenu.Open((Button)sender, _viewModel.GetVelocityVectorLengthMenuItems(), PlacementMode.Bottom, matchTargetWidth: true);
+        PopupMenu.Open((ToggleButton)sender, _viewModel.GetVelocityVectorLengthMenuItems(), PlacementMode.Bottom, matchTargetWidth: true);
     }
 
     void ShortRouteProbeLengthButton_Click(object sender, RoutedEventArgs e)
     {
-        PopupMenu.Open((Button)sender, _viewModel.GetShortRouteProbeLengthMenuItems(), PlacementMode.Bottom, matchTargetWidth: true);
+        PopupMenu.Open((ToggleButton)sender, _viewModel.GetShortRouteProbeLengthMenuItems(), PlacementMode.Bottom, matchTargetWidth: true);
     }
 
     void HistoryDotCountButton_Click(object sender, RoutedEventArgs e)
     {
-        PopupMenu.Open((Button)sender, _viewModel.GetHistoryDotCountMenuItems(), PlacementMode.Bottom, matchTargetWidth: true);
+        PopupMenu.Open((ToggleButton)sender, _viewModel.GetHistoryDotCountMenuItems(), PlacementMode.Bottom, matchTargetWidth: true);
     }
 
     void AtisWindowButton_Click(object sender, RoutedEventArgs e)
@@ -63,18 +61,8 @@ public partial class TopMenu : UserControl
 
         AtisWindowSeparator.Visibility = AtisWindowList.Children.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         AtisAirportTextBox.Clear();
-        PopupMenu.CloseOnTargetClick((Button)sender, AtisPopup);
+        PopupMenu.BindTarget((ToggleButton)sender, AtisPopup);
         AtisPopup.IsOpen = true;
-    }
-
-    void AtisPopup_Opened(object sender, EventArgs e)
-    {
-        // The popup is a separate window. In a WinForms window, a WPF popup does not get the keyboard focus by itself.
-        // Thus, give the keyboard focus to the window of the popup, so that the text box can get the keyboard input.
-        if (PresentationSource.FromVisual(AtisPopup.Child) is HwndSource popupSource)
-            SetFocus(popupSource.Handle);
-
-        AtisAirportTextBox.Focus();
     }
 
     void AtisAirportTextBox_KeyDown(object sender, KeyEventArgs e)
@@ -86,7 +74,4 @@ public partial class TopMenu : UserControl
         AtisPopup.IsOpen = false;
         _viewModel.OpenAtisWindow(AtisAirportTextBox.Text);
     }
-
-    [DllImport("user32.dll")]
-    static extern IntPtr SetFocus(IntPtr hWnd);
 }

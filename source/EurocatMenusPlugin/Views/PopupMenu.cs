@@ -1,13 +1,15 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Input;
 
 namespace EurocatMenusPlugin.Views;
 
 /// <summary>
 /// Opens a popup menu next to a button. The toolbox styles make it look like a vatSys menu.
 /// </summary>
+/// <remarks>
+/// The button is a toggle button. It is on while its popup is open, thus it looks pressed.
+/// </remarks>
 static class PopupMenu
 {
     /// <param name="target">The button that opens the menu.</param>
@@ -19,7 +21,7 @@ static class PopupMenu
     /// </param>
     /// <param name="matchTargetWidth"><c>true</c> to make the menu the same width as the button.</param>
     public static void Open(
-        FrameworkElement target,
+        ToggleButton target,
         IEnumerable<PopupMenuItem> items,
         PlacementMode placement,
         bool staysOpenOnClick = false,
@@ -39,43 +41,44 @@ static class PopupMenu
         menu.Style = (Style)target.FindResource(typeof(ContextMenu));
         menu.Resources.Add(typeof(MenuItem), target.FindResource(typeof(MenuItem)));
         menu.Resources.Add(MenuItem.SeparatorStyleKey, target.FindResource(MenuItem.SeparatorStyleKey));
-        menu.Resources.Add(typeof(TextBox), target.FindResource(typeof(TextBox)));
 
         foreach (var item in items)
-            menu.Items.Add(CreateItem(menu, item, staysOpenOnClick));
+            menu.Items.Add(CreateItem(menu, target, placement, item, staysOpenOnClick));
 
         RemoveAnimation(menu);
-        CloseOnTargetClick(target, menu);
+        SetTargetOpen(target);
+        menu.Closed += (_, _) => SetTargetClosed(target);
         menu.IsOpen = true;
     }
 
     /// <summary>
-    /// Makes a click on the button close the popup, and not open it again.
+    /// Makes the button look pressed while the popup is open, and makes a click on the button close the popup.
+    /// Call this each time before the popup opens.
     /// </summary>
-    /// <remarks>
-    /// While the popup is open, the button does not get the mouse. Thus, a click on the button is a click outside
-    /// the popup, and the popup closes.
-    /// </remarks>
-    static void CloseOnTargetClick(FrameworkElement target, ContextMenu menu)
+    public static void BindTarget(ToggleButton target, Popup popup)
     {
-        target.IsHitTestVisible = false;
-        menu.Closed += (_, _) => target.IsHitTestVisible = true;
-    }
-
-    /// <summary>
-    /// Makes a click on the button close the popup, and not open it again. Call this each time before the popup
-    /// opens.
-    /// </summary>
-    public static void CloseOnTargetClick(FrameworkElement target, Popup popup)
-    {
-        target.IsHitTestVisible = false;
+        SetTargetOpen(target);
         popup.Closed += Restore;
 
         void Restore(object sender, EventArgs e)
         {
             popup.Closed -= Restore;
-            target.IsHitTestVisible = true;
+            SetTargetClosed(target);
         }
+    }
+
+    // While the popup is open, the button does not get the mouse. Thus, a click on the button is a click outside the
+    // popup. Then the popup closes, and the button does not open it again.
+    static void SetTargetOpen(ToggleButton target)
+    {
+        target.IsChecked = true;
+        target.IsHitTestVisible = false;
+    }
+
+    static void SetTargetClosed(ToggleButton target)
+    {
+        target.IsChecked = false;
+        target.IsHitTestVisible = true;
     }
 
     // vatSys menus open and close at once. A WPF context menu fades in and out if Windows animates its menus.
@@ -98,13 +101,18 @@ static class PopupMenu
             popup.PopupAnimation = PopupAnimation.None;
     }
 
-    static Control CreateItem(ContextMenu menu, PopupMenuItem item, bool staysOpenOnClick)
+    static Control CreateItem(
+        ContextMenu menu,
+        ToggleButton target,
+        PlacementMode placement,
+        PopupMenuItem item,
+        bool staysOpenOnClick)
     {
         if (item.IsSeparator)
             return new Separator();
 
         if (item.Submit is { } submit)
-            return CreateTextInputItem(menu, item, submit);
+            return CreateTextInputItem(menu, target, placement, item, submit);
 
         var menuItem = new MenuItem
         {
@@ -115,7 +123,7 @@ static class PopupMenu
         };
 
         foreach (var child in item.Children)
-            menuItem.Items.Add(CreateItem(menu, child, staysOpenOnClick));
+            menuItem.Items.Add(CreateItem(menu, target, placement, child, staysOpenOnClick));
 
         if (item.Click is { } click)
         {
@@ -131,41 +139,55 @@ static class PopupMenu
         return menuItem;
     }
 
-    static MenuItem CreateTextInputItem(ContextMenu menu, PopupMenuItem item, Action<string> submit)
+    // A text box in a context menu does not get keyboard input, because the menu takes the keyboard. Thus, the item
+    // opens a plain popup with the text box at the same button. The context menu closes when the item is clicked.
+    static MenuItem CreateTextInputItem(
+        ContextMenu menu,
+        ToggleButton target,
+        PlacementMode placement,
+        PopupMenuItem item,
+        Action<string> submit)
     {
-        var textBox = new TextBox
+        var menuItem = new MenuItem { Header = item.Header };
+        menuItem.Click += (_, e) =>
         {
-            MaxLength = item.MaxLength,
-            CharacterCasing = item.IsUpperCase ? CharacterCasing.Upper : CharacterCasing.Normal,
-            MinWidth = 80
-        };
-
-        textBox.KeyDown += (_, e) =>
-        {
-            if (e.Key != Key.Enter)
-                return;
-
+            // The Click event goes up to the parent items. Stop it here, so that the parent items do nothing.
             e.Handled = true;
-            menu.IsOpen = false;
-            submit(textBox.Text);
+
+            // When the context menu closes, it sets the button to closed. Thus, open the text entry popup only after
+            // the context menu is closed.
+            if (!menu.IsOpen)
+            {
+                OpenTextEntry(target, placement, item, submit);
+                return;
+            }
+
+            menu.Closed += OpenAfterClose;
+
+            void OpenAfterClose(object sender, RoutedEventArgs args)
+            {
+                menu.Closed -= OpenAfterClose;
+                OpenTextEntry(target, placement, item, submit);
+            }
         };
 
-        // Put the cursor in the text box when its menu opens, the same as vatSys
-        textBox.IsVisibleChanged += (_, e) =>
+        return menuItem;
+    }
+
+    static void OpenTextEntry(ToggleButton target, PlacementMode placement, PopupMenuItem item, Action<string> submit)
+    {
+        // The same popup settings as the custom period popup in the CPDLC plugin. Typing works in that popup.
+        var popup = new Popup
         {
-            if ((bool)e.NewValue)
-                textBox.Dispatcher.BeginInvoke(new Action(() => textBox.Focus()));
+            PlacementTarget = target,
+            Placement = placement,
+            StaysOpen = false,
+            AllowsTransparency = true
         };
 
-        return new MenuItem
-        {
-            Header = textBox,
+        popup.Child = new TextEntry(item.MaxLength, item.IsUpperCase, submit, () => popup.IsOpen = false);
 
-            // A menu item takes the keyboard focus when the mouse moves on it. Then the text box loses the focus.
-            Focusable = false,
-
-            // A click in the text box must not close the menu
-            StaysOpenOnClick = true
-        };
+        BindTarget(target, popup);
+        popup.IsOpen = true;
     }
 }

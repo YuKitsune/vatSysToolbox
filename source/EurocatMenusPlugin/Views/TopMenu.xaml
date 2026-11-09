@@ -29,15 +29,20 @@
                 <Setter Property="MinWidth" Value="60" />
             </Style>
 
+            <!-- A button that opens a popup. It looks pressed while the popup is open. It has the same size as a button. -->
+            <Style TargetType="ToggleButton" BasedOn="{StaticResource ToggleButtonBaseStyle}">
+                <Setter Property="Margin" Value="{StaticResource ItemMargin}" />
+                <Setter Property="MinWidth" Value="60" />
+            </Style>
+
             <!-- The width of the functional state buttons and the label buttons -->
             <sys:Double x:Key="WideButtonWidth">72</sys:Double>
 
-            <!-- A button that shows a value of a functional state (for example, the length of the velocity vectors) -->
-            <Style x:Key="FunctionalStateButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                <Setter Property="Width" Value="{StaticResource WideButtonWidth}" />
-            </Style>
-
-            <!-- A button that turns a functional state on or off (for example, VEL). It looks pressed while the state is on. -->
+            <!--
+                A functional state button. The top button turns a functional state on or off (for example, VEL), and
+                looks pressed while the state is on. The bottom button opens a popup with the values of the state, and
+                looks pressed while the popup is open.
+            -->
             <Style x:Key="FunctionalStateToggleStyle" TargetType="ToggleButton" BasedOn="{StaticResource ToggleButtonBaseStyle}">
                 <Setter Property="Margin" Value="{StaticResource ItemMargin}" />
                 <Setter Property="Width" Value="{StaticResource WideButtonWidth}" />
@@ -117,7 +122,7 @@
             <Button Grid.Row="1" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" MinWidth="112" Command="{Binding OpenConnectionCommand}" Content="{Binding Connection}" />
 
             <TextBlock Grid.Row="3" Style="{StaticResource LabelStyle}">Position</TextBlock>
-            <Button Grid.Row="4" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" MinWidth="112" Click="PositionButton_Click" Content="{Binding PositionName}" />
+            <ToggleButton Grid.Row="4" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" MinWidth="112" Click="PositionButton_Click" Content="{Binding PositionName}" />
         </Grid>
 
         <controls:BeveledLine Style="{StaticResource SectionSeparatorStyle}" />
@@ -133,7 +138,7 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <TextBlock Grid.Row="0" Style="{StaticResource SectionTitleStyle}">Visibility</TextBlock>
-                <Button Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Click="VisibilityCentersButton_Click" Content="{Binding VisibilityCentersMode}" />
+                <ToggleButton Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Click="VisibilityCentersButton_Click" Content="{Binding VisibilityCentersMode}" />
                 <TextBlock Grid.Row="3" Style="{StaticResource LabelStyle}">Airspace</TextBlock>
                 <StackPanel Grid.Row="4" Orientation="Horizontal">
                     <Button VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Command="{Binding OpenSectorsCommand}">SECTORS</Button>
@@ -155,15 +160,16 @@
                 </Grid.RowDefinitions>
                 <TextBlock Grid.Row="0" Style="{StaticResource SectionTitleStyle}">ATIS</TextBlock>
                 <Button Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Command="{Binding OpenAtisEditorCommand}" IsEnabled="{Binding IsAtisEditorAvailable}">EDITOR</Button>
-                <Button Grid.Row="3" x:Name="AtisWindowButton" HorizontalAlignment="Center" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Click="AtisWindowButton_Click">WINDOW</Button>
+                <ToggleButton Grid.Row="3" x:Name="AtisWindowButton" HorizontalAlignment="Center" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Click="AtisWindowButton_Click">WINDOW</ToggleButton>
             </Grid>
         </DockPanel>
 
         <!--
             Opens an ATIS window for an airport, or shows an ATIS window that is open.
             The same as Windows, ATIS in the vatSys menu bar.
+            The popup settings are the same as the custom period popup in the CPDLC plugin. Typing works in that popup.
         -->
-        <Popup x:Name="AtisPopup" PlacementTarget="{Binding ElementName=AtisWindowButton}" Placement="Bottom" StaysOpen="False" Opened="AtisPopup_Opened">
+        <Popup x:Name="AtisPopup" PlacementTarget="{Binding ElementName=AtisWindowButton}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True">
             <Border Background="{toolbox:VatSysColour WindowBackground}">
                 <controls:BeveledBorder BevelType="Raised" BorderThickness="{x:Static controls:Bevel.BorderThickness}">
                     <StackPanel>
@@ -262,11 +268,11 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <ToggleButton Grid.Row="0" Grid.Column="0" Style="{StaticResource FunctionalStateToggleStyle}" Command="{Binding ToggleVelocityVectorsCommand}" IsChecked="{Binding IsVelocityVectorsOn, Mode=OneWay}">VEL</ToggleButton>
-                <Button Grid.Row="1" Grid.Column="0" Style="{StaticResource FunctionalStateButtonStyle}" Click="VelocityVectorLengthButton_Click" Content="{Binding VelocityVectorLength}" />
+                <ToggleButton Grid.Row="1" Grid.Column="0" Style="{StaticResource FunctionalStateToggleStyle}" Click="VelocityVectorLengthButton_Click" Content="{Binding VelocityVectorLength}" />
                 <ToggleButton Grid.Row="0" Grid.Column="1" Style="{StaticResource FunctionalStateToggleStyle}" Command="{Binding ToggleShortRouteProbeCommand}" IsChecked="{Binding IsShortRouteProbeOn, Mode=OneWay}">SRP</ToggleButton>
-                <Button Grid.Row="1" Grid.Column="1" Style="{StaticResource FunctionalStateButtonStyle}" Click="ShortRouteProbeLengthButton_Click" Content="{Binding ShortRouteProbeLength}" />
+                <ToggleButton Grid.Row="1" Grid.Column="1" Style="{StaticResource FunctionalStateToggleStyle}" Click="ShortRouteProbeLengthButton_Click" Content="{Binding ShortRouteProbeLength}" />
                 <ToggleButton Grid.Row="0" Grid.Column="2" Style="{StaticResource FunctionalStateToggleStyle}" Command="{Binding ToggleHistoryDotsCommand}" IsChecked="{Binding IsHistoryDotsOn, Mode=OneWay}">HIST</ToggleButton>
-                <Button Grid.Row="1" Grid.Column="2" Style="{StaticResource FunctionalStateButtonStyle}" Click="HistoryDotCountButton_Click" Content="{Binding HistoryDotCount}" />
+                <ToggleButton Grid.Row="1" Grid.Column="2" Style="{StaticResource FunctionalStateToggleStyle}" Click="HistoryDotCountButton_Click" Content="{Binding HistoryDotCount}" />
             </Grid>
         </DockPanel>
 

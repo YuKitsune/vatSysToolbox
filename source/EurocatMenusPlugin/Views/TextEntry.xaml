@@ -1,0 +1,23 @@
+<UserControl x:Class="EurocatMenusPlugin.Views.TextEntry"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:toolbox="clr-namespace:vatSysToolbox;assembly=vatSysToolbox"
+             xmlns:controls="clr-namespace:vatSysToolbox.Controls;assembly=vatSysToolbox"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/vatSysToolbox;component/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <!-- The content of a popup with one text box. The same as the custom period popup in the CPDLC plugin. -->
+    <Border Background="{toolbox:VatSysColour WindowBackground}">
+        <controls:BeveledBorder BevelType="Raised" BorderThickness="{x:Static controls:Bevel.BorderThickness}">
+            <TextBox x:Name="InputBox" Width="80" Height="24" Margin="2" KeyDown="InputBox_KeyDown" />
+        </controls:BeveledBorder>
+    </Border>
+</UserControl>

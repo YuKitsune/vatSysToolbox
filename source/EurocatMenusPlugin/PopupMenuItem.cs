@@ -13,11 +13,12 @@ public class PopupMenuItem(
     public static PopupMenuItem Separator { get; } = new(string.Empty) { IsSeparator = true };
 
     /// <summary>
-    /// Makes an item with a text box. When Enter is pressed, the item sends the text to <paramref name="submit"/>.
+    /// Makes an item that opens a text box. When Enter is pressed, the item sends the text to
+    /// <paramref name="submit"/>.
     /// </summary>
-    public static PopupMenuItem TextInput(Action<string> submit, int maxLength, bool isUpperCase)
+    public static PopupMenuItem TextInput(string header, Action<string> submit, int maxLength, bool isUpperCase)
     {
-        return new PopupMenuItem(string.Empty)
+        return new PopupMenuItem(header)
         {
             Submit = submit,
             MaxLength = maxLength,

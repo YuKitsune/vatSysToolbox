@@ -35,6 +35,12 @@
                 <Setter Property="Width" Value="{StaticResource ItemWidth}" />
             </Style>
 
+            <!-- A square button that opens a popup. It looks pressed while the popup is open. -->
+            <Style TargetType="ToggleButton" BasedOn="{StaticResource ToggleButtonBaseStyle}">
+                <Setter Property="Margin" Value="{StaticResource ItemMargin}" />
+                <Setter Property="Width" Value="{StaticResource ItemWidth}" />
+            </Style>
+
             <!--
                 A stack of items with the full height of the menu.
                 The stack has no margin, because its items have a margin. Thus, the stack is wider than a square button
@@ -60,9 +66,9 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <StackPanel Orientation="Horizontal" Margin="{StaticResource ItemMargin}">
-        <Button Click="SetUpButton_Click">Set Up</Button>
-        <Button Click="MapButton_Click">Map</Button>
-        <Button Click="InfoButton_Click">Info</Button>
+        <ToggleButton Click="SetUpButton_Click">Set Up</ToggleButton>
+        <ToggleButton Click="MapButton_Click">Map</ToggleButton>
+        <ToggleButton Click="InfoButton_Click">Info</ToggleButton>
         <Grid Style="{StaticResource StackStyle}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
@@ -84,7 +90,7 @@
             </Border>
         </Grid>
         <Button IsEnabled="False">Lost</Button>
-        <Button Click="TfmsButton_Click" IsEnabled="{Binding IsTfmsAvailable}">TFMS</Button>
+        <ToggleButton Click="TfmsButton_Click" IsEnabled="{Binding IsTfmsAvailable}">TFMS</ToggleButton>
         <Button IsEnabled="False">TFC MGT</Button>
         <Grid Style="{StaticResource StackStyle}">
             <Grid.RowDefinitions>
@@ -104,6 +110,6 @@
         <Button IsEnabled="False">Rad Tag</Button>
         <Button IsEnabled="False">LATC</Button>
         <Button Command="{Binding OpenGroundWindowCommand}">Ground</Button>
-        <Button Click="MessagesButton_Click">MSG</Button>
+        <ToggleButton Click="MessagesButton_Click">MSG</ToggleButton>
     </StackPanel>
 </UserControl>
