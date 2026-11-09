@@ -199,13 +199,41 @@ public partial class BottomMenuViewModel : ObservableObject
     {
         return GetMenuItems(() =>
         {
-            // In vatSys, Send has a submenu with a text field for the callsign. Here, Send opens the text box at once.
-            var sendItem = _vatSysMenu.GetTextInputItem(_vatSysMenu.GetItem(SendMessageItem), "Send...", title: null);
+            var messagesMenu = _vatSysMenu.GetItem(MessagesItem);
 
-            return _vatSysMenu.GetPopupMenuItems(
-                _vatSysMenu.GetItem(MessagesItem),
-                new Dictionary<string, PopupMenuItem> { [SendMessageItem] = sendItem });
+            // In vatSys, Send has a submenu with a text field for the callsign. Here, Send opens the text box at once.
+            var replacements = new Dictionary<string, PopupMenuItem>
+            {
+                [SendMessageItem] = _vatSysMenu.GetTextInputItem(
+                    _vatSysMenu.GetItem(SendMessageItem),
+                    "Send...",
+                    title: null)
+            };
+
+            // vatSys opens a private message window when its item is released, and not when it is clicked. Thus, these
+            // items open the window with the public vatSys method.
+            foreach (var recipient in _vatSysInternals.GetPrivateMessageRecipients())
+            {
+                if (messagesMenu.DropDownItems[recipient] is not ToolStripMenuItem privateMessageItem)
+                    continue;
+
+                replacements[recipient] = new PopupMenuItem(
+                    privateMessageItem.Text,
+                    () => Run(() => OpenPrivateMessage(privateMessageItem)),
+                    unreadCount: privateMessageItem.Tag is int count ? count : 0);
+            }
+
+            return _vatSysMenu.GetPopupMenuItems(messagesMenu, replacements);
         });
+    }
+
+    // Shows the private message window, and marks its messages as read, the same as its item in the vatSys Messages
+    // menu
+    static void OpenPrivateMessage(ToolStripMenuItem privateMessageItem)
+    {
+        MMI.OpenPMWindow(privateMessageItem.Name);
+        privateMessageItem.CheckState = CheckState.Unchecked;
+        privateMessageItem.Tag = null;
     }
 
     [RelayCommand]

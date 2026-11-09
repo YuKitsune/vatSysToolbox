@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Drawing;
 using System.Windows.Forms;
 using vatsys;
@@ -115,6 +116,19 @@ public class VatSysInternals(Form mainForm)
             screen.Top + (screen.Height - window.Height) / 2);
 
         window.ShowDialog();
+    }
+
+    /// <summary>
+    /// The callsigns of the private message windows. vatSys has an item in its Messages menu for each of them. The name
+    /// of the item is the callsign.
+    /// </summary>
+    public IReadOnlyList<string> GetPrivateMessageRecipients()
+    {
+        var windows = (IEnumerable)Reflection.GetStaticProperty(typeof(MMI), "PrivateMessageWindows")!;
+        return windows
+            .Cast<object>()
+            .Select(window => (string)Reflection.GetField(window, "Recipient")!)
+            .ToList();
     }
 
     /// <summary>

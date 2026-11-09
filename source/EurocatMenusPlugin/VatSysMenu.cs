@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Windows.Forms;
 using vatSysToolbox;
 
@@ -163,24 +162,11 @@ public class VatSysMenu(MenuStrip menuStrip, IErrorReporter errorReporter)
     {
         try
         {
-            // Some vatSys menu items do their action when the mouse button is released, and not on a click (for
-            // example, the private message items in Messages).
-            if (GetMouseUpHandler(item) is { } mouseUp)
-                mouseUp(item, new MouseEventArgs(MouseButtons.Left, 1, 0, 0, 0));
-            else
-                item.PerformClick();
+            item.PerformClick();
         }
         catch (Exception ex)
         {
             errorReporter.ReportError(ex, $"Cannot do {item.Text}");
         }
-    }
-
-    // WinForms keeps the MouseUp handlers in a private list. It does not let other code raise the event.
-    static MouseEventHandler? GetMouseUpHandler(ToolStripItem item)
-    {
-        var eventKey = Reflection.GetStaticField(typeof(ToolStripItem), "EventMouseUp")!;
-        var handlers = (EventHandlerList)Reflection.GetProperty(item, "Events")!;
-        return handlers[eventKey] as MouseEventHandler;
     }
 }
