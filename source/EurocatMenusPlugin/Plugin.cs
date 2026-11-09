@@ -71,9 +71,11 @@ public class Plugin : IPlugin
 
             menuBar.AddMenus(new TopMenu(topMenuViewModel), new BottomMenu(bottomMenuViewModel));
 
-            // vatSys does not send events for most of the states that the menus show. Thus, the menus read the vatSys
-            // state again at an interval.
-            void RefreshMenus()
+            var tagListWindow = new TagListWindow(_serviceProvider.GetRequiredService<WindowManager>(), errorReporter);
+
+            // vatSys does not send events for most of the states that the menus and the Tag List show. Thus, read the
+            // vatSys state again at an interval.
+            void Refresh()
             {
                 // An exception that is not caught on the UI thread stops vatSys.
                 try
@@ -85,11 +87,20 @@ public class Plugin : IPlugin
                 {
                     errorReporter.ReportError(ex, "Cannot update the menus");
                 }
+
+                try
+                {
+                    tagListWindow.Refresh();
+                }
+                catch (Exception ex)
+                {
+                    errorReporter.ReportError(ex, "Cannot update the Tag List");
+                }
             }
 
-            RefreshMenus();
+            Refresh();
             _refreshTimer = new System.Windows.Forms.Timer { Interval = (int)RefreshInterval.TotalMilliseconds };
-            _refreshTimer.Tick += (_, _) => RefreshMenus();
+            _refreshTimer.Tick += (_, _) => Refresh();
             _refreshTimer.Start();
 
             var doubleAltPressFilter = new DoubleAltPressFilter(clock, DoubleAltPressInterval, () =>
