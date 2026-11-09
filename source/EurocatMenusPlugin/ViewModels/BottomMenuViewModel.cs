@@ -22,6 +22,9 @@ public partial class BottomMenuViewModel : ObservableObject
     const string ToolsItem = "toolsToolStripMenuItem";
     const string WindowsItem = "windowsToolStripMenuItem";
     const string AtisItem = "aTISToolStripMenuItem";
+    const string QuickTagItem = "quickTagToolStripMenuItem";
+    const string AddQuickTagItem = "addToolStripMenuItem";
+    const string RemoveQuickTagItem = "removeToolStripMenuItem";
 
     // vatSys adds an item to the ATIS menu for each online ATIS station. The name of the item is the callsign of the
     // station, which has this suffix. The text of the item is the ICAO code.
@@ -55,6 +58,8 @@ public partial class BottomMenuViewModel : ObservableObject
     [ObservableProperty] bool isAdsContractAvailable;
     [ObservableProperty] bool isCpdlcHistoryAvailable;
     [ObservableProperty] bool isAtisEditorAvailable;
+    [ObservableProperty] bool canAddQuickTag;
+    [ObservableProperty] bool canRemoveQuickTag;
     [ObservableProperty] bool isHoldSetupOpen;
     [ObservableProperty] bool isStripSetupOpen;
     [ObservableProperty] bool isAtisEditorOpen;
@@ -70,6 +75,8 @@ public partial class BottomMenuViewModel : ObservableObject
         IsAdsContractAvailable = true;
         IsCpdlcHistoryAvailable = true;
         IsAtisEditorAvailable = true;
+        CanAddQuickTag = true;
+        CanRemoveQuickTag = true;
     }
 
     public BottomMenuViewModel(VatSysMenu vatSysMenu, IErrorReporter errorReporter)
@@ -91,6 +98,10 @@ public partial class BottomMenuViewModel : ObservableObject
         IsAdsContractAvailable = FindCpdlcItem(AdsContractText) is not null;
         IsCpdlcHistoryAvailable = FindCpdlcItem(CpdlcHistoryText) is not null;
         IsAtisEditorAvailable = _vatSysMenu.FindPluginItem(WindowsItem, AtisEditorText) is not null;
+
+        // vatSys enables the Quick Tag menu only when the selected track has no flight plan
+        CanAddQuickTag = _vatSysMenu.GetItem(QuickTagItem).Enabled;
+        CanRemoveQuickTag = MMI.SelectedTrack?.GetQuickTag() is not null;
 
         RefreshWindows();
     }
@@ -147,6 +158,18 @@ public partial class BottomMenuViewModel : ObservableObject
 
     [RelayCommand]
     void OpenFlightPlan() => Click(FlightPlanItem);
+
+    /// <summary>
+    /// Opens the vatSys Quick Tag window for the selected track, the same as Tools, Quick Tag, Add.
+    /// </summary>
+    [RelayCommand]
+    void AddQuickTag() => Click(AddQuickTagItem);
+
+    /// <summary>
+    /// Removes the quick tag of the selected track, the same as Tools, Quick Tag, Remove.
+    /// </summary>
+    [RelayCommand]
+    void RemoveQuickTag() => Click(RemoveQuickTagItem);
 
     [RelayCommand]
     void ToggleStripSetup() => ToggleWindow(
