@@ -5,9 +5,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:EurocatMenusPlugin.Views"
              xmlns:toolbox="clr-namespace:vatSysToolbox;assembly=vatSysToolbox"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d"
-             Height="80"
-             d:DesignHeight="80" d:DesignWidth="1920"
+             Height="56"
+             d:DesignWidth="1920"
              Background="{toolbox:VatSysColour WindowBackground}">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -20,6 +21,7 @@
                 Thus, the gap between two items is the same as the gap between an item and the edge of the menu.
             -->
             <Thickness x:Key="ItemMargin">2</Thickness>
+            <system:Double x:Key="ItemWidth">72</system:Double>
 
             <!-- A button that fills its space. Use it in a stack. -->
             <Style x:Key="StackedButtonStyle" TargetType="Button" BasedOn="{StaticResource ButtonBaseStyle}">
@@ -28,7 +30,7 @@
 
             <!-- A square button with the full height of the menu -->
             <Style TargetType="Button" BasedOn="{StaticResource StackedButtonStyle}">
-                <Setter Property="Width" Value="{Binding ActualHeight, RelativeSource={RelativeSource Self}}" />
+                <Setter Property="Width" Value="{StaticResource ItemWidth}" />
             </Style>
 
             <!--
@@ -37,18 +39,21 @@
                 by two margins, and its items have the same width as a square button.
             -->
             <Style x:Key="StackStyle" TargetType="Grid">
-                <Setter Property="Width" Value="{Binding ActualHeight, RelativeSource={RelativeSource Self}}" />
+                <Setter Property="Width" Value="{StaticResource ItemWidth}" />
             </Style>
 
             <!-- A border that is only as large as its content -->
             <Style x:Key="IndicatorStyle" TargetType="Border">
-                <Setter Property="Margin" Value="{StaticResource ItemMargin}" />
+                <Setter Property="Width" Value="24" />
+                <Setter Property="Height" Value="24" />
                 <Setter Property="HorizontalAlignment" Value="Center" />
                 <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="BorderBrush" Value="{toolbox:VatSysColour GenericText}" />
             </Style>
 
-            <Style x:Key="NonInteractiveTextStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
-                <Setter Property="Foreground" Value="{toolbox:VatSysColour NonInteractiveText}" />
+            <Style x:Key="GenericTextStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
+                <Setter Property="Foreground" Value="{toolbox:VatSysColour GenericText}" />
             </Style>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -73,7 +78,7 @@
             </Grid.RowDefinitions>
             <Button Grid.Row="0" Style="{StaticResource StackedButtonStyle}">SSTP</Button>
             <Border Grid.Row="1" Style="{StaticResource IndicatorStyle}">
-                <TextBlock Style="{StaticResource NonInteractiveTextStyle}">A</TextBlock>
+                <TextBlock Style="{StaticResource GenericTextStyle}" HorizontalAlignment="Center">A</TextBlock>
             </Border>
         </Grid>
         <Button>Lost</Button>
@@ -86,7 +91,7 @@
             </Grid.RowDefinitions>
             <Button Grid.Row="0" Style="{StaticResource StackedButtonStyle}">CQ</Button>
             <Border Grid.Row="1" Style="{StaticResource IndicatorStyle}">
-                <TextBlock Style="{StaticResource NonInteractiveTextStyle}">0</TextBlock>
+                <TextBlock Style="{StaticResource GenericTextStyle}" HorizontalAlignment="Center">0</TextBlock>
             </Border>
         </Grid>
         <Button>ADS Contract</Button>
