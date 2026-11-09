@@ -111,5 +111,7 @@
         <Button IsEnabled="False">LATC</Button>
         <Button Command="{Binding OpenGroundWindowCommand}">Ground</Button>
         <ToggleButton Click="MessagesButton_Click">MSG</ToggleButton>
+        <Button Command="{Binding OpenAtisEditorCommand}" IsEnabled="{Binding IsAtisEditorAvailable}">ATIS Edit</Button>
+        <ToggleButton Click="AtisViewButton_Click">ATIS View</ToggleButton>
     </StackPanel>
 </UserControl>

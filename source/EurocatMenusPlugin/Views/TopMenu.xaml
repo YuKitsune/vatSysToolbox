@@ -149,45 +149,6 @@
 
         <controls:BeveledLine Style="{StaticResource SectionSeparatorStyle}" />
 
-        <!-- ATIS -->
-        <DockPanel Style="{StaticResource SectionStyle}">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Style="{StaticResource SectionTitleStyle}">ATIS</TextBlock>
-                <Button Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Command="{Binding OpenAtisEditorCommand}" IsEnabled="{Binding IsAtisEditorAvailable}">EDITOR</Button>
-                <ToggleButton Grid.Row="3" x:Name="AtisWindowButton" HorizontalAlignment="Center" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Click="AtisWindowButton_Click">WINDOW</ToggleButton>
-            </Grid>
-        </DockPanel>
-
-        <!--
-            Opens an ATIS window for an airport, or shows an ATIS window that is open.
-            The same as Windows, ATIS in the vatSys menu bar.
-            The popup settings are the same as the custom period popup in the CPDLC plugin. Typing works in that popup.
-        -->
-        <Popup x:Name="AtisPopup" PlacementTarget="{Binding ElementName=AtisWindowButton}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True">
-            <Border Background="{toolbox:VatSysColour WindowBackground}">
-                <controls:BeveledBorder BevelType="Raised" BorderThickness="{x:Static controls:Bevel.BorderThickness}">
-                    <StackPanel>
-                        <TextBox x:Name="AtisAirportTextBox"
-                                 Width="64"
-                                 MaxLength="4"
-                                 CharacterCasing="Upper"
-                                 local:TextBoxBehaviours.AllowedCharacters="[A-Za-z]"
-                                 KeyDown="AtisAirportTextBox_KeyDown" />
-                        <Separator x:Name="AtisWindowSeparator" Style="{StaticResource {x:Static MenuItem.SeparatorStyleKey}}" />
-                        <StackPanel x:Name="AtisWindowList" />
-                    </StackPanel>
-                </controls:BeveledBorder>
-            </Border>
-        </Popup>
-
-        <controls:BeveledLine Style="{StaticResource SectionSeparatorStyle}" />
-
         <!-- Main Window -->
         <DockPanel Style="{StaticResource SectionStyle}">
             <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">Main Window</TextBlock>

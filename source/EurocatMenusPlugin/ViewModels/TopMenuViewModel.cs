@@ -16,7 +16,6 @@ public partial class TopMenuViewModel : ObservableObject
     const string AutomaticVisibilityCentersItem = "automaticToolStripMenuItem";
     const string SectorsItem = "sectorsToolStripMenuItem";
     const string RestrictedAreasItem = "restrictedAreasToolStripMenuItem";
-    const string WindowsItem = "windowsToolStripMenuItem";
     const string VelocityVectorsItem = "velocityVectorsToolStripMenuItem";
     const string VelocityVectorsOffItem = "offToolStripMenuItem";
     const string ShortRouteProbeDistanceItem = "srpdistanceToolStripMenuItem";
@@ -29,14 +28,6 @@ public partial class TopMenuViewModel : ObservableObject
     const string FpasdItem = "fPASDToolStripMenuItem";
     const string ExtendedLabelsItem = "extendedToolStripMenuItem";
     const string SharedLabelsItem = "sharedLabelsToolStripMenuItem";
-
-    // The menu item of the ATIS Editor plugin
-    // TODO: Use the messaging system to open the ATIS Editor, and not its menu item.
-    const string AtisEditorText = "ATIS Editor";
-
-    // vatSys adds this suffix to the callsign of an ATIS station
-    const string AtisCallsignSuffix = "_ATIS";
-    const int AtisAirportLength = 4;
 
     // The status of a display when the Air window is not open
     const string DefaultDisplayStatus = "DEF";
@@ -64,7 +55,6 @@ public partial class TopMenuViewModel : ObservableObject
     [ObservableProperty] string connection = string.Empty;
     [ObservableProperty] string positionName = string.Empty;
     [ObservableProperty] string visibilityCentersMode = string.Empty;
-    [ObservableProperty] bool isAtisEditorAvailable;
 
     [ObservableProperty] string mainWindowStatus = string.Empty;
     [ObservableProperty] string secondWindowStatus = string.Empty;
@@ -102,7 +92,6 @@ public partial class TopMenuViewModel : ObservableObject
         Connection = "ML-BIK_CTR";
         PositionName = "APPROACH";
         VisibilityCentersMode = "AUTO";
-        IsAtisEditorAvailable = true;
         _mainWindowRange = "165";
         MainWindowStatus = "RST";
         _secondWindowRange = "300";
@@ -252,7 +241,6 @@ public partial class TopMenuViewModel : ObservableObject
         Connection = Network.IsConnected ? Network.Callsign : DisconnectedText;
         PositionName = _vatSysMenu.GetItem(PositionDisplayItem).Text;
         VisibilityCentersMode = _vatSysMenu.GetItem(AutomaticVisibilityCentersItem).Checked ? "AUTO" : "MAN";
-        IsAtisEditorAvailable = _vatSysMenu.FindPluginItem(WindowsItem, AtisEditorText) is not null;
 
         RefreshMainWindow();
         RefreshSecondWindow();
@@ -270,16 +258,6 @@ public partial class TopMenuViewModel : ObservableObject
     public IReadOnlyList<PopupMenuItem> GetVisibilityCentersMenuItems()
     {
         return GetMenuItems(() => _vatSysMenu.GetPopupMenuItems(_vatSysMenu.GetItem(VisibilityCentersItem)));
-    }
-
-    /// <summary>
-    /// Gets an item for each ATIS window that is open. A click on an item shows the ATIS window.
-    /// </summary>
-    public IReadOnlyList<PopupMenuItem> GetAtisWindowMenuItems()
-    {
-        return GetMenuItems(() => _vatSysInternals.GetAtisWindows()
-            .Select(window => new PopupMenuItem(window.Text, () => Run(() => ShowWindow(window))))
-            .ToList());
     }
 
     public IReadOnlyList<PopupMenuItem> GetVelocityVectorLengthMenuItems()
@@ -301,21 +279,6 @@ public partial class TopMenuViewModel : ObservableObject
         return GetMenuItems(() => GetLengthMenuItems(HistoryDotsItem, HistoryDotsOffItem));
     }
 
-    /// <summary>
-    /// Opens the ATIS window for an airport, the same as Windows, ATIS, Request in the vatSys menu bar.
-    /// </summary>
-    /// <param name="airport">The ICAO code of the airport.</param>
-    public void OpenAtisWindow(string airport)
-    {
-        Run(() =>
-        {
-            if (airport.Length != AtisAirportLength)
-                return;
-
-            MMI.OpenATISWindow(airport.ToUpperInvariant() + AtisCallsignSuffix);
-        });
-    }
-
     [RelayCommand]
     void OpenConnection() => Click(ConnectItem);
 
@@ -324,17 +287,6 @@ public partial class TopMenuViewModel : ObservableObject
 
     [RelayCommand]
     void OpenRestrictedAreas() => Click(RestrictedAreasItem);
-
-    [RelayCommand]
-    void OpenAtisEditor()
-    {
-        Run(() =>
-        {
-            var item = _vatSysMenu.FindPluginItem(WindowsItem, AtisEditorText)
-                ?? throw new InvalidOperationException("The ATIS Editor plugin is not loaded");
-            item.PerformClick();
-        });
-    }
 
     [RelayCommand]
     void OpenTimeMenu()
@@ -578,14 +530,6 @@ public partial class TopMenuViewModel : ObservableObject
     {
         return track.SRPVisible == MMI.SRPVisibilities.On ||
                (track.SRPVisible == MMI.SRPVisibilities.Global && MMI.SRPDefaultOn);
-    }
-
-    static void ShowWindow(Form window)
-    {
-        if (!window.Visible)
-            window.Show();
-
-        window.Activate();
     }
 
     static string FormatLevelFilter(int level) => (level / LevelFilterUnit).ToString("d3");

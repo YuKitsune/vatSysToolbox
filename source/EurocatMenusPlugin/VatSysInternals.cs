@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Windows.Forms;
-using vatsys;
 
 namespace EurocatMenusPlugin;
 
@@ -60,14 +58,5 @@ public class VatSysInternals(Form mainForm)
             "clockToolStripMenuItem_MouseUp",
             null,
             new MouseEventArgs(MouseButtons.Left, 1, 0, 0, 0));
-    }
-
-    /// <summary>
-    /// The ATIS windows that are open.
-    /// </summary>
-    public IReadOnlyList<Form> GetAtisWindows()
-    {
-        var atisWindows = (IEnumerable)Reflection.GetStaticProperty(typeof(MMI), "ATISWindows")!;
-        return atisWindows.Cast<Form>().ToList();
     }
 }

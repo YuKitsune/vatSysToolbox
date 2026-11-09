@@ -20,6 +20,12 @@ public partial class BottomMenuViewModel : ObservableObject
     const string StripSetupItem = "setupToolStripMenuItem2";
     const string MessagesItem = "messagesToolStripMenuItem";
     const string ToolsItem = "toolsToolStripMenuItem";
+    const string WindowsItem = "windowsToolStripMenuItem";
+    const string AtisItem = "aTISToolStripMenuItem";
+
+    // vatSys adds an item to the ATIS menu for each online ATIS station. The name of the item is the callsign of the
+    // station, which has this suffix. The text of the item is the ICAO code.
+    const string AtisCallsignSuffix = "_ATIS";
 
     // The menu items of other plugins
     // TODO: Use the messaging system to open the windows of other plugins, and not their menu items.
@@ -28,6 +34,7 @@ public partial class BottomMenuViewModel : ObservableObject
     const string AdsContractText = "ADS Contract";
     const string CpdlcHistoryText = "History";
     const string TfmsCategory = "TFMS";
+    const string AtisEditorText = "ATIS Editor";
 
     readonly VatSysMenu _vatSysMenu = null!;
     readonly IErrorReporter _errorReporter = null!;
@@ -37,6 +44,7 @@ public partial class BottomMenuViewModel : ObservableObject
     [ObservableProperty] bool isTfmsAvailable;
     [ObservableProperty] bool isAdsContractAvailable;
     [ObservableProperty] bool isCpdlcHistoryAvailable;
+    [ObservableProperty] bool isAtisEditorAvailable;
 
     // Example data for the XAML designer. Do not use at runtime.
     public BottomMenuViewModel()
@@ -46,6 +54,7 @@ public partial class BottomMenuViewModel : ObservableObject
         IsTfmsAvailable = true;
         IsAdsContractAvailable = true;
         IsCpdlcHistoryAvailable = true;
+        IsAtisEditorAvailable = true;
     }
 
     public BottomMenuViewModel(VatSysMenu vatSysMenu, IErrorReporter errorReporter)
@@ -66,6 +75,7 @@ public partial class BottomMenuViewModel : ObservableObject
         IsTfmsAvailable = _vatSysMenu.FindPluginCategory(TfmsCategory) is not null;
         IsAdsContractAvailable = FindCpdlcItem(AdsContractText) is not null;
         IsCpdlcHistoryAvailable = FindCpdlcItem(CpdlcHistoryText) is not null;
+        IsAtisEditorAvailable = _vatSysMenu.FindPluginItem(WindowsItem, AtisEditorText) is not null;
     }
 
     public IReadOnlyList<PopupMenuItem> GetSetUpMenuItems()
@@ -95,6 +105,18 @@ public partial class BottomMenuViewModel : ObservableObject
             : []);
     }
 
+    /// <summary>
+    /// Gets an item for each online ATIS station. A click on an item opens the ATIS window for the station.
+    /// </summary>
+    public IReadOnlyList<PopupMenuItem> GetAtisMenuItems()
+    {
+        return GetMenuItems(() => _vatSysMenu.GetItem(AtisItem).DropDownItems
+            .OfType<ToolStripMenuItem>()
+            .Where(item => item.Name.EndsWith(AtisCallsignSuffix))
+            .Select(item => _vatSysMenu.GetPopupMenuItem(item))
+            .ToList());
+    }
+
     public IReadOnlyList<PopupMenuItem> GetMessagesMenuItems()
     {
         return GetMenuItems(() => _vatSysMenu.GetPopupMenuItems(_vatSysMenu.GetItem(MessagesItem)));
@@ -120,6 +142,9 @@ public partial class BottomMenuViewModel : ObservableObject
 
     [RelayCommand]
     void OpenCpdlcHistory() => ClickPluginItem(FindCpdlcItem(CpdlcHistoryText));
+
+    [RelayCommand]
+    void OpenAtisEditor() => ClickPluginItem(_vatSysMenu.FindPluginItem(WindowsItem, AtisEditorText));
 
     ToolStripMenuItem? FindCpdlcItem(string text)
     {
