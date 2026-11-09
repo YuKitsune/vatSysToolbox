@@ -45,13 +45,20 @@
     </Style>
 
     <!-- Button Styling -->
+    <!--
+        The text of a button. The TextBlock that shows string content does not inherit TextWrapping from the button.
+        Thus, the button template sets this style on that TextBlock.
+    -->
+    <Style x:Key="ButtonTextStyle" TargetType="{x:Type TextBlock}">
+        <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+
     <Style x:Key="ButtonBaseStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource ControlBaseStyle}">
 
         <Setter Property="Foreground" Value="{local:VatSysColour InteractiveText}" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
 
-        <Setter Property="TextBlock.TextWrapping" Value="Wrap"/>
         <Setter Property="TextBlock.LineStackingStrategy" Value="BlockLineHeight"/>
         <Setter Property="TextBlock.LineHeight" Value="{Binding Source={x:Static local:VatSysFont.Size}, Converter={StaticResource FontSizeToLineHeightConverter}}" />
         <Setter Property="TextBlock.TextAlignment" Value="Center" />
@@ -68,7 +75,11 @@
                                     Content="{TemplateBinding Content}"
                                     ContentTemplate="{TemplateBinding ContentTemplate}"
                                     VerticalAlignment="Center"
-                                    HorizontalAlignment="Center"/>
+                                    HorizontalAlignment="Center">
+                                    <ContentPresenter.Resources>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource ButtonTextStyle}" />
+                                    </ContentPresenter.Resources>
+                                </ContentPresenter>
                             </Border>
                         </controls:BeveledBorder>
                     </Border>
@@ -90,7 +101,11 @@
                                             Content="{TemplateBinding Content}"
                                             ContentTemplate="{TemplateBinding ContentTemplate}"
                                             VerticalAlignment="Center"
-                                            HorizontalAlignment="Center" />
+                                            HorizontalAlignment="Center">
+                                            <ContentPresenter.Resources>
+                                                <Style TargetType="TextBlock" BasedOn="{StaticResource ButtonTextStyle}" />
+                                            </ContentPresenter.Resources>
+                                        </ContentPresenter>
                                     </Border>
                                 </controls:BeveledBorder>
                             </Border>
