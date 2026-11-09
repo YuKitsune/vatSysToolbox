@@ -52,6 +52,7 @@ public partial class BottomMenuViewModel : ObservableObject
     readonly VatSysInternals _vatSysInternals = null!;
     readonly MenuBarLayout _menuBarLayout = null!;
     readonly FullScreenMode _fullScreenMode = null!;
+    readonly TagListWindow _tagListWindow = null!;
     readonly IErrorReporter _errorReporter = null!;
 
     // True after this class starts to listen to the vatSys Messages item
@@ -70,6 +71,7 @@ public partial class BottomMenuViewModel : ObservableObject
     [ObservableProperty] bool isAdsContractOpen;
     [ObservableProperty] bool isCpdlcHistoryOpen;
     [ObservableProperty] bool hasUnreadMessages;
+    [ObservableProperty] bool isTagListOn;
 
     // Example data for the XAML designer. Do not use at runtime.
     public BottomMenuViewModel()
@@ -86,12 +88,14 @@ public partial class BottomMenuViewModel : ObservableObject
         VatSysInternals vatSysInternals,
         MenuBarLayout menuBarLayout,
         FullScreenMode fullScreenMode,
+        TagListWindow tagListWindow,
         IErrorReporter errorReporter)
     {
         _vatSysMenu = vatSysMenu;
         _vatSysInternals = vatSysInternals;
         _menuBarLayout = menuBarLayout;
         _fullScreenMode = fullScreenMode;
+        _tagListWindow = tagListWindow;
         _errorReporter = errorReporter;
     }
 
@@ -275,6 +279,19 @@ public partial class BottomMenuViewModel : ObservableObject
     /// </summary>
     [RelayCommand]
     void RemoveQuickTag() => Click(RemoveQuickTagItem);
+
+    /// <summary>
+    /// Turns the Tag List on or off. The Tag List shows only while it is on and one or more quick tags exist.
+    /// </summary>
+    [RelayCommand]
+    void ToggleTagList()
+    {
+        Run(_tagListWindow.Toggle);
+
+        // A toggle button changes its own state when it is clicked. Thus, send the state again.
+        IsTagListOn = _tagListWindow.IsOn;
+        OnPropertyChanged(nameof(IsTagListOn));
+    }
 
     /// <summary>
     /// Starts or stops the lateral conflict (LATC) tool for the selected track, the same as Tools, Conflict Area, and

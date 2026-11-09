@@ -59,6 +59,12 @@ public partial class TagListViewModel : ObservableObject
         try
         {
             RDP.RemoveQuickTag(item.QuickTag);
+
+            // vatSys does not change the state of the track when the quick tag is removed. Thus, do the same as vatSys
+            // and set the state again, so that the track is not shown as jurisdiction.
+            if (MMI.FindTrack(item.QuickTag.CoupledTrack) is { } track)
+                MMI.SetTrackState(track);
+
             Items.Remove(item);
         }
         catch (Exception ex)

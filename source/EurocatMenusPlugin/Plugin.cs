@@ -60,6 +60,7 @@ public class Plugin : IPlugin
             var vatSysInternals = new VatSysInternals(mainForm);
             var menuBar = new MenuBarLayout(mainForm);
             var fullScreenMode = new FullScreenMode(mainForm);
+            var tagListWindow = new TagListWindow(_serviceProvider.GetRequiredService<WindowManager>(), errorReporter);
 
             var topMenuViewModel = new TopMenuViewModel(vatSysMenu, vatSysInternals, clock, errorReporter);
             var bottomMenuViewModel = new BottomMenuViewModel(
@@ -67,11 +68,10 @@ public class Plugin : IPlugin
                 vatSysInternals,
                 menuBar,
                 fullScreenMode,
+                tagListWindow,
                 errorReporter);
 
             menuBar.AddMenus(new TopMenu(topMenuViewModel), new BottomMenu(bottomMenuViewModel));
-
-            var tagListWindow = new TagListWindow(_serviceProvider.GetRequiredService<WindowManager>(), errorReporter);
 
             // vatSys does not send events for most of the states that the menus and the Tag List show. Thus, read the
             // vatSys state again at an interval.

@@ -26,7 +26,7 @@
     </UserControl.Resources>
 
     <ScrollViewer Style="{StaticResource CustomScrollViewerStyle}">
-        <ItemsControl ItemsSource="{Binding Items}">
+        <ItemsControl x:Name="StripList" ItemsSource="{Binding Items}">
             <ItemsControl.ItemContainerStyle>
                 <Style>
                     <Setter Property="FrameworkElement.Margin" Value="2" />
@@ -57,16 +57,21 @@
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock" BasedOn="{StaticResource StripTextStyle}">
                                             <Style.Triggers>
+                                                <!-- Hidden, and not collapsed, so that the strip keeps its size -->
                                                 <DataTrigger Binding="{Binding IsEditingGlobalOps}" Value="True">
-                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Setter Property="Visibility" Value="Hidden" />
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </TextBlock.Style>
                                 </TextBlock>
 
-                                <!-- vatSys uses the same length and casing when the label data is edited on the ASD -->
-                                <TextBox Text="{Binding GlobalOpsEditValue, UpdateSourceTrigger=PropertyChanged}"
+                                <!--
+                                    vatSys uses the same length and casing when the label data is edited on the ASD.
+                                    The negative margin puts the border of the text box in the space around the text,
+                                    so that the text box does not make the strip larger.
+                                -->
+                                <TextBox Margin="-2" Text="{Binding GlobalOpsEditValue, UpdateSourceTrigger=PropertyChanged}"
                                          MaxLength="11"
                                          CharacterCasing="Upper"
                                          HorizontalAlignment="Stretch"

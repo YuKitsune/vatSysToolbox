@@ -146,7 +146,7 @@
         <!-- Waypoint discrepancy not simulated -->
         <!-- <Button IsEnabled="False">WAYP</Button> -->
         
-        <Button IsEnabled="False">Tag List</Button>
+        <ToggleButton Command="{Binding ToggleTagListCommand}" IsChecked="{Binding IsTagListOn, Mode=OneWay}">Tag List</ToggleButton>
         <Button Command="{Binding RemoveQuickTagCommand}">Del Tag</Button>
         <Button Command="{Binding AddQuickTagCommand}">Rad Tag</Button>
         <Button Command="{Binding ToggleLateralConflictToolCommand}">LATC</Button>
