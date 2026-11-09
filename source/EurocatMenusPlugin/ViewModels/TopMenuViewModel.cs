@@ -11,6 +11,7 @@ public partial class TopMenuViewModel : ObservableObject
     // The names of the vatSys menu items
     const string ConnectItem = "connectToolStripMenuItem";
     const string PositionDisplayItem = "positionToolStripDisplay";
+    const string ClockItem = "clockToolStripMenuItem";
     const string PositionsItem = "positionsToolStripMenuItem";
     const string VisibilityCentersItem = "visibilityCentersToolStripMenuItem";
     const string AutomaticVisibilityCentersItem = "automaticToolStripMenuItem";
@@ -68,6 +69,7 @@ public partial class TopMenuViewModel : ObservableObject
 
     [ObservableProperty] string time = string.Empty;
     [ObservableProperty] string timer = string.Empty;
+    [ObservableProperty] bool isTimerExpired;
 
     [ObservableProperty] bool isVelocityVectorsOn;
     [ObservableProperty] string velocityVectorLength = string.Empty;
@@ -294,12 +296,28 @@ public partial class TopMenuViewModel : ObservableObject
     void OpenSectors() => Click(SectorsItem);
 
     [RelayCommand]
-    void OpenTimeMenu()
+    void OpenTimeMenu() => RunTimerAction(_vatSysInternals.OpenTimeMenu);
+
+    [RelayCommand]
+    void AcknowledgeTimer() => RunTimerAction(_vatSysInternals.AcknowledgeTimer);
+
+    void RunTimerAction(Action action)
     {
         Run(() =>
         {
-            _vatSysInternals.OpenTimeMenu();
-            RefreshTime();
+            try
+            {
+                action();
+            }
+            finally
+            {
+                RefreshTime();
+
+                // The timer button is a toggle button. It changes its own state when it is clicked. If the timer did
+                // not change, the property does not send a change, and the button shows the wrong state. Thus, send
+                // the state again.
+                OnPropertyChanged(nameof(IsTimerExpired));
+            }
         });
     }
 
@@ -397,7 +415,11 @@ public partial class TopMenuViewModel : ObservableObject
     {
         var now = _clock.UtcNow().UtcDateTime;
         Time = now.ToString("HH:mm:ss");
-        Timer = FormatTimer(_vatSysInternals.TimerTime, now);
+        Timer = FormatTimer(_vatSysInternals.TimerTime);
+
+        // vatSys checks its clock when the timer goes off. It shows a timer that is set, but has not gone off, as
+        // Indeterminate.
+        IsTimerExpired = _vatSysMenu.GetItem(ClockItem).CheckState == CheckState.Checked;
     }
 
     void RefreshFunctionalStates()
@@ -576,15 +598,12 @@ public partial class TopMenuViewModel : ObservableObject
         return type == MMI.SRPTypes.Distance ? $"{value} D" : $"{value} T";
     }
 
-    // The hours and minutes until the timer goes off. vatSys sets off the timer at the start of the minute.
-    static string FormatTimer(DateTime timerTime, DateTime now)
+    // The time when the timer goes off, in hours and minutes. vatSys sets off the timer at the start of the minute.
+    static string FormatTimer(DateTime timerTime)
     {
-        if (timerTime == DateTime.MaxValue)
-            return "0000";
-
-        var alarmTime = timerTime.AddTicks(-(timerTime.Ticks % TimeSpan.TicksPerMinute));
-        var remainingMinutes = Math.Max(0, (int)Math.Ceiling((alarmTime - now).TotalMinutes));
-        return $"{remainingMinutes / 60:00}{remainingMinutes % 60:00}";
+        return timerTime == DateTime.MaxValue
+            ? "0000"
+            : timerTime.ToString("HHmm");
     }
 
     void Run(Action action)

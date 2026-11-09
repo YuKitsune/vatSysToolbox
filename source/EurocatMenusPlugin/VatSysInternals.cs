@@ -120,12 +120,20 @@ public class VatSysInternals(Form mainForm)
     /// <summary>
     /// Opens the vatSys Time menu at the mouse position, the same as a click on the clock in the vatSys menu bar.
     /// </summary>
-    public void OpenTimeMenu()
+    public void OpenTimeMenu() => ClickClock(MouseButtons.Left);
+
+    /// <summary>
+    /// Acknowledges the timer and clears it, the same as a middle click on the clock in the vatSys menu bar.
+    /// </summary>
+    public void AcknowledgeTimer() => ClickClock(MouseButtons.Middle);
+
+    // The clock in the vatSys menu bar does its actions when the mouse button is released
+    void ClickClock(MouseButtons button)
     {
         Reflection.InvokeMethod(
             mainForm,
             "clockToolStripMenuItem_MouseUp",
             null,
-            new MouseEventArgs(MouseButtons.Left, 1, 0, 0, 0));
+            new MouseEventArgs(button, 1, 0, 0, 0));
     }
 }

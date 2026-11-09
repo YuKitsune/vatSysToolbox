@@ -203,9 +203,16 @@
             <StackPanel Margin="4,0" VerticalAlignment="Center">
                 <TextBlock Style="{StaticResource LargeTextStyle}" Foreground="{toolbox:VatSysColour GenericText}" Text="{Binding Time}" />
                 <TextBlock Style="{StaticResource InteractiveLabelStyle}">Timer</TextBlock>
-                <Button Command="{Binding OpenTimeMenuCommand}">
+                <!--
+                    Shows the time when the timer goes off. It looks pressed after the timer has gone off.
+                    A click opens the vatSys Time menu. A middle click acknowledges the timer and clears it.
+                -->
+                <ToggleButton Command="{Binding OpenTimeMenuCommand}" IsChecked="{Binding IsTimerExpired, Mode=OneWay}">
+                    <ToggleButton.InputBindings>
+                        <MouseBinding MouseAction="MiddleClick" Command="{Binding AcknowledgeTimerCommand}" />
+                    </ToggleButton.InputBindings>
                     <TextBlock Style="{StaticResource LargeTextStyle}" Text="{Binding Timer}" />
-                </Button>
+                </ToggleButton>
             </StackPanel>
         </DockPanel>
 
