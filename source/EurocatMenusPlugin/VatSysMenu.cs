@@ -53,13 +53,26 @@ public class VatSysMenu(MenuStrip menuStrip, IErrorReporter errorReporter)
     /// <summary>
     /// Makes popup menu items from the children of a vatSys menu item.
     /// </summary>
-    public IReadOnlyList<PopupMenuItem> GetPopupMenuItems(ToolStripMenuItem parent)
+    /// <param name="parent">The vatSys menu item.</param>
+    /// <param name="replacements">
+    /// Popup menu items to use in place of some children, by the names of the children. Use this when a child must
+    /// work differently from the vatSys menu item.
+    /// </param>
+    public IReadOnlyList<PopupMenuItem> GetPopupMenuItems(
+        ToolStripMenuItem parent,
+        IReadOnlyDictionary<string, PopupMenuItem>? replacements = null)
     {
         var items = new List<PopupMenuItem>();
         foreach (ToolStripItem item in parent.DropDownItems)
         {
             if (!item.Available)
                 continue;
+
+            if (replacements is not null && replacements.TryGetValue(item.Name, out var replacement))
+            {
+                items.Add(replacement);
+                continue;
+            }
 
             switch (item)
             {

@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace EurocatMenusPlugin.Views;
 
@@ -26,6 +27,15 @@ public partial class TextEntry : UserControl
 
         _submit = submit;
         _close = close;
+
+        Loaded += (_, _) => FocusInputBox();
+    }
+
+    // The popup must be fully shown before the text box can get the keyboard focus. Thus, focus the text box after the
+    // popup has finished loading and rendering.
+    void FocusInputBox()
+    {
+        Dispatcher.BeginInvoke(DispatcherPriority.Input, new Action(() => Keyboard.Focus(InputBox)));
     }
 
     void InputBox_KeyDown(object sender, KeyEventArgs e)

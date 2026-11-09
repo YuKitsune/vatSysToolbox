@@ -15,11 +15,13 @@ public partial class BottomMenuViewModel : ObservableObject
     const string RestrictedAreasItem = "restrictedAreasToolStripMenuItem";
     const string MapsItem = "mapsToolStripMenuItem";
     const string InfoItem = "aISToolStripMenuItem";
+    const string FindItem = "findToolStripMenuItem";
     const string AirWindowItem = "secondASDToolStripMenuItem";
     const string GroundWindowItem = "ASMGCSToolStripMenuItem";
     const string FlightPlanItem = "flightPlanToolStripMenuItem";
     const string StripSetupItem = "setupToolStripMenuItem2";
     const string MessagesItem = "messagesToolStripMenuItem";
+    const string SendMessageItem = "sendToolStripMenuItem";
     const string ToolsItem = "toolsToolStripMenuItem";
     const string WindowsItem = "windowsToolStripMenuItem";
     const string AtisItem = "aTISToolStripMenuItem";
@@ -113,7 +115,15 @@ public partial class BottomMenuViewModel : ObservableObject
 
     public IReadOnlyList<PopupMenuItem> GetInfoMenuItems()
     {
-        return GetMenuItems(() => _vatSysMenu.GetPopupMenuItems(_vatSysMenu.GetItem(InfoItem)));
+        return GetMenuItems(() =>
+        {
+            // In vatSys, Find has a submenu with a text field. Here, Find opens the text box at once.
+            var findItem = _vatSysMenu.GetTextInputItem(_vatSysMenu.GetItem(FindItem), "Find...", title: null);
+
+            return _vatSysMenu.GetPopupMenuItems(
+                _vatSysMenu.GetItem(InfoItem),
+                new Dictionary<string, PopupMenuItem> { [FindItem] = findItem });
+        });
     }
 
     public IReadOnlyList<PopupMenuItem> GetTfmsMenuItems()
@@ -144,7 +154,7 @@ public partial class BottomMenuViewModel : ObservableObject
             // same as from its own menu.
             var requestItem = _vatSysMenu.GetTextInputItem(
                 _vatSysMenu.GetItem(AtisRequestItem),
-                "Request",
+                "Request...",
                 "Request ATIS");
 
             var stationItems = atisMenu.DropDownItems
@@ -168,7 +178,15 @@ public partial class BottomMenuViewModel : ObservableObject
 
     public IReadOnlyList<PopupMenuItem> GetMessagesMenuItems()
     {
-        return GetMenuItems(() => _vatSysMenu.GetPopupMenuItems(_vatSysMenu.GetItem(MessagesItem)));
+        return GetMenuItems(() =>
+        {
+            // In vatSys, Send has a submenu with a text field for the callsign. Here, Send opens the text box at once.
+            var sendItem = _vatSysMenu.GetTextInputItem(_vatSysMenu.GetItem(SendMessageItem), "Send...", title: null);
+
+            return _vatSysMenu.GetPopupMenuItems(
+                _vatSysMenu.GetItem(MessagesItem),
+                new Dictionary<string, PopupMenuItem> { [SendMessageItem] = sendItem });
+        });
     }
 
     [RelayCommand]

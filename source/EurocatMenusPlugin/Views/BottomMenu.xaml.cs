@@ -41,7 +41,7 @@ public partial class BottomMenu : UserControl
 
     void AtisButton_Click(object sender, RoutedEventArgs e)
     {
-        PopupMenu.Open((ToggleButton)sender, _viewModel.GetAtisMenuItems(), PlacementMode.Top);
+        PopupMenu.Open((ToggleButton)sender, _viewModel.GetAtisMenuItems(), PlacementMode.Top, matchTargetWidth: true);
     }
 
     void MessagesButton_Click(object sender, RoutedEventArgs e)
