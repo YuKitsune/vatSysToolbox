@@ -326,10 +326,15 @@ public partial class TopMenuViewModel : ObservableObject
                 return;
             }
 
-            // Turn the short route probe on or off for the selected aircraft only, the same as the SRP key
-            selectedTrack.SRPVisible = IsShortRouteProbeVisible(selectedTrack)
-                ? MMI.SRPVisibilities.Off
-                : MMI.SRPVisibilities.On;
+            // Turn the short route probe on or off for the selected aircraft only
+            var isVisible = !IsShortRouteProbeVisible(selectedTrack);
+
+            // If the aircraft is now the same as all aircraft, it follows the setting for all aircraft again.
+            // Otherwise, a later change to the setting for all aircraft does not change this aircraft.
+            if (isVisible == MMI.SRPDefaultOn)
+                selectedTrack.SRPVisible = MMI.SRPVisibilities.Global;
+            else
+                selectedTrack.SRPVisible = isVisible ? MMI.SRPVisibilities.On : MMI.SRPVisibilities.Off;
         });
     }
 
