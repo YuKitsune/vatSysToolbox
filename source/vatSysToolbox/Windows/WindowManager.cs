@@ -1,0 +1,160 @@
+using System.Windows;
+using System.Windows.Forms;
+
+namespace vatSysToolbox.Windows;
+
+/// <summary>
+/// Opens and closes <see cref="VatSysForm"/> windows. A key identifies each window, so that only one window with
+/// the same key is open at a time. The window manager keeps the last location of each window, and opens the window at
+/// that location again.
+/// </summary>
+public class WindowManager(IGuiInvoker guiInvoker)
+{
+    readonly Dictionary<string, VatSysForm> _forms = new();
+    readonly Dictionary<string, System.Drawing.Point> _lastLocations = new();
+    readonly object _gate = new();
+
+    /// <summary>
+    /// Opens a window. If a window with the same key is open, this method focuses that window.
+    /// </summary>
+    public void FocusOrCreateWindow(
+        string key,
+        string title,
+        Func<IWindowHandle, FrameworkElement> createView,
+        bool sizeToContent = true,
+        bool canClose = true,
+        bool canMinimise = true,
+        Size? size = null,
+        Action<VatSysForm>? configureForm = null)
+    {
+        guiInvoker.InvokeOnGUI(mainForm =>
+        {
+            lock (_gate)
+            {
+                if (_forms.TryGetValue(key, out var existingForm))
+                {
+                    existingForm.WindowHandle.Focus();
+                    return;
+                }
+
+                CreateWindow(mainForm, key, title, createView, sizeToContent, canClose, canMinimise, size, configureForm);
+            }
+        });
+    }
+
+    /// <summary>
+    /// Opens a window. If a window with the same key is open, this method does nothing.
+    /// </summary>
+    public void TryCreateWindow(
+        string key,
+        string title,
+        Func<IWindowHandle, FrameworkElement> createView,
+        bool sizeToContent = true,
+        bool canClose = true,
+        bool canMinimise = true,
+        Size? size = null,
+        Action<VatSysForm>? configureForm = null)
+    {
+        guiInvoker.InvokeOnGUI(mainForm =>
+        {
+            lock (_gate)
+            {
+                if (_forms.ContainsKey(key))
+                    return;
+
+                CreateWindow(mainForm, key, title, createView, sizeToContent, canClose, canMinimise, size, configureForm);
+            }
+        });
+    }
+
+    public bool TryGetWindow(string key, out IWindowHandle? windowHandle)
+    {
+        lock (_gate)
+        {
+            if (_forms.TryGetValue(key, out var form))
+            {
+                windowHandle = form.WindowHandle;
+                return true;
+            }
+
+            windowHandle = null;
+            return false;
+        }
+    }
+
+    public void CloseWindow(string key)
+    {
+        guiInvoker.InvokeOnGUI(_ =>
+        {
+            VatSysForm? form;
+            lock (_gate)
+            {
+                if (!_forms.TryGetValue(key, out form))
+                    return;
+            }
+
+            try
+            {
+                form.ForceClose();
+            }
+            catch (ObjectDisposedException)
+            {
+                // Form may have already been closed or disposed
+            }
+        });
+    }
+
+    void CreateWindow(
+        Form mainForm,
+        string key,
+        string title,
+        Func<IWindowHandle, FrameworkElement> createView,
+        bool sizeToContent,
+        bool canClose,
+        bool canMinimise,
+        Size? size,
+        Action<VatSysForm>? configureForm)
+    {
+        var form = new VatSysForm(title, createView, sizeToContent, canClose, canMinimise)
+        {
+            StartPosition = FormStartPosition.CenterParent
+        };
+
+        // If the view closes the form before it has a handle, the form is disposed and cannot be shown.
+        if (form.IsDisposed)
+            return;
+
+        if (_lastLocations.TryGetValue(key, out var lastLocation))
+        {
+            form.StartPosition = FormStartPosition.Manual;
+            form.Location = lastLocation;
+        }
+
+        if (size.HasValue)
+        {
+            form.Width = (int)size.Value.Width;
+            form.Height = (int)size.Value.Height;
+        }
+
+        configureForm?.Invoke(form);
+
+        form.PerformLayout();
+        form.Closed += (_, _) => OnWindowClosed(key, form);
+
+        _forms[key] = form;
+        form.Show(mainForm);
+    }
+
+    void OnWindowClosed(string key, VatSysForm form)
+    {
+        lock (_gate)
+        {
+            // If the window is minimised or maximised, Location is not the normal position of the window
+            _lastLocations[key] = form.WindowState == FormWindowState.Normal
+                ? form.Location
+                : form.RestoreBounds.Location;
+
+            _forms.Remove(key);
+        }
+    }
+}
