@@ -5,7 +5,7 @@ using EurocatMenusPlugin.Views;
 namespace EurocatMenusPlugin;
 
 /// <summary>
-/// Hides the vatSys menu bar, and puts the top menu in its place.
+/// Hides the vatSys menu bar, and puts the top menu in its place. Puts the bottom menu below the ASD.
 /// The vatSys menu bar can show again above the top menu. The ASD then moves down to make space for it.
 /// </summary>
 public class MenuBarLayout
@@ -37,6 +37,19 @@ public class MenuBarLayout
         };
 
         mainForm.Controls.Add(_topMenuHost);
+
+        // The bottom menu uses the bottom of the ASD. It has the same height as the top menu.
+        var bottomMenuHeight = _vatSysMenu.Height;
+        var bottomMenuHost = new ElementHost
+        {
+            Child = new BottomMenu(),
+            Location = new System.Drawing.Point(0, _asd.Bottom - bottomMenuHeight),
+            Size = new System.Drawing.Size(mainForm.ClientSize.Width, bottomMenuHeight),
+            Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
+        };
+
+        mainForm.Controls.Add(bottomMenuHost);
+        _asd.Height -= bottomMenuHeight;
 
         _vatSysMenu.Visible = false;
         _vatSysMenuVisible = false;
