@@ -27,6 +27,7 @@ public partial class BottomMenuViewModel : ObservableObject
     // In the vatSys ATIS menu, the online ATIS stations come after this separator
     const string AtisStationsSeparator = "toolStripSeparator4";
     const string RemoveQuickTagItem = "removeToolStripMenuItem";
+    const string ConflictAreaItem = "latcToolStripMenuItem";
 
     // The menu items of other plugins
     // TODO: Use the messaging system to open the windows of other plugins, and not their menu items.
@@ -188,6 +189,13 @@ public partial class BottomMenuViewModel : ObservableObject
     /// </summary>
     [RelayCommand]
     void RemoveQuickTag() => Click(RemoveQuickTagItem);
+
+    /// <summary>
+    /// Starts or stops the lateral conflict (LATC) tool for the selected track, the same as Tools, Conflict Area, and
+    /// the LATC key (F2 by default).
+    /// </summary>
+    [RelayCommand]
+    void ToggleLateralConflictTool() => Click(ConflictAreaItem);
 
     [RelayCommand]
     void ToggleStripSetup() => ToggleWindow(

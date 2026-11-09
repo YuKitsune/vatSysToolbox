@@ -114,7 +114,7 @@
         <Button IsEnabled="False">Tag List</Button>
         <Button Command="{Binding RemoveQuickTagCommand}">Del Tag</Button>
         <Button Command="{Binding AddQuickTagCommand}">Rad Tag</Button>
-        <Button IsEnabled="False">LATC</Button>
+        <Button Command="{Binding ToggleLateralConflictToolCommand}">LATC</Button>
         <Button Command="{Binding OpenGroundWindowCommand}">Ground</Button>
         <ToggleButton Click="MessagesButton_Click">MSG</ToggleButton>
         <ToggleButton Click="AtisButton_Click">ATIS</ToggleButton>
