@@ -16,6 +16,9 @@ public class VatSysInternals(Form mainForm)
     const string AirWindowTypeName = "ASDWindow";
     const string QuickTagWindowTypeName = "vatsys.QuickTagWindow";
 
+    // The Air windows that are open. The window that was activated last is at the end.
+    readonly List<Form> _airWindows = [];
+
     /// <summary>
     /// The ASD in the vatSys main form.
     /// </summary>
@@ -38,17 +41,53 @@ public class VatSysInternals(Form mainForm)
     public DateTime TimerTime => (DateTime)Reflection.GetField(mainForm, "TimerTime")!;
 
     /// <summary>
-    /// The ASD in the first Air window that is open, or <c>null</c> if no Air window is open.
+    /// The ASD in the Air window that was selected last, or <c>null</c> if no Air window is open.
     /// </summary>
+    /// <remarks>
+    /// vatSys does not record which Air window was selected last. Thus, this class records the activation of each Air
+    /// window from when it finds the window. Until an Air window is activated after that, this method uses the Air
+    /// window that was opened last.
+    /// </remarks>
     public AsdDisplay? FindSecondAsd()
     {
-        var airWindow = Application.OpenForms
-            .Cast<Form>()
-            .FirstOrDefault(form => form.GetType().Name == AirWindowTypeName);
+        WatchNewAirWindows();
 
+        var airWindow = _airWindows.LastOrDefault();
         return airWindow is null
             ? null
             : new AsdDisplay((Control)Reflection.GetField(airWindow, AsdControlName)!);
+    }
+
+    // Application.OpenForms gives the windows in the order that they were opened. Thus, the window that was opened
+    // last goes at the end.
+    void WatchNewAirWindows()
+    {
+        var newAirWindows = Application.OpenForms
+            .Cast<Form>()
+            .Where(form => form.GetType().Name == AirWindowTypeName && !_airWindows.Contains(form))
+            .ToList();
+
+        foreach (var airWindow in newAirWindows)
+        {
+            _airWindows.Add(airWindow);
+            airWindow.Activated += AirWindow_Activated;
+            airWindow.FormClosed += AirWindow_FormClosed;
+        }
+    }
+
+    void AirWindow_Activated(object sender, EventArgs e)
+    {
+        var airWindow = (Form)sender;
+        _airWindows.Remove(airWindow);
+        _airWindows.Add(airWindow);
+    }
+
+    void AirWindow_FormClosed(object sender, FormClosedEventArgs e)
+    {
+        var airWindow = (Form)sender;
+        airWindow.Activated -= AirWindow_Activated;
+        airWindow.FormClosed -= AirWindow_FormClosed;
+        _airWindows.Remove(airWindow);
     }
 
     /// <summary>
