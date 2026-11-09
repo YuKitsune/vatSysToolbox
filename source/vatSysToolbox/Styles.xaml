@@ -145,9 +145,29 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
-                    <controls:BeveledBorder BorderThickness="{x:Static controls:Bevel.BorderThickness}" BevelType="Sunken">
-                        <ScrollViewer x:Name="PART_ContentHost" />
-                    </controls:BeveledBorder>
+                    <Grid>
+                        <controls:BeveledBorder BorderThickness="{x:Static controls:Bevel.BorderThickness}" BevelType="Sunken">
+                            <ScrollViewer x:Name="PART_ContentHost" />
+                        </controls:BeveledBorder>
+
+                        <!-- vatSys draws this outline over the border of a text field that has the keyboard focus -->
+                        <Border
+                            x:Name="FocusOutline"
+                            BorderThickness="2"
+                            BorderBrush="{local:VatSysColour HighlightedText}"
+                            IsHitTestVisible="False"
+                            Visibility="Collapsed" />
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsKeyboardFocused" Value="True" />
+                                <Condition Property="IsReadOnly" Value="False" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="FocusOutline" Property="Visibility" Value="Visible" />
+                        </MultiTrigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

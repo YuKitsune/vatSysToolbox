@@ -48,5 +48,23 @@
                      IsEnabled="{Binding IsEnabled, RelativeSource={RelativeSource AncestorType=UserControl}}"
                      MaxLength="{Binding MaxCharacters, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
         </controls:BeveledBorder>
+
+        <!-- vatSys draws this outline over the border of a text field that has the keyboard focus -->
+        <Border BorderThickness="2" BorderBrush="{local:VatSysColour HighlightedText}" IsHitTestVisible="False">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsKeyboardFocused, ElementName=InputBox}" Value="True" />
+                                <Condition Binding="{Binding IsReadOnly, ElementName=InputBox}" Value="False" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Visibility" Value="Visible" />
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+        </Border>
     </Grid>
 </UserControl>
