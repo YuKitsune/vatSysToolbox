@@ -152,5 +152,6 @@
         <Button Command="{Binding ToggleLateralConflictToolCommand}">LATC</Button>
         <ToggleButton Style="{StaticResource MessagesButtonStyle}" Click="MessagesButton_Click">MSG</ToggleButton>
         <ToggleButton Click="AtisButton_Click">ATIS</ToggleButton>
+        <Button Command="{Binding OpenSelcalCommand}">SELCAL</Button>
     </StackPanel>
 </UserControl>

@@ -31,6 +31,7 @@ public partial class BottomMenuViewModel : ObservableObject
     const string AtisStationsSeparator = "toolStripSeparator4";
     const string RemoveQuickTagItem = "removeToolStripMenuItem";
     const string ConflictAreaItem = "latcToolStripMenuItem";
+    const string SelcalItem = "sELCALToolStripMenuItem";
 
     // The menu items of other plugins
     // TODO: Use the messaging system to open the windows of other plugins, and not their menu items.
@@ -263,6 +264,13 @@ public partial class BottomMenuViewModel : ObservableObject
     /// </summary>
     [RelayCommand]
     void ToggleLateralConflictTool() => Click(ConflictAreaItem);
+
+    /// <summary>
+    /// Opens the vatSys SELCAL window for the selected aircraft, the same as Tools, SELCAL. vatSys does this only when
+    /// it is connected as a controller.
+    /// </summary>
+    [RelayCommand]
+    void OpenSelcal() => Click(SelcalItem);
 
     [RelayCommand]
     void ToggleStripSetup() => ToggleWindow(
