@@ -4,9 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:EurocatMenusPlugin.Views"
+             xmlns:viewModels="clr-namespace:EurocatMenusPlugin.ViewModels"
              xmlns:toolbox="clr-namespace:vatSysToolbox;assembly=vatSysToolbox"
              xmlns:system="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=viewModels:BottomMenuViewModel}"
              Height="56"
              d:DesignWidth="1920"
              Background="{toolbox:VatSysColour WindowBackground}">
@@ -58,48 +60,50 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <StackPanel Orientation="Horizontal" Margin="{StaticResource ItemMargin}">
-        <Button>Set Up</Button>
-        <Button>Map</Button>
-        <Button>Info</Button>
+        <Button Click="SetUpButton_Click">Set Up</Button>
+        <Button Click="MapButton_Click">Map</Button>
+        <Button Click="InfoButton_Click">Info</Button>
         <Grid Style="{StaticResource StackStyle}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Button Grid.Row="0" Style="{StaticResource StackedButtonStyle}">Second</Button>
-            <Button Grid.Row="1" Style="{StaticResource StackedButtonStyle}">Sup ASD</Button>
+            <Button Grid.Row="0" Style="{StaticResource StackedButtonStyle}" Command="{Binding OpenAirWindowCommand}">Second</Button>
+            <Button Grid.Row="1" Style="{StaticResource StackedButtonStyle}" IsEnabled="False">Sup ASD</Button>
         </Grid>
-        <Button>FPL</Button>
-        <Button>HLD SET</Button>
+        <Button Command="{Binding OpenFlightPlanCommand}">FPL</Button>
+        <Button Command="{Binding OpenHoldSetupCommand}" IsEnabled="{Binding IsHoldSetupAvailable}">HLD SET</Button>
         <Grid Style="{StaticResource StackStyle}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Button Grid.Row="0" Style="{StaticResource StackedButtonStyle}">SSTP</Button>
+            <Button Grid.Row="0" Style="{StaticResource StackedButtonStyle}" Command="{Binding OpenStripSetupCommand}">SSTP</Button>
             <Border Grid.Row="1" Style="{StaticResource IndicatorStyle}">
-                <TextBlock Style="{StaticResource GenericTextStyle}" HorizontalAlignment="Center">A</TextBlock>
+                <TextBlock Style="{StaticResource GenericTextStyle}" HorizontalAlignment="Center" Text="{Binding StripSortMode}" />
             </Border>
         </Grid>
-        <Button>Lost</Button>
-        <Button>TFMS</Button>
-        <Button>TFC MGT</Button>
+        <Button IsEnabled="False">Lost</Button>
+        <Button Click="TfmsButton_Click" IsEnabled="{Binding IsTfmsAvailable}">TFMS</Button>
+        <Button IsEnabled="False">TFC MGT</Button>
         <Grid Style="{StaticResource StackStyle}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Button Grid.Row="0" Style="{StaticResource StackedButtonStyle}">CQ</Button>
+            <Button Grid.Row="0" Style="{StaticResource StackedButtonStyle}" IsEnabled="False">CQ</Button>
             <Border Grid.Row="1" Style="{StaticResource IndicatorStyle}">
                 <TextBlock Style="{StaticResource GenericTextStyle}" HorizontalAlignment="Center">0</TextBlock>
             </Border>
         </Grid>
-        <Button>ADS Contract</Button>
-        <Button>History CPDLC</Button>
-        <Button>WAYP</Button>
-        <Button>Tag List</Button>
-        <Button>Del Tag</Button>
-        <Button>Rad Tag</Button>
-        <Button>LATC</Button>
+        <Button Command="{Binding OpenAdsContractCommand}" IsEnabled="{Binding IsAdsContractAvailable}">ADS Contract</Button>
+        <Button Command="{Binding OpenCpdlcHistoryCommand}" IsEnabled="{Binding IsCpdlcHistoryAvailable}">History CPDLC</Button>
+        <Button IsEnabled="False">WAYP</Button>
+        <Button IsEnabled="False">Tag List</Button>
+        <Button IsEnabled="False">Del Tag</Button>
+        <Button IsEnabled="False">Rad Tag</Button>
+        <Button IsEnabled="False">LATC</Button>
+        <Button Command="{Binding OpenGroundWindowCommand}">Ground</Button>
+        <Button Click="MessagesButton_Click">MSG</Button>
     </StackPanel>
 </UserControl>

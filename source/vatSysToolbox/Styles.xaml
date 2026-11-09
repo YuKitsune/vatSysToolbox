@@ -53,7 +53,47 @@
         <Setter Property="TextWrapping" Value="Wrap"/>
     </Style>
 
-    <Style x:Key="ButtonBaseStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource ControlBaseStyle}">
+    <ControlTemplate x:Key="RaisedButtonTemplate" TargetType="{x:Type ButtonBase}">
+        <Border Background="{TemplateBinding Background}">
+            <controls:BeveledBorder
+                BorderThickness="{x:Static controls:Bevel.BorderThickness}"
+                BevelType="Raised">
+                <Border Background="{TemplateBinding Background}">
+                    <ContentPresenter
+                        Content="{TemplateBinding Content}"
+                        ContentTemplate="{TemplateBinding ContentTemplate}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center">
+                        <ContentPresenter.Resources>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource ButtonTextStyle}" />
+                        </ContentPresenter.Resources>
+                    </ContentPresenter>
+                </Border>
+            </controls:BeveledBorder>
+        </Border>
+    </ControlTemplate>
+
+    <ControlTemplate x:Key="SunkenButtonTemplate" TargetType="{x:Type ButtonBase}">
+        <Border Background="{TemplateBinding Background}">
+            <controls:BeveledBorder
+                BorderThickness="{x:Static controls:Bevel.BorderThickness}"
+                BevelType="Sunken">
+                <Border Background="{TemplateBinding Background}">
+                    <ContentPresenter
+                        Content="{TemplateBinding Content}"
+                        ContentTemplate="{TemplateBinding ContentTemplate}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center">
+                        <ContentPresenter.Resources>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource ButtonTextStyle}" />
+                        </ContentPresenter.Resources>
+                    </ContentPresenter>
+                </Border>
+            </controls:BeveledBorder>
+        </Border>
+    </ControlTemplate>
+
+    <Style x:Key="ButtonBaseStyle" TargetType="{x:Type ButtonBase}" BasedOn="{StaticResource ControlBaseStyle}">
 
         <Setter Property="Foreground" Value="{local:VatSysColour InteractiveText}" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -63,61 +103,27 @@
         <Setter Property="TextBlock.LineHeight" Value="{Binding Source={x:Static local:VatSysFont.Size}, Converter={StaticResource FontSizeToLineHeightConverter}}" />
         <Setter Property="TextBlock.TextAlignment" Value="Center" />
 
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type Button}">
-                    <Border Background="{TemplateBinding Background}">
-                        <controls:BeveledBorder
-                            BorderThickness="{x:Static controls:Bevel.BorderThickness}"
-                            BevelType="Raised">
-                            <Border Background="{TemplateBinding Background}">
-                                <ContentPresenter
-                                    Content="{TemplateBinding Content}"
-                                    ContentTemplate="{TemplateBinding ContentTemplate}"
-                                    VerticalAlignment="Center"
-                                    HorizontalAlignment="Center">
-                                    <ContentPresenter.Resources>
-                                        <Style TargetType="TextBlock" BasedOn="{StaticResource ButtonTextStyle}" />
-                                    </ContentPresenter.Resources>
-                                </ContentPresenter>
-                            </Border>
-                        </controls:BeveledBorder>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
+        <Setter Property="Template" Value="{StaticResource RaisedButtonTemplate}" />
 
         <Style.Triggers>
             <Trigger Property="IsPressed" Value="True">
                 <!-- vatSys uses this colour for the background of a pressed button -->
                 <Setter Property="Background" Value="{local:VatSysColour WindowButtonDepressed}" />
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="{x:Type Button}">
-                            <Border Background="{TemplateBinding Background}">
-                                <controls:BeveledBorder
-                                    BorderThickness="{x:Static controls:Bevel.BorderThickness}"
-                                    BevelType="Sunken">
-                                    <Border Background="{TemplateBinding Background}">
-                                        <ContentPresenter
-                                            Content="{TemplateBinding Content}"
-                                            ContentTemplate="{TemplateBinding ContentTemplate}"
-                                            VerticalAlignment="Center"
-                                            HorizontalAlignment="Center">
-                                            <ContentPresenter.Resources>
-                                                <Style TargetType="TextBlock" BasedOn="{StaticResource ButtonTextStyle}" />
-                                            </ContentPresenter.Resources>
-                                        </ContentPresenter>
-                                    </Border>
-                                </controls:BeveledBorder>
-                            </Border>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
+                <Setter Property="Template" Value="{StaticResource SunkenButtonTemplate}" />
             </Trigger>
 
             <Trigger Property="IsEnabled" Value="False">
                 <Setter Property="Foreground" Value="{local:VatSysColour NonInteractiveText}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- A toggle button that is on looks the same as a pressed button -->
+    <Style x:Key="ToggleButtonBaseStyle" TargetType="{x:Type ToggleButton}" BasedOn="{StaticResource ButtonBaseStyle}">
+        <Style.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter Property="Background" Value="{local:VatSysColour WindowButtonDepressed}" />
+                <Setter Property="Template" Value="{StaticResource SunkenButtonTemplate}" />
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -337,7 +343,7 @@
                             BorderThickness="{x:Static controls:Bevel.BorderThickness}"
                             BevelType="Raised"
                             Visibility="Hidden">
-                            <Border Background="{local:VatSysColour WindowBackground}" />
+                            <Border x:Name="BevelBackground" Background="{local:VatSysColour WindowBackground}" />
                         </controls:BeveledBorder>
 
                         <!-- Content area -->
@@ -389,10 +395,30 @@
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="BevelBorder" Property="Visibility" Value="Visible"/>
                         </Trigger>
+                        <!-- vatSys shows a checked menu item with a sunken border and these colours -->
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="BevelBorder" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="BevelBorder" Property="BevelType" Value="Sunken"/>
+                            <Setter TargetName="BevelBackground" Property="Background" Value="{local:VatSysColour WindowButtonSelected}"/>
+                            <Setter Property="Foreground" Value="{local:VatSysColour WindowBackground}"/>
+                        </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Foreground" Value="{local:VatSysColour GenericText}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Context Menu Separator. A menu uses this key for its separators, and not the implicit Separator style. -->
+    <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="{x:Type Separator}">
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="Margin" Value="2"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Separator}">
+                    <controls:BeveledLine Orientation="Horizontal" Height="2" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

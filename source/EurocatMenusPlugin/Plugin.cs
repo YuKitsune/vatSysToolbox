@@ -1,5 +1,7 @@
 using System.ComponentModel.Composition;
 using System.Windows.Forms;
+using EurocatMenusPlugin.ViewModels;
+using EurocatMenusPlugin.Views;
 using Microsoft.Extensions.DependencyInjection;
 using vatsys;
 using vatsys.Plugin;
@@ -15,8 +17,11 @@ public class Plugin : IPlugin
     public const string Name = "Eurocat Menus";
 
     static readonly TimeSpan DoubleAltPressInterval = TimeSpan.FromSeconds(1);
+    static readonly TimeSpan RefreshInterval = TimeSpan.FromSeconds(1);
 
     readonly IServiceProvider _serviceProvider;
+
+    System.Windows.Forms.Timer? _refreshTimer;
 
     string IPlugin.Name => Name;
 
@@ -49,7 +54,36 @@ public class Plugin : IPlugin
         // The message filter must be added on the UI thread, because it only receives the messages of that thread.
         guiInvoker.InvokeOnGUI(mainForm =>
         {
-            var menuBar = new MenuBarLayout(mainForm);
+            var vatSysMenu = new VatSysMenu(
+                mainForm.MainMenuStrip ?? throw new InvalidOperationException("Cannot find the vatSys menu bar"),
+                errorReporter);
+            var vatSysInternals = new VatSysInternals(mainForm);
+
+            var topMenuViewModel = new TopMenuViewModel(vatSysMenu, vatSysInternals, clock, errorReporter);
+            var bottomMenuViewModel = new BottomMenuViewModel(vatSysMenu, errorReporter);
+
+            var menuBar = new MenuBarLayout(mainForm, new TopMenu(topMenuViewModel), new BottomMenu(bottomMenuViewModel));
+
+            // vatSys does not send events for most of the states that the menus show. Thus, the menus read the vatSys
+            // state again at an interval.
+            void RefreshMenus()
+            {
+                // An exception that is not caught on the UI thread stops vatSys.
+                try
+                {
+                    topMenuViewModel.Refresh();
+                    bottomMenuViewModel.Refresh();
+                }
+                catch (Exception ex)
+                {
+                    errorReporter.ReportError(ex, "Cannot update the menus");
+                }
+            }
+
+            RefreshMenus();
+            _refreshTimer = new System.Windows.Forms.Timer { Interval = (int)RefreshInterval.TotalMilliseconds };
+            _refreshTimer.Tick += (_, _) => RefreshMenus();
+            _refreshTimer.Start();
 
             var doubleAltPressFilter = new DoubleAltPressFilter(clock, DoubleAltPressInterval, () =>
             {

@@ -1,7 +1,6 @@
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Forms.Integration;
-using EurocatMenusPlugin.Views;
 
 namespace EurocatMenusPlugin;
 
@@ -21,7 +20,7 @@ public class MenuBarLayout
 
     bool _vatSysMenuVisible;
 
-    public MenuBarLayout(Form mainForm)
+    public MenuBarLayout(Form mainForm, FrameworkElement topMenu, FrameworkElement bottomMenu)
     {
         _vatSysMenu = mainForm.MainMenuStrip
             ?? throw new InvalidOperationException("Cannot find the vatSys menu bar");
@@ -29,7 +28,6 @@ public class MenuBarLayout
         _asd = mainForm.Controls[AsdControlName]
             ?? throw new InvalidOperationException("Cannot find the ASD");
 
-        var topMenu = new TopMenu();
         var topMenuHeight = GetHeight(topMenu);
         _topMenuHost = new ElementHost
         {
@@ -41,7 +39,6 @@ public class MenuBarLayout
 
         mainForm.Controls.Add(_topMenuHost);
 
-        var bottomMenu = new BottomMenu();
         var bottomMenuHeight = GetHeight(bottomMenu);
         var bottomMenuHost = new ElementHost
         {

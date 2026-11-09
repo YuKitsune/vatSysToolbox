@@ -4,10 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:EurocatMenusPlugin.Views"
+             xmlns:viewModels="clr-namespace:EurocatMenusPlugin.ViewModels"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:toolbox="clr-namespace:vatSysToolbox;assembly=vatSysToolbox"
              xmlns:controls="clr-namespace:vatSysToolbox.Controls;assembly=vatSysToolbox"
              mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=viewModels:TopMenuViewModel}"
              Height="96"
              d:DesignWidth="1920"
              Background="{toolbox:VatSysColour WindowBackground}">
@@ -19,7 +21,7 @@
 
             <Thickness x:Key="ItemMargin">2</Thickness>
 
-            <!-- The height of the buttons, the text inputs, and the boxes. TextInput is also this height. -->
+            <!-- The height of the buttons, the text boxes, and the boxes -->
             <sys:Double x:Key="ControlHeight">24</sys:Double>
 
             <Style TargetType="Button" BasedOn="{StaticResource ButtonBaseStyle}">
@@ -30,18 +32,26 @@
             <!-- The width of the functional state buttons and the label buttons -->
             <sys:Double x:Key="WideButtonWidth">72</sys:Double>
 
+            <!-- A button that shows a value of a functional state (for example, the length of the velocity vectors) -->
             <Style x:Key="FunctionalStateButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                 <Setter Property="Width" Value="{StaticResource WideButtonWidth}" />
             </Style>
 
-            <!-- A functional state button that shows a state that is on (for example, VEL) -->
-            <Style x:Key="SelectedFunctionalStateButtonStyle" TargetType="Button" BasedOn="{StaticResource FunctionalStateButtonStyle}">
-                <Setter Property="Background" Value="{toolbox:VatSysColour WindowButtonDepressed}" />
+            <!-- A button that turns a functional state on or off (for example, VEL). It looks pressed while the state is on. -->
+            <Style x:Key="FunctionalStateToggleStyle" TargetType="ToggleButton" BasedOn="{StaticResource ToggleButtonBaseStyle}">
+                <Setter Property="Margin" Value="{StaticResource ItemMargin}" />
+                <Setter Property="Width" Value="{StaticResource WideButtonWidth}" />
             </Style>
 
-            <Style TargetType="controls:TextInput">
+            <!--
+                A text box applies its value when Enter is pressed. If the text box loses the focus before Enter is
+                pressed, it shows the old value again. The Text binding must use UpdateSourceTrigger=Explicit.
+            -->
+            <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                <Setter Property="Height" Value="{StaticResource ControlHeight}" />
                 <Setter Property="Margin" Value="{StaticResource ItemMargin}" />
                 <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="local:TextBoxBehaviours.CommitOnEnter" Value="True" />
             </Style>
 
             <!-- A box that shows a value. It has the same size and margin as a button. -->
@@ -89,7 +99,7 @@
 
     <StackPanel Orientation="Horizontal">
 
-        <!-- System and Position -->
+        <!-- Connection and Position -->
         <!--
             The top and bottom margins are the same as SectionStyle. The first button is below its title, and the last
             button is at the bottom, as in the other sections.
@@ -102,25 +112,17 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <!-- Space between the two columns -->
-                <ColumnDefinition Width="16" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource SectionTitleStyle}">System</TextBlock>
-            <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource BoxStyle}" Width="48"><TextBlock Style="{StaticResource LabelStyle}">NORM</TextBlock></Border>
-            <Button Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Width="80" IsEnabled="False">PLOT</Button>
+            <TextBlock Grid.Row="0" Style="{StaticResource SectionTitleStyle}">Connection</TextBlock>
+            <Button Grid.Row="1" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" MinWidth="112" Command="{Binding OpenConnectionCommand}" Content="{Binding Connection}" />
 
-            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource LabelStyle}">Position</TextBlock>
-            <Button Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Width="48">NORM</Button>
-            <Button Grid.Row="4" Grid.Column="2" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Width="80">APPROACH</Button>
+            <TextBlock Grid.Row="3" Style="{StaticResource LabelStyle}">Position</TextBlock>
+            <Button Grid.Row="4" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" MinWidth="112" Click="PositionButton_Click" Content="{Binding PositionName}" />
         </Grid>
 
         <controls:BeveledLine Style="{StaticResource SectionSeparatorStyle}" />
 
-        <!-- Position Name and User -->
+        <!-- Visibility Centers and Airspace -->
         <DockPanel Style="{StaticResource SectionStyle}">
             <Grid>
                 <Grid.RowDefinitions>
@@ -130,20 +132,53 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Style="{StaticResource SectionTitleStyle}">Position Name</TextBlock>
-                <Button Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Height="{StaticResource ControlHeight}">LAAE</Button>
-                <TextBlock Grid.Row="3" Style="{StaticResource LabelStyle}">User</TextBlock>
-                <Button Grid.Row="4" HorizontalAlignment="Center" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" IsEnabled="False">INOP</Button>
+                <TextBlock Grid.Row="0" Style="{StaticResource SectionTitleStyle}">Visibility</TextBlock>
+                <Button Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Click="VisibilityCentersButton_Click" Content="{Binding VisibilityCentersMode}" />
+                <TextBlock Grid.Row="3" Style="{StaticResource LabelStyle}">Airspace</TextBlock>
+                <StackPanel Grid.Row="4" Orientation="Horizontal">
+                    <Button VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Command="{Binding OpenSectorsCommand}">SECTORS</Button>
+                    <Button VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Command="{Binding OpenRestrictedAreasCommand}">RESTR</Button>
+                </StackPanel>
             </Grid>
         </DockPanel>
 
         <controls:BeveledLine Style="{StaticResource SectionSeparatorStyle}" />
 
-        <!-- QNH -->
-        <DockPanel Style="{StaticResource SectionStyle}" Width="64">
-            <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">QNH</TextBlock>
-            <Border BorderThickness="1" BorderBrush="{toolbox:VatSysColour InteractiveText}" Height="{StaticResource ControlHeight}" VerticalAlignment="Top" Margin="0,4,0,0"><TextBlock Style="{StaticResource InteractiveTextStyle}" HorizontalAlignment="Center">OPS</TextBlock></Border>
+        <!-- ATIS -->
+        <DockPanel Style="{StaticResource SectionStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Style="{StaticResource SectionTitleStyle}">ATIS</TextBlock>
+                <Button Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Command="{Binding OpenAtisEditorCommand}" IsEnabled="{Binding IsAtisEditorAvailable}">EDITOR</Button>
+                <Button Grid.Row="3" x:Name="AtisWindowButton" HorizontalAlignment="Center" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Click="AtisWindowButton_Click">WINDOW</Button>
+            </Grid>
         </DockPanel>
+
+        <!--
+            Opens an ATIS window for an airport, or shows an ATIS window that is open.
+            The same as Windows, ATIS in the vatSys menu bar.
+        -->
+        <Popup x:Name="AtisPopup" PlacementTarget="{Binding ElementName=AtisWindowButton}" Placement="Bottom" StaysOpen="False" Opened="AtisPopup_Opened">
+            <Border Background="{toolbox:VatSysColour WindowBackground}">
+                <controls:BeveledBorder BevelType="Raised" BorderThickness="{x:Static controls:Bevel.BorderThickness}">
+                    <StackPanel>
+                        <TextBox x:Name="AtisAirportTextBox"
+                                 Width="64"
+                                 MaxLength="4"
+                                 CharacterCasing="Upper"
+                                 local:TextBoxBehaviours.AllowedCharacters="[A-Za-z]"
+                                 KeyDown="AtisAirportTextBox_KeyDown" />
+                        <Separator x:Name="AtisWindowSeparator" Style="{StaticResource {x:Static MenuItem.SeparatorStyleKey}}" />
+                        <StackPanel x:Name="AtisWindowList" />
+                    </StackPanel>
+                </controls:BeveledBorder>
+            </Border>
+        </Popup>
 
         <controls:BeveledLine Style="{StaticResource SectionSeparatorStyle}" />
 
@@ -151,8 +186,8 @@
         <DockPanel Style="{StaticResource SectionStyle}">
             <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">Main Window</TextBlock>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
-                <controls:TextInput Width="50" DigitsOnly="True" MaxCharacters="3" Value="165" />
-                <Border Style="{StaticResource BoxStyle}" Width="40"><TextBlock Style="{StaticResource LabelStyle}">RST</TextBlock></Border>
+                <TextBox Width="50" MaxLength="4" local:TextBoxBehaviours.AllowedCharacters="[0-9]" Text="{Binding MainWindowRange, UpdateSourceTrigger=Explicit}" />
+                <Border Style="{StaticResource BoxStyle}" Width="40"><TextBlock Style="{StaticResource LabelStyle}" Text="{Binding MainWindowStatus}" /></Border>
             </StackPanel>
         </DockPanel>
 
@@ -162,8 +197,8 @@
         <DockPanel Style="{StaticResource SectionStyle}">
             <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">Second Window</TextBlock>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
-                <controls:TextInput Width="50" DigitsOnly="True" MaxCharacters="3" Value="300" />
-                <Border Style="{StaticResource BoxStyle}" Width="40"><TextBlock Style="{StaticResource LabelStyle}">DEF</TextBlock></Border>
+                <TextBox Width="50" MaxLength="4" local:TextBoxBehaviours.AllowedCharacters="[0-9]" IsEnabled="{Binding IsSecondWindowOpen}" Text="{Binding SecondWindowRange, UpdateSourceTrigger=Explicit}" />
+                <Border Style="{StaticResource BoxStyle}" Width="40"><TextBlock Style="{StaticResource LabelStyle}" Text="{Binding SecondWindowStatus}" /></Border>
             </StackPanel>
         </DockPanel>
 
@@ -177,8 +212,8 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <controls:TextInput Grid.Column="0" HorizontalAlignment="Center" Width="40" DigitsOnly="True" MaxCharacters="3" Value="000" />
-                <controls:TextInput Grid.Column="1" HorizontalAlignment="Center" Width="40" DigitsOnly="True" MaxCharacters="3" Value="999" />
+                <TextBox Grid.Column="0" HorizontalAlignment="Center" Width="40" MaxLength="3" local:TextBoxBehaviours.AllowedCharacters="[0-9]" Text="{Binding LowerDisplayLevel, UpdateSourceTrigger=Explicit}" />
+                <TextBox Grid.Column="1" HorizontalAlignment="Center" Width="40" MaxLength="3" local:TextBoxBehaviours.AllowedCharacters="[0-9]" Text="{Binding UpperDisplayLevel, UpdateSourceTrigger=Explicit}" />
             </Grid>
         </DockPanel>
 
@@ -188,10 +223,11 @@
         <DockPanel Style="{StaticResource SectionStyle}">
             <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">SSR Code Filter</TextBlock>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
-                <controls:TextInput Width="32" DigitsOnly="True" />
-                <controls:TextInput Width="32" DigitsOnly="True" />
-                <controls:TextInput Width="64" DigitsOnly="True" />
-                <controls:TextInput Width="64" DigitsOnly="True" />
+                <!-- SSR codes are octal -->
+                <TextBox Width="32" MaxLength="2" local:TextBoxBehaviours.AllowedCharacters="[0-7]" Text="{Binding SsrCodeFilter1Start, UpdateSourceTrigger=Explicit}" />
+                <TextBox Width="32" MaxLength="2" local:TextBoxBehaviours.AllowedCharacters="[0-7]" Text="{Binding SsrCodeFilter1End, UpdateSourceTrigger=Explicit}" />
+                <TextBox Width="64" MaxLength="4" local:TextBoxBehaviours.AllowedCharacters="[0-7]" Text="{Binding SsrCodeFilter2Start, UpdateSourceTrigger=Explicit}" />
+                <TextBox Width="64" MaxLength="4" local:TextBoxBehaviours.AllowedCharacters="[0-7]" Text="{Binding SsrCodeFilter2End, UpdateSourceTrigger=Explicit}" />
             </StackPanel>
         </DockPanel>
 
@@ -201,10 +237,10 @@
         <DockPanel Style="{StaticResource SectionStyle}">
             <TextBlock DockPanel.Dock="Top" Style="{StaticResource InteractiveLabelStyle}" Margin="{StaticResource ItemMargin}">Time</TextBlock>
             <StackPanel Margin="4,0" VerticalAlignment="Center">
-                <TextBlock Style="{StaticResource LargeTextStyle}" Foreground="{toolbox:VatSysColour GenericText}">00:36:57</TextBlock>
+                <TextBlock Style="{StaticResource LargeTextStyle}" Foreground="{toolbox:VatSysColour GenericText}" Text="{Binding Time}" />
                 <TextBlock Style="{StaticResource InteractiveLabelStyle}">Timer</TextBlock>
-                <Button>
-                    <TextBlock Style="{StaticResource LargeTextStyle}">0024</TextBlock>
+                <Button Command="{Binding OpenTimeMenuCommand}">
+                    <TextBlock Style="{StaticResource LargeTextStyle}" Text="{Binding Timer}" />
                 </Button>
             </StackPanel>
         </DockPanel>
@@ -225,12 +261,12 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <Button Grid.Row="0" Grid.Column="0" Style="{StaticResource SelectedFunctionalStateButtonStyle}">VEL</Button>
-                <Button Grid.Row="1" Grid.Column="0" Style="{StaticResource FunctionalStateButtonStyle}">1</Button>
-                <Button Grid.Row="0" Grid.Column="1" Style="{StaticResource FunctionalStateButtonStyle}">SRP</Button>
-                <Button Grid.Row="1" Grid.Column="1" Style="{StaticResource FunctionalStateButtonStyle}">5 T</Button>
-                <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource SelectedFunctionalStateButtonStyle}">HIST</Button>
-                <Button Grid.Row="1" Grid.Column="2" Style="{StaticResource FunctionalStateButtonStyle}">6</Button>
+                <ToggleButton Grid.Row="0" Grid.Column="0" Style="{StaticResource FunctionalStateToggleStyle}" Command="{Binding ToggleVelocityVectorsCommand}" IsChecked="{Binding IsVelocityVectorsOn, Mode=OneWay}">VEL</ToggleButton>
+                <Button Grid.Row="1" Grid.Column="0" Style="{StaticResource FunctionalStateButtonStyle}" Click="VelocityVectorLengthButton_Click" Content="{Binding VelocityVectorLength}" />
+                <ToggleButton Grid.Row="0" Grid.Column="1" Style="{StaticResource FunctionalStateToggleStyle}" Command="{Binding ToggleShortRouteProbeCommand}" IsChecked="{Binding IsShortRouteProbeOn, Mode=OneWay}">SRP</ToggleButton>
+                <Button Grid.Row="1" Grid.Column="1" Style="{StaticResource FunctionalStateButtonStyle}" Click="ShortRouteProbeLengthButton_Click" Content="{Binding ShortRouteProbeLength}" />
+                <ToggleButton Grid.Row="0" Grid.Column="2" Style="{StaticResource FunctionalStateToggleStyle}" Command="{Binding ToggleHistoryDotsCommand}" IsChecked="{Binding IsHistoryDotsOn, Mode=OneWay}">HIST</ToggleButton>
+                <Button Grid.Row="1" Grid.Column="2" Style="{StaticResource FunctionalStateButtonStyle}" Click="HistoryDotCountButton_Click" Content="{Binding HistoryDotCount}" />
             </Grid>
         </DockPanel>
 
@@ -246,9 +282,9 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <Button Grid.Row="0" Grid.Column="0" Style="{StaticResource FunctionalStateButtonStyle}">SSR ALL</Button>
-                <Button Grid.Row="1" Grid.Column="0" Style="{StaticResource FunctionalStateButtonStyle}">QLK ALL</Button>
-                <Button Grid.Row="1" Grid.Column="1" Style="{StaticResource FunctionalStateButtonStyle}">FPASD</Button>
+                <ToggleButton Grid.Row="0" Grid.Column="0" Style="{StaticResource FunctionalStateToggleStyle}" Command="{Binding ToggleSsrAllCommand}" IsChecked="{Binding IsSsrAllOn, Mode=OneWay}">SSR ALL</ToggleButton>
+                <ToggleButton Grid.Row="1" Grid.Column="0" Style="{StaticResource FunctionalStateToggleStyle}" Command="{Binding ToggleQuickLookAllCommand}" IsChecked="{Binding IsQuickLookAllOn, Mode=OneWay}">QLK ALL</ToggleButton>
+                <ToggleButton Grid.Row="1" Grid.Column="1" Style="{StaticResource FunctionalStateToggleStyle}" Command="{Binding ToggleFpasdCommand}" IsChecked="{Binding IsFpasdOn, Mode=OneWay}">FPASD</ToggleButton>
             </Grid>
         </DockPanel>
 
@@ -266,8 +302,8 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <Button Grid.Row="0" Width="{StaticResource WideButtonWidth}">Normal</Button>
-                <Button Grid.Row="1" Width="{StaticResource WideButtonWidth}">Fixed</Button>
+                <Button Grid.Row="0" Width="{StaticResource WideButtonWidth}" Command="{Binding ToggleExtendedLabelsCommand}" Content="{Binding LabelType}" />
+                <Button Grid.Row="1" Width="{StaticResource WideButtonWidth}" Command="{Binding ToggleSharedLabelsCommand}" Content="{Binding LabelSharing}" />
             </Grid>
         </DockPanel>
 
