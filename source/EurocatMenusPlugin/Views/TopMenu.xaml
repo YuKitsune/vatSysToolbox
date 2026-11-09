@@ -27,8 +27,11 @@
                 <Setter Property="MinWidth" Value="60" />
             </Style>
 
+            <!-- The width of the functional state buttons and the label buttons -->
+            <sys:Double x:Key="WideButtonWidth">72</sys:Double>
+
             <Style x:Key="FunctionalStateButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                <Setter Property="Width" Value="72" />
+                <Setter Property="Width" Value="{StaticResource WideButtonWidth}" />
             </Style>
 
             <!-- A functional state button that shows a state that is on (for example, VEL) -->
@@ -87,12 +90,17 @@
     <StackPanel Orientation="Horizontal">
 
         <!-- System and Position -->
-        <Grid Margin="40,0,16,0">
+        <!--
+            The top and bottom margins are the same as SectionStyle. The first button is below its title, and the last
+            button is at the bottom, as in the other sections.
+        -->
+        <Grid Margin="40,4,16,4">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -101,13 +109,13 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource LabelStyle}" Margin="0,0,0,4">System</TextBlock>
+            <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource SectionTitleStyle}">System</TextBlock>
             <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource BoxStyle}" Width="48"><TextBlock Style="{StaticResource LabelStyle}">NORM</TextBlock></Border>
             <Button Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Width="80" IsEnabled="False">PLOT</Button>
 
-            <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelStyle}" Margin="0,4,0,4">Position</TextBlock>
-            <Button Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Width="48">NORM</Button>
-            <Button Grid.Row="3" Grid.Column="2" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Width="80">APPROACH</Button>
+            <TextBlock Grid.Row="3" Grid.Column="0" Style="{StaticResource LabelStyle}">Position</TextBlock>
+            <Button Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Width="48">NORM</Button>
+            <Button Grid.Row="4" Grid.Column="2" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Width="80">APPROACH</Button>
         </Grid>
 
         <controls:BeveledLine Style="{StaticResource SectionSeparatorStyle}" />
@@ -117,14 +125,15 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Style="{StaticResource LabelStyle}">Position Name</TextBlock>
+                <TextBlock Grid.Row="0" Style="{StaticResource SectionTitleStyle}">Position Name</TextBlock>
                 <Button Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Height="{StaticResource ControlHeight}">LAAE</Button>
-                <TextBlock Grid.Row="2" Style="{StaticResource LabelStyle}">User</TextBlock>
-                <Button Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" IsEnabled="False">INOP</Button>
+                <TextBlock Grid.Row="3" Style="{StaticResource LabelStyle}">User</TextBlock>
+                <Button Grid.Row="4" HorizontalAlignment="Center" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" IsEnabled="False">INOP</Button>
             </Grid>
         </DockPanel>
 
@@ -207,7 +216,8 @@
             <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">Functional States</TextBlock>
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="40" />
+                    <RowDefinition Height="*" />
+                    <!-- The same as ControlHeight -->
                     <RowDefinition Height="24" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
@@ -229,8 +239,8 @@
             <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}" Visibility="Hidden">Functional States</TextBlock>
             <Grid Margin="8,0,0,0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="32" />
-                    <RowDefinition Height="32" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -243,7 +253,7 @@
             </Grid>
         </DockPanel>
 
-        <!-- Space for one more column of functional state buttons: the button width (72) and its two margins (2) -->
+        <!-- Space for one more column of functional state buttons: the button width (WideButtonWidth = 72) and its two margins (2) -->
         <FrameworkElement Width="76" />
 
         <!-- Label -->
@@ -251,14 +261,14 @@
             <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">Label</TextBlock>
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="32" />
-                    <RowDefinition Height="32" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <Button Grid.Row="0">Normal</Button>
-                <Button Grid.Row="1">Fixed</Button>
+                <Button Grid.Row="0" Width="{StaticResource WideButtonWidth}">Normal</Button>
+                <Button Grid.Row="1" Width="{StaticResource WideButtonWidth}">Fixed</Button>
             </Grid>
         </DockPanel>
 

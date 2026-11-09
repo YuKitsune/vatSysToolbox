@@ -4,6 +4,10 @@ using System.Windows.Media;
 
 namespace vatSysToolbox.Controls;
 
+/// <summary>
+/// A line with a sunken bevel, like a groove. The top or left half is dark, and the bottom or right half is light.
+/// Set <see cref="Flipped"/> to make a raised line.
+/// </summary>
 public class BeveledLine : FrameworkElement
 {
     public static readonly DependencyProperty OrientationProperty =
@@ -62,12 +66,12 @@ public class BeveledLine : FrameworkElement
         {
             case Orientation.Horizontal:
                 {
-                    var topBrush = Flipped ? Bevel.DarkBrush : Bevel.LightBrush;
+                    var topBrush = Flipped ? Bevel.LightBrush : Bevel.DarkBrush;
                     var topPen = new Pen(topBrush, 0);
                     var topGeometry = GetGeometry(0, 0, ActualWidth, ActualHeight / 2);
                     drawingContext.DrawGeometry(topBrush, topPen, topGeometry);
 
-                    var bottomBrush = Flipped ? Bevel.LightBrush : Bevel.DarkBrush;
+                    var bottomBrush = Flipped ? Bevel.DarkBrush : Bevel.LightBrush;
                     var bottomPen = new Pen(bottomBrush, 0);
                     var bottomGeometry = GetGeometry(0, ActualHeight / 2, ActualWidth, ActualHeight);
                     drawingContext.DrawGeometry(bottomBrush, bottomPen, bottomGeometry);
@@ -75,12 +79,12 @@ public class BeveledLine : FrameworkElement
                 }
             case Orientation.Vertical:
                 {
-                    var leftBrush = Flipped ? Bevel.DarkBrush : Bevel.LightBrush;
+                    var leftBrush = Flipped ? Bevel.LightBrush : Bevel.DarkBrush;
                     var leftPen = new Pen(leftBrush, 0);
                     var leftGeometry = GetGeometry(0, 0, ActualWidth / 2, ActualHeight);
                     drawingContext.DrawGeometry(leftBrush, leftPen, leftGeometry);
 
-                    var bottomBrush = Flipped ? Bevel.LightBrush : Bevel.DarkBrush;
+                    var bottomBrush = Flipped ? Bevel.DarkBrush : Bevel.LightBrush;
                     var bottomPen = new Pen(bottomBrush, 0);
                     var bottomGeometry = GetGeometry(ActualWidth / 2, 0, ActualWidth, ActualHeight);
                     drawingContext.DrawGeometry(bottomBrush, bottomPen, bottomGeometry);
