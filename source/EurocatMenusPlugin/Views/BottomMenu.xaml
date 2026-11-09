@@ -150,8 +150,11 @@
         <Button Command="{Binding RemoveQuickTagCommand}">Del Tag</Button>
         <Button Command="{Binding AddQuickTagCommand}">Rad Tag</Button>
         <Button Command="{Binding ToggleLateralConflictToolCommand}">LATC</Button>
+        
+        <!-- VATSIM-isms -->
         <ToggleButton Style="{StaticResource MessagesButtonStyle}" Click="MessagesButton_Click">MSG</ToggleButton>
         <ToggleButton Click="AtisButton_Click">ATIS</ToggleButton>
         <Button Command="{Binding OpenSelcalCommand}">SELCAL</Button>
+
     </StackPanel>
 </UserControl>

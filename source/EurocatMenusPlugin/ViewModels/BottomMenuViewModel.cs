@@ -50,6 +50,8 @@ public partial class BottomMenuViewModel : ObservableObject
 
     readonly VatSysMenu _vatSysMenu = null!;
     readonly VatSysInternals _vatSysInternals = null!;
+    readonly MenuBarLayout _menuBarLayout = null!;
+    readonly FullScreenMode _fullScreenMode = null!;
     readonly IErrorReporter _errorReporter = null!;
 
     // True after this class starts to listen to the vatSys Messages item
@@ -79,10 +81,17 @@ public partial class BottomMenuViewModel : ObservableObject
         IsCpdlcHistoryAvailable = true;
     }
 
-    public BottomMenuViewModel(VatSysMenu vatSysMenu, VatSysInternals vatSysInternals, IErrorReporter errorReporter)
+    public BottomMenuViewModel(
+        VatSysMenu vatSysMenu,
+        VatSysInternals vatSysInternals,
+        MenuBarLayout menuBarLayout,
+        FullScreenMode fullScreenMode,
+        IErrorReporter errorReporter)
     {
         _vatSysMenu = vatSysMenu;
         _vatSysInternals = vatSysInternals;
+        _menuBarLayout = menuBarLayout;
+        _fullScreenMode = fullScreenMode;
         _errorReporter = errorReporter;
     }
 
@@ -111,7 +120,16 @@ public partial class BottomMenuViewModel : ObservableObject
             _vatSysMenu.GetPopupMenuItem(_vatSysMenu.GetItem(DisplaySettingsItem), "Display"),
             _vatSysMenu.GetPopupMenuItem(_vatSysMenu.GetItem(AudioSettingsItem), "Audio"),
             _vatSysMenu.GetPopupMenuItem(_vatSysMenu.GetItem(KeyboardSettingsItem), "Keyboard"),
-            _vatSysMenu.GetPopupMenuItem(_vatSysMenu.GetItem(RestrictedAreasItem), "Restricted Areas")
+            _vatSysMenu.GetPopupMenuItem(_vatSysMenu.GetItem(RestrictedAreasItem), "Restricted Areas"),
+            PopupMenuItem.Separator,
+            new PopupMenuItem(
+                "Full Screen",
+                () => Run(_fullScreenMode.Toggle),
+                () => _fullScreenMode.IsOn),
+            new PopupMenuItem(
+                "vatSys Menu",
+                () => Run(_menuBarLayout.ToggleVatSysMenu),
+                () => _menuBarLayout.IsVatSysMenuVisible)
         ]);
     }
 

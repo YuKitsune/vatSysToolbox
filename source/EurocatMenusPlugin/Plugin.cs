@@ -58,11 +58,18 @@ public class Plugin : IPlugin
                 mainForm.MainMenuStrip ?? throw new InvalidOperationException("Cannot find the vatSys menu bar"),
                 errorReporter);
             var vatSysInternals = new VatSysInternals(mainForm);
+            var menuBar = new MenuBarLayout(mainForm);
+            var fullScreenMode = new FullScreenMode(mainForm);
 
             var topMenuViewModel = new TopMenuViewModel(vatSysMenu, vatSysInternals, clock, errorReporter);
-            var bottomMenuViewModel = new BottomMenuViewModel(vatSysMenu, vatSysInternals, errorReporter);
+            var bottomMenuViewModel = new BottomMenuViewModel(
+                vatSysMenu,
+                vatSysInternals,
+                menuBar,
+                fullScreenMode,
+                errorReporter);
 
-            var menuBar = new MenuBarLayout(mainForm, new TopMenu(topMenuViewModel), new BottomMenu(bottomMenuViewModel));
+            menuBar.AddMenus(new TopMenu(topMenuViewModel), new BottomMenu(bottomMenuViewModel));
 
             // vatSys does not send events for most of the states that the menus show. Thus, the menus read the vatSys
             // state again at an interval.

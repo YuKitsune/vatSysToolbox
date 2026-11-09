@@ -9,81 +9,101 @@ namespace EurocatMenusPlugin;
 /// The views set the height of the menus. The ASD fills the space between the menus.
 /// The vatSys menu bar can show again above the top menu. The ASD then moves down to make space for it.
 /// </summary>
+/// <remarks>
+/// The menus can show and hide the vatSys menu bar. Thus, create this class first, and then add the menus with
+/// <see cref="AddMenus"/>.
+/// </remarks>
 public class MenuBarLayout
 {
     // The name of the ASD control on the vatSys main form
     const string AsdControlName = "ASD";
 
+    readonly Form _mainForm;
     readonly MenuStrip _vatSysMenu;
     readonly Control _asd;
-    readonly ElementHost _topMenuHost;
 
-    bool _vatSysMenuVisible;
+    ElementHost? _topMenuHost;
 
-    public MenuBarLayout(Form mainForm, FrameworkElement topMenu, FrameworkElement bottomMenu)
+    public MenuBarLayout(Form mainForm)
     {
+        _mainForm = mainForm;
+
         _vatSysMenu = mainForm.MainMenuStrip
             ?? throw new InvalidOperationException("Cannot find the vatSys menu bar");
 
         _asd = mainForm.Controls[AsdControlName]
             ?? throw new InvalidOperationException("Cannot find the ASD");
+    }
 
+    /// <summary>
+    /// <c>true</c> if the vatSys menu bar shows above the top menu.
+    /// </summary>
+    public bool IsVatSysMenuVisible { get; private set; } = true;
+
+    /// <summary>
+    /// Adds the menus, and hides the vatSys menu bar.
+    /// </summary>
+    public void AddMenus(FrameworkElement topMenu, FrameworkElement bottomMenu)
+    {
         var topMenuHeight = GetHeight(topMenu);
         _topMenuHost = new ElementHost
         {
             Child = topMenu,
             Location = new System.Drawing.Point(0, 0),
-            Size = new System.Drawing.Size(mainForm.ClientSize.Width, topMenuHeight),
+            Size = new System.Drawing.Size(_mainForm.ClientSize.Width, topMenuHeight),
             Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
         };
 
-        mainForm.Controls.Add(_topMenuHost);
+        _mainForm.Controls.Add(_topMenuHost);
 
         var bottomMenuHeight = GetHeight(bottomMenu);
         var bottomMenuHost = new ElementHost
         {
             Child = bottomMenu,
             Location = new System.Drawing.Point(0, _asd.Bottom - bottomMenuHeight),
-            Size = new System.Drawing.Size(mainForm.ClientSize.Width, bottomMenuHeight),
+            Size = new System.Drawing.Size(_mainForm.ClientSize.Width, bottomMenuHeight),
             Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
         };
 
-        mainForm.Controls.Add(bottomMenuHost);
+        _mainForm.Controls.Add(bottomMenuHost);
 
         _asd.SetBounds(_asd.Left, topMenuHeight, _asd.Width, bottomMenuHost.Top - topMenuHeight);
 
         _vatSysMenu.Visible = false;
-        _vatSysMenuVisible = false;
+        IsVatSysMenuVisible = false;
     }
 
     public void ToggleVatSysMenu()
     {
-        if (_vatSysMenuVisible)
-            HideVatSysMenu();
+        var topMenuHost = _topMenuHost
+            ?? throw new InvalidOperationException("The menus are not added");
+
+        if (IsVatSysMenuVisible)
+            HideVatSysMenu(topMenuHost);
         else
-            ShowVatSysMenu();
+            ShowVatSysMenu(topMenuHost);
     }
 
-    void ShowVatSysMenu()
+    void ShowVatSysMenu(ElementHost topMenuHost)
     {
         var offset = _vatSysMenu.Height;
 
         _vatSysMenu.Visible = true;
-        _topMenuHost.Top += offset;
+        topMenuHost.Top += offset;
         _asd.SetBounds(_asd.Left, _asd.Top + offset, _asd.Width, _asd.Height - offset);
 
-        _vatSysMenuVisible = true;
+        IsVatSysMenuVisible = true;
     }
 
-    void HideVatSysMenu()
+    void HideVatSysMenu(ElementHost topMenuHost)
     {
         var offset = _vatSysMenu.Height;
 
         _vatSysMenu.Visible = false;
-        _topMenuHost.Top -= offset;
+        topMenuHost.Top -= offset;
         _asd.SetBounds(_asd.Left, _asd.Top - offset, _asd.Width, _asd.Height + offset);
 
-        _vatSysMenuVisible = false;
+        IsVatSysMenuVisible = false;
     }
 
     static int GetHeight(FrameworkElement view)
