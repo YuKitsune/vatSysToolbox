@@ -15,6 +15,23 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <PackageId>vatSysToolbox</PackageId>
+    <Title>vatSys Toolbox</Title>
+    <Authors>Eoin Motherway</Authors>
+    <Description>Helpers for vatSys plugins.</Description>
+    <PackageTags>vatsys;vatsim;plugin;wpf</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/YuKitsune/vatSysToolbox</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/YuKitsune/vatSysToolbox</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <PropertyGroup>
     <VatSysPath Condition="'$(VatSysPath)' == ''">$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Sawbe\vatSys@Path)</VatSysPath>
   </PropertyGroup>
 

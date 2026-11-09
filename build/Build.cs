@@ -26,11 +26,11 @@ using Serilog;
     "release",
     GitHubActionsImage.WindowsLatest,
     OnPushTags = ["v*"],
-    InvokedTargets = [nameof(Release)],
+    InvokedTargets = [nameof(Publish), nameof(Release)],
     ImportSecrets = [nameof(GitHubToken)],
     EnableGitHubToken = true,
     FetchDepth = 0,
-    WritePermissions = [GitHubActionsPermissions.Contents])]
+    WritePermissions = [GitHubActionsPermissions.Contents, GitHubActionsPermissions.Packages])]
 class Build : FalloutBuild
 {
     public static int Main () => Execute<Build>(x => x.Compile);
@@ -38,7 +38,7 @@ class Build : FalloutBuild
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
-    [Parameter("GitHub token for creating releases")]
+    [Parameter("GitHub token for creating releases and publishing packages")]
     [Secret]
     readonly string GitHubToken;
 
@@ -153,6 +153,26 @@ class Build : FalloutBuild
                 .SetFileVersion(GitVersion.MajorMinorPatch)
                 .SetInformationalVersion(version)
                 .SetProperty("VatSysPath", VatSysExePath.Parent.Parent));
+        });
+
+    Target Publish => _ => _
+        .Description("Pushes the NuGet package to the GitHub Packages feed.")
+        .DependsOn(Pack)
+        .Requires(() => GitHubToken)
+        .Requires(() => GitRepository)
+        .Requires(() => Configuration == Configuration.Release)
+        .Executes(() =>
+        {
+            var feedUrl = $"https://nuget.pkg.github.com/{GitRepository.GetGitHubOwner()}/index.json";
+
+            foreach (var packagePath in PackageOutputDirectory.GlobFiles("*.nupkg"))
+            {
+                Log.Information("Pushing {Package} to {FeedUrl}", packagePath.Name, feedUrl);
+                DotNetTasks.DotNetNuGetPush(s => s
+                    .SetTargetPath(packagePath)
+                    .SetSource(feedUrl)
+                    .SetApiKey(GitHubToken));
+            }
         });
 
     Target Release => _ => _
