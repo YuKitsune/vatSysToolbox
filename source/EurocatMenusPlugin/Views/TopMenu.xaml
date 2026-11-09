@@ -7,8 +7,8 @@
              xmlns:toolbox="clr-namespace:vatSysToolbox;assembly=vatSysToolbox"
              xmlns:controls="clr-namespace:vatSysToolbox.Controls;assembly=vatSysToolbox"
              mc:Ignorable="d"
-             Height="80"
-             d:DesignHeight="80" d:DesignWidth="1920"
+             Height="96"
+             d:DesignWidth="1920"
              Background="{toolbox:VatSysColour WindowBackground}">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -25,7 +25,7 @@
 
             <!-- A button that shows a state that is on (for example, VEL) -->
             <Style x:Key="SelectedButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                <Setter Property="Background" Value="{toolbox:VatSysColour WindowButtonSelected}" />
+                <Setter Property="Background" Value="{toolbox:VatSysColour WindowButtonDepressed}" />
             </Style>
 
             <Style TargetType="controls:TextInput">
@@ -43,12 +43,11 @@
 
             <Style x:Key="SectionSeparatorStyle" TargetType="controls:BeveledLine">
                 <Setter Property="Orientation" Value="Vertical" />
-                <!-- BeveledLine does not measure itself. Thus, it needs a width. -->
-                <Setter Property="Width" Value="{x:Static controls:Bevel.LineWidth}" />
+                <Setter Property="Width" Value="2" />
             </Style>
 
             <Style x:Key="SectionStyle" TargetType="DockPanel">
-                <Setter Property="Margin" Value="4,0" />
+                <Setter Property="Margin" Value="8,4" />
             </Style>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -58,16 +57,23 @@
         <!-- Label -->
         <DockPanel DockPanel.Dock="Right" Style="{StaticResource SectionStyle}">
             <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">Label</TextBlock>
-            <StackPanel VerticalAlignment="Center">
-                <Button>Normal</Button>
-                <Button>Fixed</Button>
-            </StackPanel>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="32" />
+                    <RowDefinition Height="32" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Button Grid.Row="0" >Normal</Button>
+                <Button Grid.Row="1" >Fixed</Button>
+            </Grid>
         </DockPanel>
 
         <StackPanel Orientation="Horizontal">
 
             <!-- System and Position -->
-            <Grid Margin="4,0">
+            <Grid Margin="40,0,16,0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
@@ -78,36 +84,45 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource LabelStyle}">System</TextBlock>
-                <Button Grid.Row="1" Grid.Column="0">NORM</Button>
-                <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" VerticalAlignment="Bottom" IsEnabled="False">PLOT</Button>
-                <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelStyle}">Position</TextBlock>
-                <Button Grid.Row="3" Grid.Column="0">NORM</Button>
-                <Button Grid.Row="2" Grid.RowSpan="2" Grid.Column="1" VerticalAlignment="Bottom">APPROACH</Button>
+                
+                
+                <!-- TODO: Border size should match the button size -->
+                <!-- TODO: Button heights are inconsistent, use the same button height throughout -->
+                <!-- TODO: Second column needs more space from the first -->
+                
+                <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource LabelStyle}" Margin="0,0,0,4">System</TextBlock>
+                <Border Grid.Row="1" Grid.Column="0" BorderThickness="1" BorderBrush="{toolbox:VatSysColour GenericText}" Height="24" Width="48"><TextBlock Style="{StaticResource LabelStyle}">NORM</TextBlock></Border>
+                <Button Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Width="80" IsEnabled="False">PLOT</Button>
+                
+                <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelStyle}" Margin="0,4,0,4">Position</TextBlock>
+                <Button Grid.Row="3" Grid.Column="0" Height="24" Width="48">NORM</Button>
+                <Button Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" Width="80">APPROACH</Button>
             </Grid>
 
             <controls:BeveledLine Style="{StaticResource SectionSeparatorStyle}" />
 
             <!-- Position Name and User -->
-            <Grid Margin="4,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Style="{StaticResource LabelStyle}">Position Name</TextBlock>
-                <Button Grid.Row="1" HorizontalAlignment="Center">LAAE</Button>
-                <TextBlock Grid.Row="2" Style="{StaticResource LabelStyle}">User</TextBlock>
-                <Button Grid.Row="3" HorizontalAlignment="Center" IsEnabled="False">T001</Button>
-            </Grid>
+            <DockPanel Style="{StaticResource SectionStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Style="{StaticResource LabelStyle}">Position Name</TextBlock>
+                    <Button Grid.Row="1" HorizontalAlignment="Center">LAAE</Button>
+                    <TextBlock Grid.Row="2" Style="{StaticResource LabelStyle}">User</TextBlock>
+                    <Button Grid.Row="3" HorizontalAlignment="Center" IsEnabled="False">INOP</Button>
+                </Grid>
+            </DockPanel>
 
             <controls:BeveledLine Style="{StaticResource SectionSeparatorStyle}" />
 
             <!-- QNH -->
-            <DockPanel Style="{StaticResource SectionStyle}">
+            <DockPanel Style="{StaticResource SectionStyle}" Width="64">
                 <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">QNH</TextBlock>
-                <Button VerticalAlignment="Top">OPS</Button>
+                <Border BorderThickness="1" BorderBrush="{toolbox:VatSysColour InteractiveText}" Height="24" VerticalAlignment="Top" Margin="0,4,0,0"><TextBlock Style="{StaticResource InteractiveTextStyle}" HorizontalAlignment="Center">OPS</TextBlock></Border>
             </DockPanel>
 
             <controls:BeveledLine Style="{StaticResource SectionSeparatorStyle}" />
@@ -117,7 +132,9 @@
                 <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">Main Window</TextBlock>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
                     <controls:TextInput Width="50" DigitsOnly="True" MaxCharacters="3" Value="165" />
-                    <Button>RST</Button>
+                    
+                    <!-- TODO: Border isn't aligned with text input -->
+                    <Border BorderThickness="1" BorderBrush="{toolbox:VatSysColour GenericText}" Height="24" Width="40" VerticalAlignment="Center" Margin="0,4,0,0"><TextBlock Style="{StaticResource GenericTextStyle}" HorizontalAlignment="Center">RST</TextBlock></Border>
                 </StackPanel>
             </DockPanel>
 
@@ -128,7 +145,8 @@
                 <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">Second Window</TextBlock>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
                     <controls:TextInput Width="50" DigitsOnly="True" MaxCharacters="3" Value="300" />
-                    <Button>DEF</Button>
+                    <!-- TODO: Border isn't aligned with text input -->
+                    <Border BorderThickness="1" BorderBrush="{toolbox:VatSysColour GenericText}" Height="24" Width="40" VerticalAlignment="Center" Margin="0,4,0,0"><TextBlock Style="{StaticResource GenericTextStyle}" HorizontalAlignment="Center">DEF</TextBlock></Border>
                 </StackPanel>
             </DockPanel>
 
@@ -137,9 +155,10 @@
             <!-- Display Levels -->
             <DockPanel Style="{StaticResource SectionStyle}">
                 <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">Display Levels</TextBlock>
+                <!-- TODO: Use two columns, evenly divided, and center-align the inputs -->
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Center">
-                    <controls:TextInput Width="50" DigitsOnly="True" MaxCharacters="3" Value="000" />
-                    <controls:TextInput Width="50" DigitsOnly="True" MaxCharacters="3" Value="999" />
+                    <controls:TextInput Width="40" DigitsOnly="True" MaxCharacters="3" Value="000" />
+                    <controls:TextInput Width="40" DigitsOnly="True" MaxCharacters="3" Value="999" />
                 </StackPanel>
             </DockPanel>
 
@@ -149,39 +168,42 @@
             <DockPanel Style="{StaticResource SectionStyle}">
                 <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">SSR Code Filter</TextBlock>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
-                    <controls:TextInput Width="35" DigitsOnly="True" />
-                    <controls:TextInput Width="35" DigitsOnly="True" />
-                    <controls:TextInput Width="60" DigitsOnly="True" />
-                    <controls:TextInput Width="60" DigitsOnly="True" />
+                    <controls:TextInput Width="32" DigitsOnly="True" />
+                    <controls:TextInput Width="32" DigitsOnly="True" />
+                    <controls:TextInput Width="64" DigitsOnly="True" />
+                    <controls:TextInput Width="64" DigitsOnly="True" />
                 </StackPanel>
             </DockPanel>
 
             <controls:BeveledLine Style="{StaticResource SectionSeparatorStyle}" />
 
             <!-- Time and Timer -->
-            <StackPanel Margin="4,0" VerticalAlignment="Center">
-                <TextBlock Style="{StaticResource LabelStyle}">Time</TextBlock>
-                <TextBlock Style="{StaticResource LabelStyle}" FontSize="24">00:36:57</TextBlock>
-                <TextBlock Style="{StaticResource LabelStyle}">Timer</TextBlock>
-                <controls:BeveledBorder BevelType="Sunken" BorderThickness="{x:Static controls:Bevel.BorderThickness}" Margin="{StaticResource ItemMargin}">
-                    <TextBlock Style="{StaticResource LabelStyle}" FontSize="24">0024</TextBlock>
-                </controls:BeveledBorder>
-            </StackPanel>
+            <DockPanel Style="{StaticResource SectionStyle}">
+                <!-- TODO: This needs the inter active text colour -->
+                <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">Time</TextBlock>
+                <StackPanel Margin="4,0" VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource LabelStyle}" FontSize="24">00:36:57</TextBlock>
+                    <!-- TODO: This needs the inter active text colour -->
+                    <TextBlock Style="{StaticResource LabelStyle}">Timer</TextBlock>
+                    <Button>
+                        <!-- TODO: The content is floating outside of the button -->
+                        <TextBlock Style="{StaticResource InteractiveTextStyle}" FontSize="24">0024</TextBlock>
+                    </Button>
+                </StackPanel>
+            </DockPanel>
 
             <controls:BeveledLine Style="{StaticResource SectionSeparatorStyle}" />
 
             <!-- Functional States -->
+            <!-- TODO: These buttons should be 72 wide -->
             <DockPanel Style="{StaticResource SectionStyle}">
                 <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">Functional States</TextBlock>
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="*" />
+                        <RowDefinition Height="40" />
+                        <RowDefinition Height="24" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
@@ -192,13 +214,35 @@
                     <Button Grid.Row="1" Grid.Column="1">5 T</Button>
                     <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource SelectedButtonStyle}">HIST</Button>
                     <Button Grid.Row="1" Grid.Column="2">6</Button>
+                </Grid>
+            </DockPanel>
+            
+            <DockPanel Style="{StaticResource SectionStyle}">
+                
+                <!-- TODO: This section doesn't need a heading, but the top of these buttons should be aligned with the top of the other buttons. Like an invisible title. -->
+                <!-- TODO: All of these buttons should be 72 wide -->
+                
+                <Grid Margin="8,16,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="32" />
+                        <RowDefinition Height="32" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
                     <Button Grid.Row="0" Grid.Column="3">SSR ALL</Button>
                     <Button Grid.Row="1" Grid.Column="3">QLK ALL</Button>
                     <Button Grid.Row="0" Grid.Column="4" Style="{StaticResource SelectedButtonStyle}">ADS-B</Button>
                     <Button Grid.Row="1" Grid.Column="4">FPASD</Button>
-                    <Button Grid.Row="1" Grid.Column="5" IsEnabled="False">RAIM</Button>
                 </Grid>
             </DockPanel>
+            
+            <!-- TODO: The Label section should go here, with a gap after the previous section, equivelant to one additional column of buttons -->
+            <!-- TODO: The labels section shouldn't be docked to the right -->
 
         </StackPanel>
     </DockPanel>
