@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
 using vatsys;
@@ -14,13 +15,25 @@ public static class VatSysFont
 {
     public static FontFamily Family { get; } = DesignMode.IsActive
         ? new FontFamily("Terminus (TTF), Consolas")
-        : new FontFamily(MMI.eurofont_winsml.FontFamily.Name);
+        : GetVatSysFamily();
 
     public static double Size { get; } = DesignMode.IsActive
         ? 16
-        : MMI.eurofont_winsml.Size;
+        : GetVatSysSize();
 
-    public static FontWeight Weight { get; } = DesignMode.IsActive || MMI.eurofont_winsml.Bold
+    public static FontWeight Weight { get; } = DesignMode.IsActive || IsVatSysFontBold()
         ? FontWeights.Bold
         : FontWeights.Regular;
+
+    // The JIT compiler loads MMI when it compiles the method that uses it. The designer cannot load MMI.
+    // These methods are not inlined. Thus, MMI loads only when these methods run, and not in design mode.
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    static FontFamily GetVatSysFamily() => new(MMI.eurofont_winsml.FontFamily.Name);
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    static double GetVatSysSize() => MMI.eurofont_winsml.Size;
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    static bool IsVatSysFontBold() => MMI.eurofont_winsml.Bold;
 }

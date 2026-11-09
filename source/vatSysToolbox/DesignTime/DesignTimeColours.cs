@@ -1,7 +1,6 @@
 using System.Windows;
 using System.Windows.Media;
 using System.Xml.Linq;
-using vatsys;
 
 namespace vatSysToolbox.DesignTime;
 
@@ -9,41 +8,55 @@ namespace vatSysToolbox.DesignTime;
 /// The default vatSys colours, for the XAML designer.
 /// The colours come from DefaultColours.xml, which is a copy of the default vatSys Colours.xml file.
 /// </summary>
+/// <remarks>
+/// The designer cannot load the vatSys types. Thus, this class uses the colour names, and not
+/// <c>Colours.Identities</c>.
+/// </remarks>
 static class DesignTimeColours
 {
     const string ResourceName = "vatSysToolbox.DesignTime.DefaultColours.xml";
 
-    static readonly Lazy<Dictionary<Colours.Identities, Color>> DefaultColours = new(LoadDefaultColours);
+    // The Custom colours do not have an identity
+    const string CustomColourName = "Custom";
+
+    static readonly Lazy<Dictionary<string, SolidColorBrush>> DefaultColours = new(LoadDefaultColours);
 
     /// <summary>
     /// Gets the default colour. If DefaultColours.xml does not have the colour, gives the same fallback colour as vatSys.
+    /// The brush is frozen.
     /// </summary>
-    public static Color GetColour(Colours.Identities identity)
+    public static SolidColorBrush GetColour(string name)
     {
-        return DefaultColours.Value.TryGetValue(identity, out var colour)
-            ? colour
-            : SystemColors.ControlDarkColor;
+        return DefaultColours.Value.TryGetValue(name, out var brush)
+            ? brush
+            : CreateBrush(SystemColors.ControlDarkColor);
     }
 
-    static Dictionary<Colours.Identities, Color> LoadDefaultColours()
+    static Dictionary<string, SolidColorBrush> LoadDefaultColours()
     {
         using var stream = typeof(DesignTimeColours).Assembly.GetManifestResourceStream(ResourceName)
             ?? throw new InvalidOperationException($"The resource {ResourceName} does not exist.");
 
-        var colours = new Dictionary<Colours.Identities, Color>();
+        var colours = new Dictionary<string, SolidColorBrush>();
         foreach (var element in XDocument.Load(stream).Root!.Elements("Colour"))
         {
-            // Ignore the Custom colours, because they do not have an identity
-            if (!Enum.TryParse<Colours.Identities>((string?)element.Attribute("id"), out var identity) ||
-                identity == Colours.Identities.Custom)
+            var name = (string?)element.Attribute("id");
+            if (string.IsNullOrEmpty(name) || name == CustomColourName)
                 continue;
 
-            colours[identity] = Color.FromRgb(
+            colours[name!] = CreateBrush(Color.FromRgb(
                 (byte)(int)element.Element("R")!,
                 (byte)(int)element.Element("G")!,
-                (byte)(int)element.Element("B")!);
+                (byte)(int)element.Element("B")!));
         }
 
         return colours;
+    }
+
+    static SolidColorBrush CreateBrush(Color colour)
+    {
+        var brush = new SolidColorBrush(colour);
+        brush.Freeze();
+        return brush;
     }
 }
