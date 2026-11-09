@@ -140,10 +140,7 @@
                 <TextBlock Grid.Row="0" Style="{StaticResource SectionTitleStyle}">Visibility</TextBlock>
                 <ToggleButton Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Click="VisibilityCentersButton_Click" Content="{Binding VisibilityCentersMode}" />
                 <TextBlock Grid.Row="3" Style="{StaticResource LabelStyle}">Airspace</TextBlock>
-                <StackPanel Grid.Row="4" Orientation="Horizontal">
-                    <Button VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Command="{Binding OpenSectorsCommand}">SECTORS</Button>
-                    <Button VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Command="{Binding OpenRestrictedAreasCommand}">RESTR</Button>
-                </StackPanel>
+                <Button Grid.Row="4" HorizontalAlignment="Center" VerticalAlignment="Center" Height="{StaticResource ControlHeight}" Command="{Binding OpenSectorsCommand}" Content="{Binding Sectors}" />
             </Grid>
         </DockPanel>
 

@@ -53,13 +53,15 @@ public class VatSysInternals(Form mainForm)
 
     /// <summary>
     /// Opens the vatSys Quick Tag window for the selected track, the same as Tools, Quick Tag, Add. The window opens in
-    /// the middle of the screen of the main form, and not at the mouse position.
+    /// the middle of the screen of the main form, and not at the mouse position. Does nothing if the selected track is
+    /// not an uncoupled radar track.
     /// </summary>
     public void OpenQuickTagWindow()
     {
-        // The same check as Tools, Quick Tag, Add. A quick tag is only for a radar track.
+        // A quick tag is only for a radar track that is not coupled to a flight plan. vatSys uses the same rule to
+        // enable Tools, Quick Tag.
         var selectedTrack = MMI.SelectedTrack;
-        if (selectedTrack?.SourceData is not RDP.RadarTrack)
+        if (selectedTrack?.SourceData is not RDP.RadarTrack || selectedTrack.GetFDR() is not null)
             return;
 
         using var window = (Form)Reflection.CreateInstance(

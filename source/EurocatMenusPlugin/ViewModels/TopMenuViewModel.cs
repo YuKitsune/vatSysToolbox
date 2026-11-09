@@ -15,7 +15,6 @@ public partial class TopMenuViewModel : ObservableObject
     const string VisibilityCentersItem = "visibilityCentersToolStripMenuItem";
     const string AutomaticVisibilityCentersItem = "automaticToolStripMenuItem";
     const string SectorsItem = "sectorsToolStripMenuItem";
-    const string RestrictedAreasItem = "restrictedAreasToolStripMenuItem";
     const string VelocityVectorsItem = "velocityVectorsToolStripMenuItem";
     const string VelocityVectorsOffItem = "offToolStripMenuItem";
     const string ShortRouteProbeDistanceItem = "srpdistanceToolStripMenuItem";
@@ -33,6 +32,12 @@ public partial class TopMenuViewModel : ObservableObject
     const string DefaultDisplayStatus = "DEF";
 
     const string DisconnectedText = "OFFLINE";
+
+    // The Sectors button shows this text when no sectors are selected
+    const string NoSectorsText = "SECTORS";
+
+    // The Sectors button shows this after the first sector when more than one sector group is selected
+    const string MoreSectorsSuffix = "*";
 
     // The level filters are in hundreds of feet, and the text boxes show three digits
     const int LevelFilterUnit = 100;
@@ -55,6 +60,7 @@ public partial class TopMenuViewModel : ObservableObject
     [ObservableProperty] string connection = string.Empty;
     [ObservableProperty] string positionName = string.Empty;
     [ObservableProperty] string visibilityCentersMode = string.Empty;
+    [ObservableProperty] string sectors = string.Empty;
 
     [ObservableProperty] string mainWindowStatus = string.Empty;
     [ObservableProperty] string secondWindowStatus = string.Empty;
@@ -92,6 +98,7 @@ public partial class TopMenuViewModel : ObservableObject
         Connection = "ML-BIK_CTR";
         PositionName = "APPROACH";
         VisibilityCentersMode = "AUTO";
+        Sectors = "BIK*";
         _mainWindowRange = "165";
         MainWindowStatus = "RST";
         _secondWindowRange = "300";
@@ -241,6 +248,7 @@ public partial class TopMenuViewModel : ObservableObject
         Connection = Network.IsConnected ? Network.Callsign : DisconnectedText;
         PositionName = _vatSysMenu.GetItem(PositionDisplayItem).Text;
         VisibilityCentersMode = _vatSysMenu.GetItem(AutomaticVisibilityCentersItem).Checked ? "AUTO" : "MAN";
+        Sectors = FormatSectors(MMI.SectorsControlled);
 
         RefreshMainWindow();
         RefreshSecondWindow();
@@ -284,9 +292,6 @@ public partial class TopMenuViewModel : ObservableObject
 
     [RelayCommand]
     void OpenSectors() => Click(SectorsItem);
-
-    [RelayCommand]
-    void OpenRestrictedAreas() => Click(RestrictedAreasItem);
 
     [RelayCommand]
     void OpenTimeMenu()
@@ -530,6 +535,25 @@ public partial class TopMenuViewModel : ObservableObject
     {
         return track.SRPVisible == MMI.SRPVisibilities.On ||
                (track.SRPVisible == MMI.SRPVisibilities.Global && MMI.SRPDefaultOn);
+    }
+
+    // Shows the ID of the first sector group, the same as the first row in the vatSys Sectors window. A sector group
+    // is a selected sector that is not a sub-sector of another selected sector.
+    static string FormatSectors(IList<SectorsVolumes.Sector> sectors)
+    {
+        var sectorGroups = sectors
+            .Where(sector => !sectors.Any(group =>
+                group != sector &&
+                SectorsVolumes.SectorGroupings.TryGetValue(group, out var subSectors) &&
+                subSectors.Contains(sector)))
+            .ToList();
+
+        if (sectorGroups.Count == 0)
+            return NoSectorsText;
+
+        return sectorGroups.Count == 1
+            ? sectorGroups[0].Name
+            : sectorGroups[0].Name + MoreSectorsSuffix;
     }
 
     static string FormatLevelFilter(int level) => (level / LevelFilterUnit).ToString("d3");

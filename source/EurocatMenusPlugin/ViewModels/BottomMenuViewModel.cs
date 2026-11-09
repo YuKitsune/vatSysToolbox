@@ -12,6 +12,7 @@ public partial class BottomMenuViewModel : ObservableObject
     const string DisplaySettingsItem = "displayToolStripMenuItem1";
     const string AudioSettingsItem = "audioToolStripMenuItem";
     const string KeyboardSettingsItem = "keyToolStripMenuItem";
+    const string RestrictedAreasItem = "restrictedAreasToolStripMenuItem";
     const string MapsItem = "mapsToolStripMenuItem";
     const string InfoItem = "aISToolStripMenuItem";
     const string AirWindowItem = "secondASDToolStripMenuItem";
@@ -100,7 +101,8 @@ public partial class BottomMenuViewModel : ObservableObject
         [
             _vatSysMenu.GetPopupMenuItem(_vatSysMenu.GetItem(DisplaySettingsItem), "Display"),
             _vatSysMenu.GetPopupMenuItem(_vatSysMenu.GetItem(AudioSettingsItem), "Audio"),
-            _vatSysMenu.GetPopupMenuItem(_vatSysMenu.GetItem(KeyboardSettingsItem), "Keyboard")
+            _vatSysMenu.GetPopupMenuItem(_vatSysMenu.GetItem(KeyboardSettingsItem), "Keyboard"),
+            _vatSysMenu.GetPopupMenuItem(_vatSysMenu.GetItem(RestrictedAreasItem), "Restricted Areas")
         ]);
     }
 
