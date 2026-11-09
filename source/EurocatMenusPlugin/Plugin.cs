@@ -29,6 +29,14 @@ public class Plugin : IPlugin
             .AddVatSysToolbox(Name)
             .BuildServiceProvider();
 
+        // vatSys loads the plugins while it creates the main form. The main form is ready only after the message
+        // loop starts, thus replace the menu bar when the message loop is idle for the first time.
+        Application.Idle += OnFirstIdle;
+    }
+
+    void OnFirstIdle(object sender, EventArgs e)
+    {
+        Application.Idle -= OnFirstIdle;
         ReplaceMenuBar();
     }
 
