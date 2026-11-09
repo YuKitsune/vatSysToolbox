@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using vatSysToolbox;
 
 namespace EurocatMenusPlugin.Views;
 
@@ -116,7 +117,7 @@ static class PopupMenu
 
         var menuItem = new MenuItem
         {
-            Header = item.Header,
+            Header = item.UnreadCount > 0 ? CreateHeaderWithUnreadCount(item) : item.Header,
             IsEnabled = item.IsEnabled,
             IsChecked = item.IsChecked,
             StaysOpenOnClick = staysOpenOnClick
@@ -137,6 +138,23 @@ static class PopupMenu
         }
 
         return menuItem;
+    }
+
+    // vatSys shows the number of unread messages on the right of the item, in the warning colour
+    static DockPanel CreateHeaderWithUnreadCount(PopupMenuItem item)
+    {
+        var unreadCount = new TextBlock
+        {
+            Text = $"[{item.UnreadCount}]",
+            Foreground = VatSysColours.GetColour(vatsys.Colours.Identities.WindowWarning),
+            Margin = new Thickness(8, 0, 0, 0)
+        };
+        DockPanel.SetDock(unreadCount, Dock.Right);
+
+        var header = new DockPanel();
+        header.Children.Add(unreadCount);
+        header.Children.Add(new TextBlock { Text = item.Header });
+        return header;
     }
 
     // A text box in a context menu does not get keyboard input, because the menu takes the keyboard. Thus, the item

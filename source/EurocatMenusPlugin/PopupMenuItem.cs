@@ -8,7 +8,8 @@ public class PopupMenuItem(
     Action? click = null,
     Func<bool>? isChecked = null,
     bool isEnabled = true,
-    IReadOnlyList<PopupMenuItem>? children = null)
+    IReadOnlyList<PopupMenuItem>? children = null,
+    int unreadCount = 0)
 {
     public static PopupMenuItem Separator { get; } = new(string.Empty) { IsSeparator = true };
 
@@ -41,6 +42,12 @@ public class PopupMenuItem(
     public bool IsEnabled { get; } = isEnabled;
 
     public IReadOnlyList<PopupMenuItem> Children { get; } = children ?? [];
+
+    /// <summary>
+    /// The number of unread messages (for example, in Messages, System). The popup menu shows the number after the
+    /// header if it is more than 0.
+    /// </summary>
+    public int UnreadCount { get; } = unreadCount;
 
     public bool IsSeparator { get; private set; }
 

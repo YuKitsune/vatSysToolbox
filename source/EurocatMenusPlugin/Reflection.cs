@@ -19,6 +19,20 @@ static class Reflection
         return field.GetValue(target);
     }
 
+    public static object? GetStaticField(Type type, string name)
+    {
+        var field = type.GetField(name, StaticFlags)
+            ?? throw new MissingMemberException(type.Name, name);
+        return field.GetValue(null);
+    }
+
+    public static object? GetProperty(object target, string name)
+    {
+        var property = target.GetType().GetProperty(name, InstanceFlags)
+            ?? throw new MissingMemberException(target.GetType().Name, name);
+        return property.GetValue(target);
+    }
+
     public static object? GetStaticProperty(Type type, string name)
     {
         var property = type.GetProperty(name, StaticFlags)

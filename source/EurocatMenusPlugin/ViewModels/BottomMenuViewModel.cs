@@ -51,6 +51,9 @@ public partial class BottomMenuViewModel : ObservableObject
     readonly VatSysInternals _vatSysInternals = null!;
     readonly IErrorReporter _errorReporter = null!;
 
+    // True after this class starts to listen to the vatSys Messages item
+    bool _isWatchingMessagesItem;
+
     // The open windows that this class listens to, so that a button is turned off as soon as its window closes
     readonly HashSet<Form> _watchedWindows = [];
 
@@ -63,6 +66,7 @@ public partial class BottomMenuViewModel : ObservableObject
     [ObservableProperty] bool isStripSetupOpen;
     [ObservableProperty] bool isAdsContractOpen;
     [ObservableProperty] bool isCpdlcHistoryOpen;
+    [ObservableProperty] bool hasUnreadMessages;
 
     // Example data for the XAML designer. Do not use at runtime.
     public BottomMenuViewModel()
@@ -86,6 +90,8 @@ public partial class BottomMenuViewModel : ObservableObject
     /// </summary>
     public void Refresh()
     {
+        RefreshUnreadMessages();
+
         // The first letter of Alpha, Time, or Level
         StripSortMode = MMI.StripSortMode.ToString().Substring(0, 1);
 
@@ -173,6 +179,19 @@ public partial class BottomMenuViewModel : ObservableObject
                     isEnabled: atisEditorItem is not null),
                 new PopupMenuItem("View", children: [requestItem, ..stationItems])
             ];
+        });
+    }
+
+    /// <summary>
+    /// Marks the new messages as seen, so that the MSG button stops flashing. The same as a click on Messages in the
+    /// vatSys menu bar. The popup menu still shows the number of unread messages of each item.
+    /// </summary>
+    public void ClearUnreadMessages()
+    {
+        Run(() =>
+        {
+            _vatSysMenu.GetItem(MessagesItem).Checked = false;
+            RefreshUnreadMessages();
         });
     }
 
@@ -276,6 +295,22 @@ public partial class BottomMenuViewModel : ObservableObject
                 OnPropertyChanged(nameof(IsCpdlcHistoryOpen));
             }
         });
+    }
+
+    // vatSys checks its Messages item when a message is received in the System chat, the Controller chat, or a private
+    // message. Then the vatSys menu bar flashes the item.
+    void RefreshUnreadMessages()
+    {
+        var messagesItem = _vatSysMenu.GetItem(MessagesItem);
+
+        // The refresh is only at an interval. Thus, listen to the item, so that the button flashes at once.
+        if (!_isWatchingMessagesItem)
+        {
+            _isWatchingMessagesItem = true;
+            messagesItem.CheckedChanged += (_, _) => Run(RefreshUnreadMessages);
+        }
+
+        HasUnreadMessages = messagesItem.Checked;
     }
 
     /// <param name="closingWindow">

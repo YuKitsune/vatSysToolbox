@@ -46,6 +46,7 @@ public partial class BottomMenu : UserControl
 
     void MessagesButton_Click(object sender, RoutedEventArgs e)
     {
+        _viewModel.ClearUnreadMessages();
         PopupMenu.Open((ToggleButton)sender, _viewModel.GetMessagesMenuItems(), PlacementMode.Top);
     }
 }
