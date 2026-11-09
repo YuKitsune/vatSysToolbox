@@ -74,14 +74,17 @@
     <StackPanel Orientation="Horizontal" Margin="{StaticResource ItemMargin}">
         <ToggleButton Click="SetUpButton_Click">Set Up</ToggleButton>
         <ToggleButton Click="MapButton_Click">Map</ToggleButton>
+        <!-- IRL, this opens a window we can't simulate. Just open the built-in Info menu for simplicity -->
         <ToggleButton Click="InfoButton_Click">Info</ToggleButton>
         <Grid Style="{StaticResource StackStyle}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Button Grid.Row="0" Style="{StaticResource StackedButtonStyle}" Command="{Binding OpenAirWindowCommand}">Second</Button>
-            <Button Grid.Row="1" Style="{StaticResource StackedButtonStyle}" IsEnabled="False">Sup ASD</Button>
+            <!-- IRL, this opens the second ASD window. vatSys supports multiple, so this just opens another Air window -->
+            <Button Grid.Row="0" Style="{StaticResource StackedButtonStyle}" Command="{Binding OpenAirWindowCommand}">Air</Button>
+            <!-- IRL, this opens the Sup ASD, which we don't simulate. Open a Ground window instead -->
+            <Button Grid.Row="1" Command="{Binding OpenGroundWindowCommand}">Ground</Button>
         </Grid>
         <Button Command="{Binding OpenFlightPlanCommand}">FPL</Button>
         <ToggleButton Command="{Binding ToggleHoldSetupCommand}" IsChecked="{Binding IsHoldSetupOpen, Mode=OneWay}" IsEnabled="{Binding IsHoldSetupAvailable}">HLD SET</ToggleButton>
@@ -115,7 +118,6 @@
         <Button Command="{Binding RemoveQuickTagCommand}">Del Tag</Button>
         <Button Command="{Binding AddQuickTagCommand}">Rad Tag</Button>
         <Button Command="{Binding ToggleLateralConflictToolCommand}">LATC</Button>
-        <Button Command="{Binding OpenGroundWindowCommand}">Ground</Button>
         <ToggleButton Click="MessagesButton_Click">MSG</ToggleButton>
         <ToggleButton Click="AtisButton_Click">ATIS</ToggleButton>
     </StackPanel>
