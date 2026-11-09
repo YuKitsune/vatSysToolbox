@@ -68,7 +68,7 @@
         <Grid Style="{StaticResource StackStyle}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Button Grid.Row="0" Style="{StaticResource StackedButtonStyle}">SSTP</Button>
             <Border Grid.Row="1" Style="{StaticResource IndicatorStyle}">
@@ -81,7 +81,7 @@
         <Grid Style="{StaticResource StackStyle}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Button Grid.Row="0" Style="{StaticResource StackedButtonStyle}">CQ</Button>
             <Border Grid.Row="1" Style="{StaticResource IndicatorStyle}">
