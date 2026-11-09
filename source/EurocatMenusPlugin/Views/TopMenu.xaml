@@ -5,14 +5,201 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:EurocatMenusPlugin.Views"
              xmlns:toolbox="clr-namespace:vatSysToolbox;assembly=vatSysToolbox"
+             xmlns:controls="clr-namespace:vatSysToolbox.Controls;assembly=vatSysToolbox"
              mc:Ignorable="d"
-             Height="28"
-             d:DesignHeight="28" d:DesignWidth="800"
+             Height="80"
+             d:DesignHeight="80" d:DesignWidth="1920"
              Background="{toolbox:VatSysColour WindowBackground}">
     <UserControl.Resources>
-        <ResourceDictionary Source="/vatSysToolbox;component/Styles.xaml" />
-    </UserControl.Resources>
-    <Grid>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/vatSysToolbox;component/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
 
-    </Grid>
+            <Thickness x:Key="ItemMargin">2</Thickness>
+
+            <Style TargetType="Button" BasedOn="{StaticResource ButtonBaseStyle}">
+                <Setter Property="Margin" Value="{StaticResource ItemMargin}" />
+                <Setter Property="MinWidth" Value="60" />
+            </Style>
+
+            <!-- A button that shows a state that is on (for example, VEL) -->
+            <Style x:Key="SelectedButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                <Setter Property="Background" Value="{toolbox:VatSysColour WindowButtonSelected}" />
+            </Style>
+
+            <Style TargetType="controls:TextInput">
+                <Setter Property="Margin" Value="{StaticResource ItemMargin}" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <Style x:Key="LabelStyle" TargetType="TextBlock" BasedOn="{StaticResource GenericTextStyle}">
+                <Setter Property="HorizontalAlignment" Value="Center" />
+            </Style>
+
+            <Style x:Key="SectionTitleStyle" TargetType="TextBlock" BasedOn="{StaticResource LabelStyle}">
+                <Setter Property="Margin" Value="{StaticResource ItemMargin}" />
+            </Style>
+
+            <Style x:Key="SectionSeparatorStyle" TargetType="controls:BeveledLine">
+                <Setter Property="Orientation" Value="Vertical" />
+                <!-- BeveledLine does not measure itself. Thus, it needs a width. -->
+                <Setter Property="Width" Value="{x:Static controls:Bevel.LineWidth}" />
+            </Style>
+
+            <Style x:Key="SectionStyle" TargetType="DockPanel">
+                <Setter Property="Margin" Value="4,0" />
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <DockPanel>
+
+        <!-- Label -->
+        <DockPanel DockPanel.Dock="Right" Style="{StaticResource SectionStyle}">
+            <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">Label</TextBlock>
+            <StackPanel VerticalAlignment="Center">
+                <Button>Normal</Button>
+                <Button>Fixed</Button>
+            </StackPanel>
+        </DockPanel>
+
+        <StackPanel Orientation="Horizontal">
+
+            <!-- System and Position -->
+            <Grid Margin="4,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Style="{StaticResource LabelStyle}">System</TextBlock>
+                <Button Grid.Row="1" Grid.Column="0">NORM</Button>
+                <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" VerticalAlignment="Bottom" IsEnabled="False">PLOT</Button>
+                <TextBlock Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelStyle}">Position</TextBlock>
+                <Button Grid.Row="3" Grid.Column="0">NORM</Button>
+                <Button Grid.Row="2" Grid.RowSpan="2" Grid.Column="1" VerticalAlignment="Bottom">APPROACH</Button>
+            </Grid>
+
+            <controls:BeveledLine Style="{StaticResource SectionSeparatorStyle}" />
+
+            <!-- Position Name and User -->
+            <Grid Margin="4,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Style="{StaticResource LabelStyle}">Position Name</TextBlock>
+                <Button Grid.Row="1" HorizontalAlignment="Center">LAAE</Button>
+                <TextBlock Grid.Row="2" Style="{StaticResource LabelStyle}">User</TextBlock>
+                <Button Grid.Row="3" HorizontalAlignment="Center" IsEnabled="False">T001</Button>
+            </Grid>
+
+            <controls:BeveledLine Style="{StaticResource SectionSeparatorStyle}" />
+
+            <!-- QNH -->
+            <DockPanel Style="{StaticResource SectionStyle}">
+                <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">QNH</TextBlock>
+                <Button VerticalAlignment="Top">OPS</Button>
+            </DockPanel>
+
+            <controls:BeveledLine Style="{StaticResource SectionSeparatorStyle}" />
+
+            <!-- Main Window -->
+            <DockPanel Style="{StaticResource SectionStyle}">
+                <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">Main Window</TextBlock>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                    <controls:TextInput Width="50" DigitsOnly="True" MaxCharacters="3" Value="165" />
+                    <Button>RST</Button>
+                </StackPanel>
+            </DockPanel>
+
+            <controls:BeveledLine Style="{StaticResource SectionSeparatorStyle}" />
+
+            <!-- Second Window -->
+            <DockPanel Style="{StaticResource SectionStyle}">
+                <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">Second Window</TextBlock>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                    <controls:TextInput Width="50" DigitsOnly="True" MaxCharacters="3" Value="300" />
+                    <Button>DEF</Button>
+                </StackPanel>
+            </DockPanel>
+
+            <controls:BeveledLine Style="{StaticResource SectionSeparatorStyle}" />
+
+            <!-- Display Levels -->
+            <DockPanel Style="{StaticResource SectionStyle}">
+                <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">Display Levels</TextBlock>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Center">
+                    <controls:TextInput Width="50" DigitsOnly="True" MaxCharacters="3" Value="000" />
+                    <controls:TextInput Width="50" DigitsOnly="True" MaxCharacters="3" Value="999" />
+                </StackPanel>
+            </DockPanel>
+
+            <controls:BeveledLine Style="{StaticResource SectionSeparatorStyle}" />
+
+            <!-- SSR Code Filter -->
+            <DockPanel Style="{StaticResource SectionStyle}">
+                <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">SSR Code Filter</TextBlock>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                    <controls:TextInput Width="35" DigitsOnly="True" />
+                    <controls:TextInput Width="35" DigitsOnly="True" />
+                    <controls:TextInput Width="60" DigitsOnly="True" />
+                    <controls:TextInput Width="60" DigitsOnly="True" />
+                </StackPanel>
+            </DockPanel>
+
+            <controls:BeveledLine Style="{StaticResource SectionSeparatorStyle}" />
+
+            <!-- Time and Timer -->
+            <StackPanel Margin="4,0" VerticalAlignment="Center">
+                <TextBlock Style="{StaticResource LabelStyle}">Time</TextBlock>
+                <TextBlock Style="{StaticResource LabelStyle}" FontSize="24">00:36:57</TextBlock>
+                <TextBlock Style="{StaticResource LabelStyle}">Timer</TextBlock>
+                <controls:BeveledBorder BevelType="Sunken" BorderThickness="{x:Static controls:Bevel.BorderThickness}" Margin="{StaticResource ItemMargin}">
+                    <TextBlock Style="{StaticResource LabelStyle}" FontSize="24">0024</TextBlock>
+                </controls:BeveledBorder>
+            </StackPanel>
+
+            <controls:BeveledLine Style="{StaticResource SectionSeparatorStyle}" />
+
+            <!-- Functional States -->
+            <DockPanel Style="{StaticResource SectionStyle}">
+                <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionTitleStyle}">Functional States</TextBlock>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Row="0" Grid.Column="0" Style="{StaticResource SelectedButtonStyle}">VEL</Button>
+                    <Button Grid.Row="1" Grid.Column="0">1</Button>
+                    <Button Grid.Row="0" Grid.Column="1">SRP</Button>
+                    <Button Grid.Row="1" Grid.Column="1">5 T</Button>
+                    <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource SelectedButtonStyle}">HIST</Button>
+                    <Button Grid.Row="1" Grid.Column="2">6</Button>
+                    <Button Grid.Row="0" Grid.Column="3">SSR ALL</Button>
+                    <Button Grid.Row="1" Grid.Column="3">QLK ALL</Button>
+                    <Button Grid.Row="0" Grid.Column="4" Style="{StaticResource SelectedButtonStyle}">ADS-B</Button>
+                    <Button Grid.Row="1" Grid.Column="4">FPASD</Button>
+                    <Button Grid.Row="1" Grid.Column="5" IsEnabled="False">RAIM</Button>
+                </Grid>
+            </DockPanel>
+
+        </StackPanel>
+    </DockPanel>
 </UserControl>
