@@ -9,43 +9,85 @@
              d:DesignHeight="80" d:DesignWidth="1920"
              Background="{toolbox:VatSysColour WindowBackground}">
     <UserControl.Resources>
-        <ResourceDictionary Source="/vatSysToolbox;component/Styles.xaml" />
-        
-        <!-- TODO: All button widths should be the same -->
-        <!-- TODO: Buttons should take max possible height -->
-        <!-- TODO: When stack panel is oriented vertically, buttons should take max height, so it's split evenly -->
-        <!-- TODO: Consistent gap between buttons, matches margin -->
-        
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/vatSysToolbox;component/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!--
+                Each item has a margin of 2, and the menu has a padding of 2.
+                Thus, the gap between two items is the same as the gap between an item and the edge of the menu.
+            -->
+            <Thickness x:Key="ItemMargin">2</Thickness>
+
+            <!-- A button that fills its space. Use it in a stack. -->
+            <Style x:Key="StackedButtonStyle" TargetType="Button" BasedOn="{StaticResource ButtonBaseStyle}">
+                <Setter Property="Margin" Value="{StaticResource ItemMargin}" />
+            </Style>
+
+            <!-- A square button with the full height of the menu -->
+            <Style TargetType="Button" BasedOn="{StaticResource StackedButtonStyle}">
+                <Setter Property="Width" Value="{Binding ActualHeight, RelativeSource={RelativeSource Self}}" />
+            </Style>
+
+            <!--
+                A stack of items with the full height of the menu.
+                The stack has no margin, because its items have a margin. Thus, the stack is wider than a square button
+                by two margins, and its items have the same width as a square button.
+            -->
+            <Style x:Key="StackStyle" TargetType="Grid">
+                <Setter Property="Width" Value="{Binding ActualHeight, RelativeSource={RelativeSource Self}}" />
+            </Style>
+
+            <!-- A border that is only as large as its content -->
+            <Style x:Key="IndicatorStyle" TargetType="Border">
+                <Setter Property="Margin" Value="{StaticResource ItemMargin}" />
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <Style x:Key="NonInteractiveTextStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
+                <Setter Property="Foreground" Value="{toolbox:VatSysColour NonInteractiveText}" />
+            </Style>
+        </ResourceDictionary>
     </UserControl.Resources>
-    <StackPanel Orientation="Horizontal">
+    <StackPanel Orientation="Horizontal" Margin="{StaticResource ItemMargin}">
         <Button>Set Up</Button>
         <Button>Map</Button>
         <Button>Info</Button>
-        <StackPanel Orientation="Vertical">
-            <Button>Second</Button>
-            <Button>Sup ASD</Button>
-        </StackPanel>
+        <Grid Style="{StaticResource StackStyle}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Button Grid.Row="0" Style="{StaticResource StackedButtonStyle}">Second</Button>
+            <Button Grid.Row="1" Style="{StaticResource StackedButtonStyle}">Sup ASD</Button>
+        </Grid>
         <Button>FPL</Button>
         <Button>HLD SET</Button>
-        <StackPanel Orientation="Vertical">
-            <Button>SSTP</Button>
-            <!-- TODO: Shrink border to fit content -->
-            <Border>
-                <!-- TODO: Non-interactive text -->
-                <TextBlock HorizontalAlignment="Center">A</TextBlock>
+        <Grid Style="{StaticResource StackStyle}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Button Grid.Row="0" Style="{StaticResource StackedButtonStyle}">SSTP</Button>
+            <Border Grid.Row="1" Style="{StaticResource IndicatorStyle}">
+                <TextBlock Style="{StaticResource NonInteractiveTextStyle}">A</TextBlock>
             </Border>
-        </StackPanel>
+        </Grid>
         <Button>Lost</Button>
         <Button>TFMS</Button>
         <Button>TFC MGT</Button>
-        <StackPanel Orientation="Vertical">
-            <Button>CQ</Button>
-            <!-- TODO: Shrink border to fit content -->
-            <Border>
-                <!-- TODO: Non-interactive text -->
-                <TextBlock HorizontalAlignment="Center">0</TextBlock>
+        <Grid Style="{StaticResource StackStyle}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Button Grid.Row="0" Style="{StaticResource StackedButtonStyle}">CQ</Button>
+            <Border Grid.Row="1" Style="{StaticResource IndicatorStyle}">
+                <TextBlock Style="{StaticResource NonInteractiveTextStyle}">0</TextBlock>
             </Border>
-        </StackPanel>
+        </Grid>
         <Button>ADS Contract</Button>
         <Button>History CPDLC</Button>
         <Button>WAYP</Button>
