@@ -1,6 +1,7 @@
 using System.Windows.Media;
 using vatsys;
 using vatSysToolbox.Controls;
+using vatSysToolbox.DesignTime;
 
 namespace vatSysToolbox;
 
@@ -18,17 +19,20 @@ public static class VatSysColours
     /// <summary>
     /// Gets a vatSys colour from the profile. If the profile does not have the colour, vatSys gives its default colour.
     /// The brush is frozen, so you can use it from all threads.
+    /// In the XAML designer, gives the default vatSys colour.
     /// </summary>
     public static SolidColorBrush GetColour(Colours.Identities identity)
     {
+        if (DesignMode.IsActive)
+            return CreateBrush(DesignTimeColours.GetColour(identity));
+
         lock (ColourCache)
         {
             if (ColourCache.TryGetValue(identity, out var cachedBrush))
                 return cachedBrush;
 
             var colour = Colours.GetColour(identity);
-            var brush = new SolidColorBrush(Color.FromArgb(colour.A, colour.R, colour.G, colour.B));
-            brush.Freeze();
+            var brush = CreateBrush(Color.FromArgb(colour.A, colour.R, colour.G, colour.B));
 
             // Before vatSys loads the colours, it gives a fallback colour. Do not keep the fallback colour.
             if (Colours.Loaded)
@@ -36,5 +40,12 @@ public static class VatSysColours
 
             return brush;
         }
+    }
+
+    static SolidColorBrush CreateBrush(Color colour)
+    {
+        var brush = new SolidColorBrush(colour);
+        brush.Freeze();
+        return brush;
     }
 }
