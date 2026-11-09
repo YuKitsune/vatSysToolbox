@@ -1,7 +1,6 @@
 using System.Windows.Media;
 using vatsys;
 using vatSysToolbox.Controls;
-using vatSysToolbox.Extensions;
 
 namespace vatSysToolbox;
 
@@ -27,7 +26,8 @@ public static class VatSysColours
             if (ColourCache.TryGetValue(identity, out var cachedBrush))
                 return cachedBrush;
 
-            var brush = new SolidColorBrush(Colours.GetColour(identity).ToWindowsColor());
+            var colour = Colours.GetColour(identity);
+            var brush = new SolidColorBrush(Color.FromArgb(colour.A, colour.R, colour.G, colour.B));
             brush.Freeze();
 
             // Before vatSys loads the colours, it gives a fallback colour. Do not keep the fallback colour.
