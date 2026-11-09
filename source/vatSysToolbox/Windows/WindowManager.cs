@@ -5,13 +5,14 @@ namespace vatSysToolbox.Windows;
 
 /// <summary>
 /// Opens and closes <see cref="VatSysForm"/> windows. A key identifies each window, so that only one window with
-/// the same key is open at a time. The window manager keeps the last location of each window, and opens the window at
-/// that location again.
+/// the same key is open at a time. The window manager keeps the last location and size of each window, and opens the
+/// window at that location again. A window that sizes to its content gets its size from the content, and not the last
+/// size.
 /// </summary>
 public class WindowManager(IGuiInvoker guiInvoker)
 {
     readonly Dictionary<string, VatSysForm> _forms = new();
-    readonly Dictionary<string, System.Drawing.Point> _lastLocations = new();
+    readonly Dictionary<string, System.Drawing.Rectangle> _lastBounds = new();
     readonly object _gate = new();
 
     /// <summary>
@@ -124,16 +125,19 @@ public class WindowManager(IGuiInvoker guiInvoker)
         if (form.IsDisposed)
             return;
 
-        if (_lastLocations.TryGetValue(key, out var lastLocation))
-        {
-            form.StartPosition = FormStartPosition.Manual;
-            form.Location = lastLocation;
-        }
-
         if (size.HasValue)
         {
             form.Width = (int)size.Value.Width;
             form.Height = (int)size.Value.Height;
+        }
+
+        if (_lastBounds.TryGetValue(key, out var lastBounds))
+        {
+            form.StartPosition = FormStartPosition.Manual;
+            form.Location = lastBounds.Location;
+
+            if (!sizeToContent)
+                form.Size = lastBounds.Size;
         }
 
         configureForm?.Invoke(form);
@@ -149,10 +153,10 @@ public class WindowManager(IGuiInvoker guiInvoker)
     {
         lock (_gate)
         {
-            // If the window is minimised or maximised, Location is not the normal position of the window
-            _lastLocations[key] = form.WindowState == FormWindowState.Normal
-                ? form.Location
-                : form.RestoreBounds.Location;
+            // If the window is minimised or maximised, Bounds is not the normal position and size of the window
+            _lastBounds[key] = form.WindowState == FormWindowState.Normal
+                ? form.Bounds
+                : form.RestoreBounds;
 
             _forms.Remove(key);
         }
