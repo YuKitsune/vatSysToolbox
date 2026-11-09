@@ -1,4 +1,5 @@
 ﻿<Solution>
+  <Project Path="EurocatMenusPlugin\EurocatMenusPlugin.csproj" />
   <Project Path="vatSysToolbox/vatSysToolbox.csproj" />
   <Project Path="../build/_build.csproj">
     <Build Project="false" />
