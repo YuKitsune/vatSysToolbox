@@ -84,7 +84,7 @@
             <!-- IRL, this opens the second ASD window. vatSys supports multiple, so this just opens another Air window -->
             <Button Grid.Row="0" Style="{StaticResource StackedButtonStyle}" Command="{Binding OpenAirWindowCommand}">Air</Button>
             <!-- IRL, this opens the Sup ASD, which we don't simulate. Open a Ground window instead -->
-            <Button Grid.Row="1" Command="{Binding OpenGroundWindowCommand}">Ground</Button>
+            <Button Grid.Row="1" Style="{StaticResource StackedButtonStyle}" Command="{Binding OpenGroundWindowCommand}">Ground</Button>
         </Grid>
         <Button Command="{Binding OpenFlightPlanCommand}">FPL</Button>
         <ToggleButton Command="{Binding ToggleHoldSetupCommand}" IsChecked="{Binding IsHoldSetupOpen, Mode=OneWay}" IsEnabled="{Binding IsHoldSetupAvailable}">HLD SET</ToggleButton>
@@ -100,20 +100,28 @@
         </Grid>
         <Button IsEnabled="False">Lost</Button>
         <ToggleButton Click="TfmsButton_Click" IsEnabled="{Binding IsTfmsAvailable}">TFMS</ToggleButton>
-        <Button IsEnabled="False">TFC MGT</Button>
-        <Grid Style="{StaticResource StackStyle}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Button Grid.Row="0" Style="{StaticResource StackedButtonStyle}" IsEnabled="False">CQ</Button>
-            <Border Grid.Row="1" Style="{StaticResource IndicatorStyle}">
-                <TextBlock Style="{StaticResource GenericTextStyle}" HorizontalAlignment="Center">0</TextBlock>
-            </Border>
-        </Grid>
+        
+        <!-- Traffic management window not simulated -->
+        <!-- <Button IsEnabled="False">TFC MGT</Button> -->
+        
+        <!-- Coordination Queue not simulated -->
+        <!-- <Grid Style="{StaticResource StackStyle}"> -->
+        <!--     <Grid.RowDefinitions> -->
+        <!--         <RowDefinition Height="*" /> -->
+        <!--         <RowDefinition Height="*" /> -->
+        <!--     </Grid.RowDefinitions> -->
+        <!--     <Button Grid.Row="0" Style="{StaticResource StackedButtonStyle}" IsEnabled="False">CQ</Button> -->
+        <!--     <Border Grid.Row="1" Style="{StaticResource IndicatorStyle}"> -->
+        <!--         <TextBlock Style="{StaticResource GenericTextStyle}" HorizontalAlignment="Center">0</TextBlock> -->
+        <!--     </Border> -->
+        <!-- </Grid> -->
+        
         <ToggleButton Command="{Binding ToggleAdsContractCommand}" IsChecked="{Binding IsAdsContractOpen, Mode=OneWay}" IsEnabled="{Binding IsAdsContractAvailable}">ADS Contract</ToggleButton>
         <ToggleButton Command="{Binding ToggleCpdlcHistoryCommand}" IsChecked="{Binding IsCpdlcHistoryOpen, Mode=OneWay}" IsEnabled="{Binding IsCpdlcHistoryAvailable}">History CPDLC</ToggleButton>
-        <Button IsEnabled="False">WAYP</Button>
+        
+        <!-- Waypoint discrepancy not simulated -->
+        <!-- <Button IsEnabled="False">WAYP</Button> -->
+        
         <Button IsEnabled="False">Tag List</Button>
         <Button Command="{Binding RemoveQuickTagCommand}">Del Tag</Button>
         <Button Command="{Binding AddQuickTagCommand}">Rad Tag</Button>
