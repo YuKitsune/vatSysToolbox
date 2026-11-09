@@ -112,8 +112,8 @@
         <ToggleButton Command="{Binding ToggleCpdlcHistoryCommand}" IsChecked="{Binding IsCpdlcHistoryOpen, Mode=OneWay}" IsEnabled="{Binding IsCpdlcHistoryAvailable}">History CPDLC</ToggleButton>
         <Button IsEnabled="False">WAYP</Button>
         <Button IsEnabled="False">Tag List</Button>
-        <Button Command="{Binding RemoveQuickTagCommand}" IsEnabled="{Binding CanRemoveQuickTag}">Del Tag</Button>
-        <Button Command="{Binding AddQuickTagCommand}" IsEnabled="{Binding CanAddQuickTag}">Rad Tag</Button>
+        <Button Command="{Binding RemoveQuickTagCommand}">Del Tag</Button>
+        <Button Command="{Binding AddQuickTagCommand}">Rad Tag</Button>
         <Button IsEnabled="False">LATC</Button>
         <Button Command="{Binding OpenGroundWindowCommand}">Ground</Button>
         <ToggleButton Click="MessagesButton_Click">MSG</ToggleButton>

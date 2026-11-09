@@ -22,7 +22,6 @@ public partial class BottomMenuViewModel : ObservableObject
     const string ToolsItem = "toolsToolStripMenuItem";
     const string WindowsItem = "windowsToolStripMenuItem";
     const string AtisItem = "aTISToolStripMenuItem";
-    const string QuickTagItem = "quickTagToolStripMenuItem";
     const string AddQuickTagItem = "addToolStripMenuItem";
     const string RemoveQuickTagItem = "removeToolStripMenuItem";
 
@@ -58,8 +57,6 @@ public partial class BottomMenuViewModel : ObservableObject
     [ObservableProperty] bool isAdsContractAvailable;
     [ObservableProperty] bool isCpdlcHistoryAvailable;
     [ObservableProperty] bool isAtisEditorAvailable;
-    [ObservableProperty] bool canAddQuickTag;
-    [ObservableProperty] bool canRemoveQuickTag;
     [ObservableProperty] bool isHoldSetupOpen;
     [ObservableProperty] bool isStripSetupOpen;
     [ObservableProperty] bool isAtisEditorOpen;
@@ -75,8 +72,6 @@ public partial class BottomMenuViewModel : ObservableObject
         IsAdsContractAvailable = true;
         IsCpdlcHistoryAvailable = true;
         IsAtisEditorAvailable = true;
-        CanAddQuickTag = true;
-        CanRemoveQuickTag = true;
     }
 
     public BottomMenuViewModel(VatSysMenu vatSysMenu, IErrorReporter errorReporter)
@@ -98,10 +93,6 @@ public partial class BottomMenuViewModel : ObservableObject
         IsAdsContractAvailable = FindCpdlcItem(AdsContractText) is not null;
         IsCpdlcHistoryAvailable = FindCpdlcItem(CpdlcHistoryText) is not null;
         IsAtisEditorAvailable = _vatSysMenu.FindPluginItem(WindowsItem, AtisEditorText) is not null;
-
-        // vatSys enables the Quick Tag menu only when the selected track has no flight plan
-        CanAddQuickTag = _vatSysMenu.GetItem(QuickTagItem).Enabled;
-        CanRemoveQuickTag = MMI.SelectedTrack?.GetQuickTag() is not null;
 
         RefreshWindows();
     }
