@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 
 namespace EurocatMenusPlugin.Views;
 
@@ -33,17 +34,21 @@ static class PopupMenu
         menu.Style = (Style)target.FindResource(typeof(ContextMenu));
         menu.Resources.Add(typeof(MenuItem), target.FindResource(typeof(MenuItem)));
         menu.Resources.Add(MenuItem.SeparatorStyleKey, target.FindResource(MenuItem.SeparatorStyleKey));
+        menu.Resources.Add(typeof(TextBox), target.FindResource(typeof(TextBox)));
 
         foreach (var item in items)
-            menu.Items.Add(CreateItem(item, staysOpenOnClick));
+            menu.Items.Add(CreateItem(menu, item, staysOpenOnClick));
 
         menu.IsOpen = true;
     }
 
-    static Control CreateItem(PopupMenuItem item, bool staysOpenOnClick)
+    static Control CreateItem(ContextMenu menu, PopupMenuItem item, bool staysOpenOnClick)
     {
         if (item.IsSeparator)
             return new Separator();
+
+        if (item.Submit is { } submit)
+            return CreateTextInputItem(menu, item, submit);
 
         var menuItem = new MenuItem
         {
@@ -54,7 +59,7 @@ static class PopupMenu
         };
 
         foreach (var child in item.Children)
-            menuItem.Items.Add(CreateItem(child, staysOpenOnClick));
+            menuItem.Items.Add(CreateItem(menu, child, staysOpenOnClick));
 
         if (item.Click is { } click)
         {
@@ -68,5 +73,43 @@ static class PopupMenu
         }
 
         return menuItem;
+    }
+
+    static MenuItem CreateTextInputItem(ContextMenu menu, PopupMenuItem item, Action<string> submit)
+    {
+        var textBox = new TextBox
+        {
+            MaxLength = item.MaxLength,
+            CharacterCasing = item.IsUpperCase ? CharacterCasing.Upper : CharacterCasing.Normal,
+            MinWidth = 80
+        };
+
+        textBox.KeyDown += (_, e) =>
+        {
+            if (e.Key != Key.Enter)
+                return;
+
+            e.Handled = true;
+            menu.IsOpen = false;
+            submit(textBox.Text);
+        };
+
+        // Put the cursor in the text box when its menu opens, the same as vatSys
+        textBox.IsVisibleChanged += (_, e) =>
+        {
+            if ((bool)e.NewValue)
+                textBox.Dispatcher.BeginInvoke(new Action(() => textBox.Focus()));
+        };
+
+        return new MenuItem
+        {
+            Header = textBox,
+
+            // A menu item takes the keyboard focus when the mouse moves on it. Then the text box loses the focus.
+            Focusable = false,
+
+            // A click in the text box must not close the menu
+            StaysOpenOnClick = true
+        };
     }
 }

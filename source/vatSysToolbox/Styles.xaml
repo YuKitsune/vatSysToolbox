@@ -129,7 +129,8 @@
     </Style>
 
     <!-- TextBox -->
-    <Style TargetType="TextBox">
+    <Style x:Key="TextBoxBaseStyle" TargetType="TextBox">
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="0"/>
@@ -158,6 +159,8 @@
             </Trigger>
         </Style.Triggers>
     </Style>
+
+    <Style TargetType="TextBox" BasedOn="{StaticResource TextBoxBaseStyle}" />
 
     <!-- PasswordBox -->
     <Style TargetType="PasswordBox">

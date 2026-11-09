@@ -47,7 +47,7 @@
                 A text box applies its value when Enter is pressed. If the text box loses the focus before Enter is
                 pressed, it shows the old value again. The Text binding must use UpdateSourceTrigger=Explicit.
             -->
-            <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Style TargetType="TextBox" BasedOn="{StaticResource TextBoxBaseStyle}">
                 <Setter Property="Height" Value="{StaticResource ControlHeight}" />
                 <Setter Property="Margin" Value="{StaticResource ItemMargin}" />
                 <Setter Property="VerticalAlignment" Value="Center" />

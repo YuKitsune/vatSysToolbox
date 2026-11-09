@@ -58,8 +58,6 @@ public class VatSysMenu(MenuStrip menuStrip, IErrorReporter errorReporter)
         var items = new List<PopupMenuItem>();
         foreach (ToolStripItem item in parent.DropDownItems)
         {
-            // Hidden items are not available. vatSys also puts text fields in some menus. The popup menu does not
-            // show them.
             if (!item.Available)
                 continue;
 
@@ -70,6 +68,14 @@ public class VatSysMenu(MenuStrip menuStrip, IErrorReporter errorReporter)
                     break;
                 case ToolStripMenuItem menuItem:
                     items.Add(GetPopupMenuItem(menuItem));
+                    break;
+
+                // vatSys puts text fields in some menus (for example, Info, Find)
+                case ToolStripControlHost { Control: TextBox textField }:
+                    items.Add(PopupMenuItem.TextInput(
+                        text => Submit(textField, text),
+                        textField.MaxLength,
+                        textField.CharacterCasing == CharacterCasing.Upper));
                     break;
             }
         }
@@ -89,6 +95,21 @@ public class VatSysMenu(MenuStrip menuStrip, IErrorReporter errorReporter)
             () => item.Checked,
             item.Enabled,
             children);
+    }
+
+    // Puts the text in the vatSys text field, and presses Enter in it. The vatSys text field does its action when it
+    // gets Enter as a key press. A key press can only be sent with its protected method, thus use reflection.
+    void Submit(TextBox textField, string text)
+    {
+        try
+        {
+            textField.Text = text;
+            Reflection.InvokeMethod(textField, "OnKeyPress", new KeyPressEventArgs('\r'));
+        }
+        catch (Exception ex)
+        {
+            errorReporter.ReportError(ex, "Cannot send the text to vatSys");
+        }
     }
 
     // An exception that is not caught on the UI thread stops vatSys.
