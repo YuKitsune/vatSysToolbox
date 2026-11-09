@@ -11,6 +11,9 @@ public class PopupMenuItem(
     IReadOnlyList<PopupMenuItem>? children = null,
     int unreadCount = 0)
 {
+    /// <summary>
+    /// An item that separates groups of items. The popup menu shows it as a blank button.
+    /// </summary>
     public static PopupMenuItem Separator { get; } = new(string.Empty) { IsSeparator = true };
 
     /// <summary>

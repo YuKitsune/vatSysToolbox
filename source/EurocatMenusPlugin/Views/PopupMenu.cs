@@ -122,10 +122,11 @@ static class PopupMenu
 
         foreach (var item in items)
         {
+            // A separator is a blank button that does nothing
             if (item.IsSeparator)
             {
-                var separator = new BeveledLine();
-                separator.SetResourceReference(FrameworkElement.StyleProperty, "PopupMenuSeparatorStyle");
+                var separator = new ToggleButton { IsEnabled = false };
+                separator.SetResourceReference(FrameworkElement.StyleProperty, "PopupMenuItemStyle");
                 stack.Children.Add(separator);
                 continue;
             }
