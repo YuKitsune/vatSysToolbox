@@ -89,6 +89,8 @@
 
         <Style.Triggers>
             <Trigger Property="IsPressed" Value="True">
+                <!-- vatSys uses this colour for the background of a pressed button -->
+                <Setter Property="Background" Value="{local:VatSysColour WindowButtonDepressed}" />
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type Button}">
