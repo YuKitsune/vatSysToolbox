@@ -6,12 +6,52 @@
              xmlns:local="clr-namespace:EurocatMenusPlugin.Views"
              xmlns:toolbox="clr-namespace:vatSysToolbox;assembly=vatSysToolbox"
              mc:Ignorable="d"
-             d:DesignHeight="28" d:DesignWidth="800"
+             d:DesignHeight="80" d:DesignWidth="1920"
              Background="{toolbox:VatSysColour WindowBackground}">
     <UserControl.Resources>
         <ResourceDictionary Source="/vatSysToolbox;component/Styles.xaml" />
-    </UserControl.Resources>
-    <Grid>
         
-    </Grid>
+        <!-- TODO: All button widths should be the same -->
+        <!-- TODO: Buttons should take max possible height -->
+        <!-- TODO: When stack panel is oriented vertically, buttons should take max height, so it's split evenly -->
+        <!-- TODO: Consistent gap between buttons, matches margin -->
+        
+    </UserControl.Resources>
+    <StackPanel Orientation="Horizontal">
+        <Button>Set Up</Button>
+        <Button>Map</Button>
+        <Button>Info</Button>
+        <StackPanel Orientation="Vertical">
+            <Button>Second</Button>
+            <Button>Sup ASD</Button>
+        </StackPanel>
+        <Button>FPL</Button>
+        <Button>HLD SET</Button>
+        <StackPanel Orientation="Vertical">
+            <Button>SSTP</Button>
+            <!-- TODO: Shrink border to fit content -->
+            <Border>
+                <!-- TODO: Non-interactive text -->
+                <TextBlock HorizontalAlignment="Center">A</TextBlock>
+            </Border>
+        </StackPanel>
+        <Button>Lost</Button>
+        <Button>TFMS</Button>
+        <Button>TFC MGT</Button>
+        <StackPanel Orientation="Vertical">
+            <Button>CQ</Button>
+            <!-- TODO: Shrink border to fit content -->
+            <Border>
+                <!-- TODO: Non-interactive text -->
+                <TextBlock HorizontalAlignment="Center">0</TextBlock>
+            </Border>
+        </StackPanel>
+        <Button>ADS Contract</Button>
+        <Button>History CPDLC</Button>
+        <Button>WAYP</Button>
+        <Button>Tag List</Button>
+        <Button>Del Tag</Button>
+        <Button>Rad Tag</Button>
+        <Button>LATC</Button>
+    </StackPanel>
 </UserControl>
