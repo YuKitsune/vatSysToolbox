@@ -1,4 +1,4 @@
-using vatSysToolbox;
+using CommunityToolkit.Mvvm.Messaging;
 using vatSysToolbox.Messaging;
 using vatSysToolbox.Windows;
 
@@ -9,8 +9,7 @@ namespace EurocatMenusPlugin.Shims;
 /// opens and closes the Hold Setup window with the Hold plugin menu item.
 /// </summary>
 /// <remarks>
-/// vatSys does not send events when the windows open. Thus, call <see cref="Refresh"/> at an interval. Make the shim
-/// before the messenger starts.
+/// Make the shim before the messenger starts.
 /// </remarks>
 public class HoldShim
 {
@@ -33,15 +32,15 @@ public class HoldShim
         VatSysMenu vatSysMenu,
         MenuEvents events,
         IPluginMessenger messenger,
-        IGuiInvoker guiInvoker,
-        IErrorReporter errorReporter)
+        IMessenger vatSysMessenger,
+        IGuiInvoker guiInvoker)
     {
         _vatSysMenu = vatSysMenu;
 
         _setupWindow = new ToggleableWindow(
             window => window.Text == SetupWindowTitle,
             ClickSetupItem,
-            errorReporter);
+            vatSysMessenger);
 
         // The Hold plugin will send the events to all plugins. A plugin does not receive its own messages, thus the shim
         // raises the events in this plugin.
@@ -54,11 +53,6 @@ public class HoldShim
             guiInvoker.InvokeOnGUI(_ => _setupWindow.Toggle());
             return Task.CompletedTask;
         });
-    }
-
-    public void Refresh()
-    {
-        _setupWindow.Refresh();
     }
 
     void ClickSetupItem()

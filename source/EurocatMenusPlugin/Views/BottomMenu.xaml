@@ -70,8 +70,7 @@
             <DataTemplate DataType="{x:Type viewModels:ToggleButtonViewModel}">
                 <ToggleButton Content="{Binding Text}"
                               Command="{Binding ClickCommand}"
-                              IsChecked="{Binding IsChecked, Mode=OneWay}"
-                              IsEnabled="{Binding IsEnabled}" />
+                              IsChecked="{Binding IsChecked, Mode=OneWay}" />
             </DataTemplate>
 
             <!--
@@ -81,7 +80,6 @@
             <DataTemplate DataType="{x:Type viewModels:PopupButtonViewModel}">
                 <ToggleButton x:Name="Button"
                               Content="{Binding Text}"
-                              IsEnabled="{Binding IsEnabled}"
                               Click="PopupButton_Click" />
                 <DataTemplate.Triggers>
                     <DataTrigger Binding="{Binding IsFlashing}" Value="True">

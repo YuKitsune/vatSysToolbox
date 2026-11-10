@@ -6,10 +6,4 @@ namespace EurocatMenusPlugin.ViewModels;
 public class StackViewModel(IReadOnlyList<IBottomMenuItem> items) : IBottomMenuItem
 {
     public IReadOnlyList<IBottomMenuItem> Items { get; } = items;
-
-    public void Refresh()
-    {
-        foreach (var item in Items)
-            item.Refresh();
-    }
 }

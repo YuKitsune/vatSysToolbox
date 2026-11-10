@@ -1,5 +1,5 @@
 using System.Windows.Forms;
-using vatSysToolbox;
+using CommunityToolkit.Mvvm.Messaging;
 using vatSysToolbox.Messaging;
 using vatSysToolbox.Windows;
 
@@ -10,8 +10,7 @@ namespace EurocatMenusPlugin.Shims;
 /// opens and closes the windows with the CPDLC menu items.
 /// </summary>
 /// <remarks>
-/// vatSys does not send events when the windows open. Thus, call <see cref="Refresh"/> at an interval. Make the shim
-/// before the messenger starts.
+/// Make the shim before the messenger starts.
 /// </remarks>
 public class CpdlcShim
 {
@@ -46,23 +45,23 @@ public class CpdlcShim
         VatSysMenu vatSysMenu,
         MenuEvents events,
         IPluginMessenger messenger,
-        IGuiInvoker guiInvoker,
-        IErrorReporter errorReporter)
+        IMessenger vatSysMessenger,
+        IGuiInvoker guiInvoker)
     {
         _vatSysMenu = vatSysMenu;
 
         _setupWindow = new ToggleableWindow(
             window => window.Text == SetupWindowTitle,
             () => ClickCpdlcItem(SetupItemText),
-            errorReporter);
+            vatSysMessenger);
         _adsContractWindow = new ToggleableWindow(
             window => window.Text == AdsContractWindowTitle,
             () => ClickCpdlcItem(AdsContractItemText),
-            errorReporter);
+            vatSysMessenger);
         _historyWindow = new ToggleableWindow(
             window => window.Text == HistoryWindowTitle,
             () => ClickCpdlcItem(HistoryItemText),
-            errorReporter);
+            vatSysMessenger);
 
         // The CPDLC plugin will send the events to all plugins. A plugin does not receive its own messages, thus the shim
         // raises the events in this plugin.
@@ -89,13 +88,6 @@ public class CpdlcShim
             guiInvoker.InvokeOnGUI(_ => _historyWindow.Toggle());
             return Task.CompletedTask;
         });
-    }
-
-    public void Refresh()
-    {
-        _setupWindow.Refresh();
-        _adsContractWindow.Refresh();
-        _historyWindow.Refresh();
     }
 
     void ClickCpdlcItem(string text)

@@ -10,10 +10,6 @@ public partial class ButtonViewModel(string text, Action click) : ObservableObje
 {
     public string Text { get; } = text;
 
-    public void Refresh()
-    {
-    }
-
     [RelayCommand]
     void Click() => click();
 }

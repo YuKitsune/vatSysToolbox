@@ -10,12 +10,9 @@ namespace EurocatMenusPlugin.ViewModels;
 public partial class PopupButtonViewModel(
     string text,
     Func<IReadOnlyList<PopupMenuItem>> getItems,
-    bool staysOpenOnClick = false,
-    Func<bool>? getIsEnabled = null)
+    bool staysOpenOnClick = false)
     : ObservableObject, IBottomMenuItem
 {
-    [ObservableProperty] bool isEnabled = true;
-
     /// <summary>
     /// If <c>true</c>, the background of the button changes between the warning colour and the window colour.
     /// </summary>
@@ -32,9 +29,4 @@ public partial class PopupButtonViewModel(
     /// Gets the items of the popup menu. The button calls this each time that the popup menu opens.
     /// </summary>
     public IReadOnlyList<PopupMenuItem> GetItems() => getItems();
-
-    public void Refresh()
-    {
-        IsEnabled = getIsEnabled?.Invoke() ?? true;
-    }
 }

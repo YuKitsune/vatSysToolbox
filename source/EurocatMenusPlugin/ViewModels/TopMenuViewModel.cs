@@ -1,11 +1,20 @@
 using System.Windows.Forms;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using vatsys;
 using vatSysToolbox;
+using vatSysToolbox.Windows;
 
 namespace EurocatMenusPlugin.ViewModels;
 
+/// <summary>
+/// The state of vatSys in the top menu. The state changes with the vatSys events, and with the events that
+/// <see cref="VatSysPatches"/> sends.
+/// </summary>
+/// <remarks>
+/// Make this class on the UI thread. The messenger keeps only a weak reference to it.
+/// </remarks>
 public partial class TopMenuViewModel : ObservableObject
 {
     // The names of the vatSys menu items
@@ -51,6 +60,7 @@ public partial class TopMenuViewModel : ObservableObject
     readonly VatSysMenu _vatSysMenu = null!;
     readonly VatSysInternals _vatSysInternals = null!;
     readonly IClock _clock = null!;
+    readonly IGuiInvoker _guiInvoker = null!;
     readonly IErrorReporter _errorReporter = null!;
 
     // The SSR code filters that the text boxes show. The text boxes can have a value that is not yet applied
@@ -124,12 +134,45 @@ public partial class TopMenuViewModel : ObservableObject
         VatSysMenu vatSysMenu,
         VatSysInternals vatSysInternals,
         IClock clock,
+        IMessenger vatSysMessenger,
+        IGuiInvoker guiInvoker,
         IErrorReporter errorReporter)
     {
         _vatSysMenu = vatSysMenu;
         _vatSysInternals = vatSysInternals;
         _clock = clock;
+        _guiInvoker = guiInvoker;
         _errorReporter = errorReporter;
+
+        vatSysMessenger.Register<TopMenuViewModel, ClockUpdatedMessage>(
+            this,
+            (viewModel, _) => viewModel.OnGui(viewModel.RefreshTime));
+        vatSysMessenger.Register<TopMenuViewModel, DisplaySettingsChangedMessage>(
+            this,
+            (viewModel, _) => viewModel.OnGui(viewModel.RefreshDisplaySettings));
+
+        // The second ASD changes when an Air window opens, closes, or is activated
+        vatSysMessenger.Register<TopMenuViewModel, WindowChangedMessage>(
+            this,
+            (viewModel, _) => viewModel.OnGui(viewModel.RefreshSecondWindow));
+        vatSysMessenger.Register<TopMenuViewModel, WindowClosedMessage>(
+            this,
+            (viewModel, _) => viewModel.OnGui(viewModel.RefreshSecondWindow));
+
+        Network.Connected += (_, _) => OnGui(RefreshConnection);
+        Network.Disconnected += (_, _) => OnGui(RefreshConnection);
+        MMI.SectorsControlledChanged += (_, _) => OnGui(RefreshSectors);
+
+        // The short route probe uses the settings of the selected aircraft
+        MMI.SelectedTrackChanged += (_, _) => OnGui(RefreshFunctionalStates);
+        MMI.QuickLookAllChanged += (_, _) => OnGui(RefreshFunctionalStates);
+
+        // vatSys shows these states in its menu bar
+        vatSysMenu.GetItem(PositionDisplayItem).TextChanged += (_, _) => OnGui(RefreshPositionName);
+        vatSysMenu.GetItem(AutomaticVisibilityCentersItem).CheckedChanged +=
+            (_, _) => OnGui(RefreshVisibilityCentersMode);
+
+        Refresh();
     }
 
     public string MainWindowRange
@@ -242,21 +285,46 @@ public partial class TopMenuViewModel : ObservableObject
         }
     }
 
-    /// <summary>
-    /// Reads the vatSys state again.
-    /// </summary>
-    public void Refresh()
+    // Reads all of the vatSys state
+    void Refresh()
+    {
+        RefreshConnection();
+        RefreshPositionName();
+        RefreshVisibilityCentersMode();
+        RefreshSectors();
+        RefreshDisplaySettings();
+        RefreshTime();
+    }
+
+    // vatSys sends the events on its own threads
+    void OnGui(Action action) => _guiInvoker.InvokeOnGUI(_ => action());
+
+    void RefreshConnection()
     {
         Connection = Network.IsConnected ? Network.Callsign : DisconnectedText;
-        PositionName = _vatSysMenu.GetItem(PositionDisplayItem).Text;
-        VisibilityCentersMode = _vatSysMenu.GetItem(AutomaticVisibilityCentersItem).Checked ? "AUTO" : "MAN";
-        Sectors = FormatSectors(MMI.SectorsControlled);
+    }
 
+    void RefreshPositionName()
+    {
+        PositionName = _vatSysMenu.GetItem(PositionDisplayItem).Text;
+    }
+
+    void RefreshVisibilityCentersMode()
+    {
+        VisibilityCentersMode = _vatSysMenu.GetItem(AutomaticVisibilityCentersItem).Checked ? "AUTO" : "MAN";
+    }
+
+    void RefreshSectors()
+    {
+        Sectors = FormatSectors(MMI.SectorsControlled);
+    }
+
+    void RefreshDisplaySettings()
+    {
         RefreshMainWindow();
         RefreshSecondWindow();
         RefreshDisplayLevels();
         RefreshSsrCodeFilters();
-        RefreshTime();
         RefreshFunctionalStates();
     }
 

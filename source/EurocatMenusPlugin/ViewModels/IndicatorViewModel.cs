@@ -8,8 +8,4 @@ namespace EurocatMenusPlugin.ViewModels;
 public partial class IndicatorViewModel(string defaultText) : ObservableObject, IBottomMenuItem
 {
     [ObservableProperty] string text = defaultText;
-
-    public void Refresh()
-    {
-    }
 }

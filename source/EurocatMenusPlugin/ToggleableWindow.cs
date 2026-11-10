@@ -1,5 +1,5 @@
 using System.Windows.Forms;
-using vatSysToolbox;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace EurocatMenusPlugin;
 
@@ -8,15 +8,30 @@ namespace EurocatMenusPlugin;
 /// Used to hook into opened and closed events.
 /// </summary>
 /// <remarks>
-/// vatSys does not send events when its windows open. Thus, call <see cref="Refresh"/> at an interval. Use this class
-/// on the UI thread.
+/// The window events come from <see cref="VatSysPatches"/>. Use this class on the UI thread. The messenger keeps only a
+/// weak reference to this class.
 /// </remarks>
-/// <param name="isWindow">Gives <c>true</c> for the window.</param>
-/// <param name="open">Opens the window.</param>
-public class ToggleableWindow(Func<Form, bool> isWindow, Action open, IErrorReporter errorReporter)
+public class ToggleableWindow
 {
-    // The open windows that this class listens to, so that IsOpen changes as soon as the window closes
-    readonly HashSet<Form> _watchedWindows = [];
+    readonly Func<Form, bool> _isWindow;
+    readonly Action _open;
+
+    /// <param name="isWindow">Gives <c>true</c> for the window.</param>
+    /// <param name="open">Opens the window.</param>
+    /// <param name="vatSysMessenger">Sends the vatSys events.</param>
+    public ToggleableWindow(Func<Form, bool> isWindow, Action open, IMessenger vatSysMessenger)
+    {
+        _isWindow = isWindow;
+        _open = open;
+
+        // vatSys hides some windows, and does not close them
+        vatSysMessenger.Register<ToggleableWindow, WindowChangedMessage>(
+            this,
+            (window, _) => window.SetIsOpen(window.FindWindow(closingWindow: null) is not null));
+        vatSysMessenger.Register<ToggleableWindow, WindowClosedMessage>(
+            this,
+            (window, message) => window.SetIsOpen(window.FindWindow(message.Window) is not null));
+    }
 
     public bool IsOpen { get; private set; }
 
@@ -30,19 +45,15 @@ public class ToggleableWindow(Func<Form, bool> isWindow, Action open, IErrorRepo
         if (FindWindow(closingWindow: null) is { } window)
         {
             window.Close();
-            Refresh();
             return;
         }
 
-        open();
-        Refresh();
+        _open();
 
         // Some plugins open their window later (for example, the CPDLC plugin uses a work queue). Thus, show the window
-        // as open now. If the window does not open, the next refresh shows it as closed.
+        // as open now. If the window does not open, the next window event shows it as closed.
         SetIsOpen(true);
     }
-
-    public void Refresh() => SetIsOpen(FindWindow(closingWindow: null) is not null);
 
     void SetIsOpen(bool isOpen)
     {
@@ -58,42 +69,8 @@ public class ToggleableWindow(Func<Form, bool> isWindow, Action open, IErrorRepo
     /// </param>
     Form? FindWindow(Form? closingWindow)
     {
-        var window = Application.OpenForms
+        return Application.OpenForms
             .Cast<Form>()
-            .FirstOrDefault(form => form != closingWindow && form.Visible && isWindow(form));
-
-        if (window is not null && _watchedWindows.Add(window))
-        {
-            window.VisibleChanged += Window_VisibleChanged;
-            window.FormClosed += Window_FormClosed;
-        }
-
-        return window;
-    }
-
-    // vatSys hides some windows, and does not close them
-    void Window_VisibleChanged(object sender, EventArgs e) => Run(Refresh);
-
-    void Window_FormClosed(object sender, FormClosedEventArgs e)
-    {
-        var window = (Form)sender;
-        window.VisibleChanged -= Window_VisibleChanged;
-        window.FormClosed -= Window_FormClosed;
-        _watchedWindows.Remove(window);
-
-        Run(() => SetIsOpen(FindWindow(window) is not null));
-    }
-
-    // An exception that is not caught on the UI thread stops vatSys.
-    void Run(Action action)
-    {
-        try
-        {
-            action();
-        }
-        catch (Exception ex)
-        {
-            errorReporter.ReportError(ex);
-        }
+            .FirstOrDefault(form => form != closingWindow && form.Visible && _isWindow(form));
     }
 }

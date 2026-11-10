@@ -18,7 +18,6 @@ public class BottomMenuViewModel
             ])
         ])
     {
-        Refresh();
     }
 
     /// <param name="items">The items of the bottom menu, from the configuration.</param>
@@ -28,13 +27,4 @@ public class BottomMenuViewModel
     }
 
     public IReadOnlyList<IBottomMenuItem> Items { get; }
-
-    /// <summary>
-    /// Reads the state of the items again.
-    /// </summary>
-    public void Refresh()
-    {
-        foreach (var item in Items)
-            item.Refresh();
-    }
 }

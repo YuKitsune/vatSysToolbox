@@ -1,4 +1,4 @@
-using vatSysToolbox;
+using CommunityToolkit.Mvvm.Messaging;
 using vatSysToolbox.Messaging;
 using vatSysToolbox.Windows;
 
@@ -8,8 +8,7 @@ namespace EurocatMenusPlugin;
 /// Opens and closes the vatSys Strip Setup window, and sends the events when it opens and closes.
 /// </summary>
 /// <remarks>
-/// vatSys does not send events when the windows open. Thus, call <see cref="Refresh"/> at an interval. Make this class
-/// before the messenger starts, because it subscribes to its message.
+/// Make this class before the messenger starts, because it subscribes to its message.
 /// </remarks>
 public class StripSetupWindow
 {
@@ -30,13 +29,13 @@ public class StripSetupWindow
         VatSysMenu vatSysMenu,
         MenuEvents events,
         IPluginMessenger messenger,
-        IGuiInvoker guiInvoker,
-        IErrorReporter errorReporter)
+        IMessenger vatSysMessenger,
+        IGuiInvoker guiInvoker)
     {
         _window = new ToggleableWindow(
             window => window.GetType().Name == WindowTypeName,
             () => vatSysMenu.Click(StripSetupItem),
-            errorReporter);
+            vatSysMessenger);
         _window.IsOpenChanged += (_, _) => events.Raise(_window.IsOpen ? OpenedEvent : ClosedEvent);
 
         // The messenger receives the messages on a background thread
@@ -45,10 +44,5 @@ public class StripSetupWindow
             guiInvoker.InvokeOnGUI(_ => _window.Toggle());
             return Task.CompletedTask;
         });
-    }
-
-    public void Refresh()
-    {
-        _window.Refresh();
     }
 }
