@@ -45,5 +45,5 @@ jobs:
           global-json-file: global.json
       - name: 'Restore: dotnet tools'
         run: dotnet tool restore
-      - name: 'Run: Compile'
-        run: dotnet fallout Compile
+      - name: 'Run: Compile, RepackPlugin'
+        run: dotnet fallout Compile RepackPlugin

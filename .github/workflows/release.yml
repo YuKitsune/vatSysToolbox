@@ -23,6 +23,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   windows-latest:
@@ -45,8 +46,8 @@ jobs:
           global-json-file: global.json
       - name: 'Restore: dotnet tools'
         run: dotnet tool restore
-      - name: 'Run: Release'
-        run: dotnet fallout Release
+      - name: 'Run: Publish, Release'
+        run: dotnet fallout Publish Release
         env:
           GitHubToken: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

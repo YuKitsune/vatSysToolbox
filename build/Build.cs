@@ -9,8 +9,8 @@ using Fallout.Common.CI.GitHubActions;
 using Fallout.Common.Git;
 using Fallout.Common.IO;
 using Fallout.Common.Tools.DotNet;
+using Fallout.Common.Tools.Git;
 using Fallout.Common.Tools.GitHub;
-using Fallout.Common.Tools.GitVersion;
 using Fallout.Common.Tools.ILRepack;
 using Octokit;
 using Serilog;
@@ -21,7 +21,7 @@ using Serilog;
     GitHubActionsImage.WindowsLatest,
     OnPushBranches = ["main"],
     OnPullRequestBranches = ["main"],
-    InvokedTargets = [nameof(Compile)],
+    InvokedTargets = [nameof(Compile), nameof(RepackPlugin)],
     FetchDepth = 0)]
 [GitHubActions(
     "release",
@@ -48,9 +48,6 @@ class Build : FalloutBuild
 
     [GitRepository]
     readonly GitRepository GitRepository;
-
-    [GitVersion]
-    readonly GitVersion GitVersion;
 
     AbsolutePath ProjectPath => RootDirectory / "source" / "vatSysToolbox" / "vatSysToolbox.csproj";
     AbsolutePath BuildOutputDirectory => TemporaryDirectory / "build";
@@ -136,8 +133,8 @@ class Build : FalloutBuild
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(BuildOutputDirectory)
                 .SetVersion(version)
-                .SetAssemblyVersion(GitVersion.MajorMinorPatch)
-                .SetFileVersion(GitVersion.MajorMinorPatch)
+                .SetAssemblyVersion(GetMajorMinorPatch())
+                .SetFileVersion(GetMajorMinorPatch())
                 .SetInformationalVersion(version)
                 .SetProperty("VatSysPath", VatSysExePath.Parent.Parent));
         });
@@ -157,8 +154,8 @@ class Build : FalloutBuild
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(PackageOutputDirectory)
                 .SetVersion(version)
-                .SetAssemblyVersion(GitVersion.MajorMinorPatch)
-                .SetFileVersion(GitVersion.MajorMinorPatch)
+                .SetAssemblyVersion(GetMajorMinorPatch())
+                .SetFileVersion(GetMajorMinorPatch())
                 .SetInformationalVersion(version)
                 .SetProperty("VatSysPath", VatSysExePath.Parent.Parent));
         });
@@ -184,8 +181,8 @@ class Build : FalloutBuild
                     .SetConfiguration(Configuration)
                     .SetOutputDirectory(outputDirectory)
                     .SetVersion(version)
-                    .SetAssemblyVersion(GitVersion.MajorMinorPatch)
-                    .SetFileVersion(GitVersion.MajorMinorPatch)
+                    .SetAssemblyVersion(GetMajorMinorPatch())
+                    .SetFileVersion(GetMajorMinorPatch())
                     .SetInformationalVersion(version)
                     .SetProperty("VatSysPath", VatSysExePath.Parent.Parent));
             }
@@ -417,16 +414,16 @@ class Build : FalloutBuild
         return Path.Combine(documentsPath, "vatSys Files", "Profiles", profileName);
     }
 
+    // The version is the tag on the current commit (for example, v1.2.3 gives 1.2.3). A commit with no tag is a local
+    // build.
     string GetSemanticVersion()
     {
-        // For main/master branch, or if we're on a detached head (building from a tag)
-        // use major.minor.patch (e.g., "1.2.3")
-        if (string.IsNullOrEmpty(GitVersion.BranchName) || GitVersion.BranchName is "main" or "master")
-        {
-            return GitVersion.MajorMinorPatch;
-        }
+        var exactTag = GitTasks.Git("tag --points-at HEAD")
+            .Select(o => o.Text.Trim())
+            .FirstOrDefault(t => t.StartsWith("v"));
 
-        // For other branches (develop, hotfix, etc.): use SemVer format
-        return GitVersion.SemVer;
+        return exactTag != null ? exactTag.TrimStart('v') : "0.0.0-local";
     }
+
+    string GetMajorMinorPatch() => GetSemanticVersion().Split('-')[0];
 }
