@@ -57,6 +57,7 @@
 #   The Hold plugin will send these events. Until then, the Hold shim in this plugin sends them:
 #     dev.eoinmotherway.hold.setup-window-opened, dev.eoinmotherway.hold.setup-window-closed
 #   The CPDLC plugin will send these events. Until then, the CPDLC shim in this plugin sends them:
+#     dev.eoinmotherway.cpdlc.setup-window-opened, dev.eoinmotherway.cpdlc.setup-window-closed
 #     dev.eoinmotherway.cpdlc.ads-contract-window-opened, dev.eoinmotherway.cpdlc.ads-contract-window-closed
 #     dev.eoinmotherway.cpdlc.history-window-opened, dev.eoinmotherway.cpdlc.history-window-closed
 #
@@ -197,6 +198,13 @@ bottomMenu:
 
   # The CPDLC plugin will handle these messages and send these events. Until then, the CPDLC shim in this plugin does
   # it. Thus, the recipient is this plugin.
+  - type: toggle
+    text: CPDLC SET
+    recipient: Eurocat Menus
+    messageType: dev.eoinmotherway.cpdlc.toggle-setup-window
+    activeOn: dev.eoinmotherway.cpdlc.setup-window-opened
+    inactiveOn: dev.eoinmotherway.cpdlc.setup-window-closed
+
   - type: toggle
     text: ADS Contract
     recipient: Eurocat Menus
