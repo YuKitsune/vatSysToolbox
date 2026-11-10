@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Drawing;
 using System.Windows.Forms;
 using vatsys;
 
@@ -15,7 +14,6 @@ public class VatSysInternals(Form mainForm)
 {
     const string AsdControlName = "ASD";
     const string AirWindowTypeName = "ASDWindow";
-    const string QuickTagWindowTypeName = "vatsys.QuickTagWindow";
 
     // The Air windows that are open. The window that was activated last is at the end.
     readonly List<Form> _airWindows = [];
@@ -89,33 +87,6 @@ public class VatSysInternals(Form mainForm)
         airWindow.Activated -= AirWindow_Activated;
         airWindow.FormClosed -= AirWindow_FormClosed;
         _airWindows.Remove(airWindow);
-    }
-
-    /// <summary>
-    /// Opens the vatSys Quick Tag window for the selected track, the same as Tools, Quick Tag, Add. The window opens in
-    /// the middle of the screen of the main form, and not at the mouse position. Does nothing if the selected track is
-    /// not an uncoupled radar track.
-    /// </summary>
-    public void OpenQuickTagWindow()
-    {
-        // A quick tag is only for a radar track that is not coupled to a flight plan. vatSys uses the same rule to
-        // enable Tools, Quick Tag.
-        var selectedTrack = MMI.SelectedTrack;
-        if (selectedTrack?.SourceData is not RDP.RadarTrack || selectedTrack.GetFDR() is not null)
-            return;
-
-        using var window = (Form)Reflection.CreateInstance(
-            typeof(MMI).Assembly,
-            QuickTagWindowTypeName,
-            selectedTrack.GetRadarTrack());
-
-        var screen = Screen.FromControl(mainForm).WorkingArea;
-        window.StartPosition = FormStartPosition.Manual;
-        window.Location = new Point(
-            screen.Left + (screen.Width - window.Width) / 2,
-            screen.Top + (screen.Height - window.Height) / 2);
-
-        window.ShowDialog();
     }
 
     /// <summary>

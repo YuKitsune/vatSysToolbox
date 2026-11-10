@@ -1,5 +1,7 @@
 using System.ComponentModel.Composition;
 using System.Windows.Forms;
+using EurocatMenusPlugin.Configuration;
+using EurocatMenusPlugin.Shims;
 using EurocatMenusPlugin.ViewModels;
 using EurocatMenusPlugin.Views;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +9,7 @@ using vatsys;
 using vatsys.Plugin;
 using vatSysToolbox;
 using vatSysToolbox.Extensions;
+using vatSysToolbox.Messaging;
 using vatSysToolbox.Windows;
 
 namespace EurocatMenusPlugin;
@@ -14,7 +17,11 @@ namespace EurocatMenusPlugin;
 [Export(typeof(IPlugin))]
 public class Plugin : IPlugin
 {
+#if DEBUG
+    public const string Name = "Eurocat Menus - Debug";
+#else
     public const string Name = "Eurocat Menus";
+#endif
 
     static readonly TimeSpan DoubleAltPressInterval = TimeSpan.FromSeconds(1);
     static readonly TimeSpan RefreshInterval = TimeSpan.FromSeconds(1);
@@ -50,6 +57,8 @@ public class Plugin : IPlugin
         var guiInvoker = _serviceProvider.GetRequiredService<IGuiInvoker>();
         var errorReporter = _serviceProvider.GetRequiredService<IErrorReporter>();
         var clock = _serviceProvider.GetRequiredService<IClock>();
+        var messenger = _serviceProvider.GetRequiredService<IPluginMessenger>();
+        var configuration = LoadConfiguration(errorReporter);
 
         // The message filter must be added on the UI thread, because it only receives the messages of that thread.
         guiInvoker.InvokeOnGUI(mainForm =>
@@ -59,48 +68,63 @@ public class Plugin : IPlugin
                 errorReporter);
             var vatSysInternals = new VatSysInternals(mainForm);
             var menuBar = new MenuBarLayout(mainForm);
-            var fullScreenMode = new FullScreenMode(mainForm);
-            var tagListWindow = new TagListWindow(_serviceProvider.GetRequiredService<WindowManager>(), errorReporter);
+
+            var menuEvents = new MenuEvents(messenger, guiInvoker, errorReporter);
+
+            // Make this before the menus are added, so that it sends the event when the vatSys menu bar is hidden
+            var builtInEvents = new BuiltInEvents(menuEvents, menuBar, guiInvoker);
 
             var topMenuViewModel = new TopMenuViewModel(vatSysMenu, vatSysInternals, clock, errorReporter);
-            var bottomMenuViewModel = new BottomMenuViewModel(
+
+            // The toggle buttons subscribe to their events. Thus, start the messenger after the items are made.
+            var bottomMenuItemFactory = new BottomMenuItemFactory(
                 vatSysMenu,
                 vatSysInternals,
-                menuBar,
-                fullScreenMode,
-                tagListWindow,
+                menuEvents,
+                messenger,
                 errorReporter);
+            var bottomMenuItems = bottomMenuItemFactory.CreateItems(configuration.BottomMenu);
+            var bottomMenuViewModel = new BottomMenuViewModel(bottomMenuItems);
+
+            // The shims do the work of other plugins until those plugins handle their own messages. They subscribe to
+            // their messages, thus make them before the messenger starts.
+            var cpdlcShim = new CpdlcShim(vatSysMenu, menuEvents, messenger, guiInvoker, errorReporter);
+            var holdShim = new HoldShim(vatSysMenu, menuEvents, messenger, guiInvoker, errorReporter);
+            _ = new MaestroShim(vatSysMenu, messenger, guiInvoker);
+            _ = new AtisShim(vatSysMenu, messenger, guiInvoker);
+
+            // The built-in message handlers, the Strip Setup window, and full screen also subscribe to their messages
+            _ = new BuiltInMessageHandlers(vatSysMenu, menuBar, messenger, guiInvoker);
+            var stripSetupWindow = new StripSetupWindow(vatSysMenu, menuEvents, messenger, guiInvoker, errorReporter);
+            _ = new FullScreenMode(mainForm, menuEvents, messenger, guiInvoker);
+
+            messenger.Start();
+            builtInEvents.SendCurrentState();
 
             menuBar.AddMenus(new TopMenu(topMenuViewModel), new BottomMenu(bottomMenuViewModel));
 
-            // vatSys does not send events for most of the states that the menus and the Tag List show. Thus, read the
-            // vatSys state again at an interval.
-            void Refresh()
+            // vatSys does not send events for most of the states that the menus show. Thus, read the vatSys state again
+            // at an interval.
+            void RefreshMenus()
             {
                 // An exception that is not caught on the UI thread stops vatSys.
                 try
                 {
                     topMenuViewModel.Refresh();
                     bottomMenuViewModel.Refresh();
+                    stripSetupWindow.Refresh();
+                    cpdlcShim.Refresh();
+                    holdShim.Refresh();
                 }
                 catch (Exception ex)
                 {
                     errorReporter.ReportError(ex, "Cannot update the menus");
                 }
-
-                try
-                {
-                    tagListWindow.Refresh();
-                }
-                catch (Exception ex)
-                {
-                    errorReporter.ReportError(ex, "Cannot update the Tag List");
-                }
             }
 
-            Refresh();
+            RefreshMenus();
             _refreshTimer = new System.Windows.Forms.Timer { Interval = (int)RefreshInterval.TotalMilliseconds };
-            _refreshTimer.Tick += (_, _) => Refresh();
+            _refreshTimer.Tick += (_, _) => RefreshMenus();
             _refreshTimer.Start();
 
             var doubleAltPressFilter = new DoubleAltPressFilter(clock, DoubleAltPressInterval, () =>
@@ -118,6 +142,20 @@ public class Plugin : IPlugin
 
             Application.AddMessageFilter(doubleAltPressFilter);
         });
+    }
+
+    // If the configuration cannot be read, the bottom menu has no items
+    static MenuConfiguration LoadConfiguration(IErrorReporter errorReporter)
+    {
+        try
+        {
+            return MenuConfigurationLoader.Load();
+        }
+        catch (Exception ex)
+        {
+            errorReporter.ReportError(ex, $"Cannot read {MenuConfigurationLoader.FileName}");
+            return new MenuConfiguration();
+        }
     }
 
     public void OnFDRUpdate(FDP2.FDR updated) { }

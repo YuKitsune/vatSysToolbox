@@ -27,26 +27,17 @@ static class Reflection
     }
 
     /// <summary>
-    /// Creates an instance of a type that is not public.
+    /// Adds a handler to a static event that is not public.
     /// </summary>
-    /// <param name="assembly">The assembly that contains the type.</param>
-    /// <param name="typeName">The full name of the type, for example <c>vatsys.QuickTagWindow</c>.</param>
-    /// <param name="arguments">The arguments for a public constructor.</param>
-    public static object CreateInstance(Assembly assembly, string typeName, params object?[] arguments)
+    public static void AddStaticEventHandler(Type type, string name, EventHandler handler)
     {
-        var type = assembly.GetType(typeName)
-            ?? throw new TypeLoadException($"Cannot find the type {typeName}");
+        var eventInfo = type.GetEvent(name, StaticFlags)
+            ?? throw new MissingMemberException(type.Name, name);
 
-        try
-        {
-            return Activator.CreateInstance(type, arguments);
-        }
-        catch (TargetInvocationException ex) when (ex.InnerException is not null)
-        {
-            // Show the exception from vatSys, and not the exception from reflection
-            ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
-            throw;
-        }
+        var addMethod = eventInfo.GetAddMethod(nonPublic: true)
+            ?? throw new MissingMemberException(type.Name, name);
+
+        addMethod.Invoke(null, [handler]);
     }
 
     public static object? InvokeMethod(object target, string name, params object?[] arguments)

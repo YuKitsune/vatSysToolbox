@@ -1,0 +1,258 @@
+# The buttons of the Eurocat Menus plugin.
+#
+# bottomMenu: the items of the bottom menu, from left to right. Each item has a type:
+#
+#   button     A button that sends a message to other plugins.
+#              Keys:
+#                text
+#                messageType  The type of the message.
+#                recipient    Optional. The name of the plugin that receives the message. If not set, all the other
+#                             plugins receive the message.
+#                payload      Optional. The data of the message. The button sends it as JSON.
+#
+#   toggle     A button that sends a message, and looks pressed after activeOn, until inactiveOn. In a popup menu, the
+#              item shows a check mark.
+#              Keys: the keys of button, and:
+#                activeOn, inactiveOn  Required.
+#
+#   menu       A button that opens a popup menu. In a popup menu, an item that opens a submenu. The popup menu is
+#              at least as wide as its button.
+#              Keys:
+#                text
+#                items  A built-in menu, or a list of items. A popup menu can contain button, toggle, menu, and
+#                       separator items.
+#                       Built-in menus:
+#                         builtin/map-menu             The vatSys maps.
+#                         builtin/info-menu            The vatSys Info menu.
+#                         builtin/atis-menu            Edit (the ATIS Editor plugin) and View.
+#                         builtin/atis-menu-no-editor  The items of View: Request, and the online ATIS stations.
+#                         builtin/messages-menu        The vatSys Messages menu. The button flashes while there are
+#                                                      new messages.
+#                       In a submenu, the messages menu does not flash.
+#                staysOpenOnClick  Optional. If true, the popup menu stays open after a click on an item, so that more
+#                                  than one item can be turned on or off (for example, maps). The default is false. A
+#                                  submenu uses the value of its top-level menu.
+#
+#   indicator  A small box that shows a value. The value changes when an event occurs.
+#              Keys:
+#                default   The value before the first event.
+#                event     Optional. The event that changes the value.
+#                template  Required with event. Makes the value from the payload of the event, in the Scriban syntax
+#                          (https://github.com/scriban/scriban). The properties of the payload are variables.
+#
+#   separator  A blank item between groups of items. Only in a popup menu.
+#
+#   stack      Items on top of each other, in the space of one button.
+#              Keys: items
+#
+# Events:
+#   An event is a built-in event, or a message from another plugin. The name of the event is the type of the message.
+#   Built-in events:
+#     dev.eoinmotherway.eurocatmenus.strip-setup-window-opened, dev.eoinmotherway.eurocatmenus.strip-setup-window-closed
+#     dev.eoinmotherway.eurocatmenus.strip-sort-mode-changed
+#       Payload: { "mode": "Alpha" }, { "mode": "Time" }, or { "mode": "Level" }. This plugin sends it when it starts,
+#       and when vatSys changes the mode.
+#     dev.eoinmotherway.eurocatmenus.default-menu-shown, dev.eoinmotherway.eurocatmenus.default-menu-hidden
+#     dev.eoinmotherway.eurocatmenus.full-screen-enabled, dev.eoinmotherway.eurocatmenus.full-screen-disabled
+#   The Hold plugin will send these events. Until then, the Hold shim in this plugin sends them:
+#     dev.eoinmotherway.hold.setup-window-opened, dev.eoinmotherway.hold.setup-window-closed
+#   The CPDLC plugin will send these events. Until then, the CPDLC shim in this plugin sends them:
+#     dev.eoinmotherway.cpdlc.ads-contract-window-opened, dev.eoinmotherway.cpdlc.ads-contract-window-closed
+#     dev.eoinmotherway.cpdlc.history-window-opened, dev.eoinmotherway.cpdlc.history-window-closed
+#
+# Built-in messages:
+#   This plugin (recipient: Eurocat Menus) handles these messages. Other plugins can also send them. The payload is not
+#   used.
+#     dev.eoinmotherway.eurocatmenus.open-display-settings
+#     dev.eoinmotherway.eurocatmenus.open-audio-settings
+#     dev.eoinmotherway.eurocatmenus.open-keyboard-settings
+#     dev.eoinmotherway.eurocatmenus.open-restricted-area-window
+#     dev.eoinmotherway.eurocatmenus.toggle-default-menu
+#     dev.eoinmotherway.eurocatmenus.open-air-window
+#     dev.eoinmotherway.eurocatmenus.open-ground-window
+#     dev.eoinmotherway.eurocatmenus.open-flight-plan-window
+#     dev.eoinmotherway.eurocatmenus.toggle-strip-setup-window
+#     dev.eoinmotherway.eurocatmenus.toggle-full-screen
+#     dev.eoinmotherway.eurocatmenus.toggle-lateral-conflict-tool
+#     dev.eoinmotherway.eurocatmenus.open-selcal-window
+
+bottomMenu:
+  # The items send messages to this plugin, so that other plugins can do the same actions
+  - type: menu
+    text: Set Up
+    items:
+      - type: button
+        text: Display
+        recipient: Eurocat Menus
+        messageType: dev.eoinmotherway.eurocatmenus.open-display-settings
+      - type: button
+        text: Audio
+        recipient: Eurocat Menus
+        messageType: dev.eoinmotherway.eurocatmenus.open-audio-settings
+      - type: button
+        text: Keyboard
+        recipient: Eurocat Menus
+        messageType: dev.eoinmotherway.eurocatmenus.open-keyboard-settings
+      - type: button
+        text: Restricted Areas
+        recipient: Eurocat Menus
+        messageType: dev.eoinmotherway.eurocatmenus.open-restricted-area-window
+      - type: separator
+      - type: toggle
+        text: Full Screen
+        recipient: Eurocat Menus
+        messageType: dev.eoinmotherway.eurocatmenus.toggle-full-screen
+        activeOn: dev.eoinmotherway.eurocatmenus.full-screen-enabled
+        inactiveOn: dev.eoinmotherway.eurocatmenus.full-screen-disabled
+      - type: toggle
+        text: vatSys Menu
+        recipient: Eurocat Menus
+        messageType: dev.eoinmotherway.eurocatmenus.toggle-default-menu
+        activeOn: dev.eoinmotherway.eurocatmenus.default-menu-shown
+        inactiveOn: dev.eoinmotherway.eurocatmenus.default-menu-hidden
+
+  - type: menu
+    text: Map
+    items: builtin/map-menu
+    # vatSys keeps the Maps menu open after a click
+    staysOpenOnClick: true
+
+  # IRL, this Info opens a window that we cannot simulate. It opens the vatSys Info menu.
+  - type: menu
+    text: Info
+    items: builtin/info-menu
+
+  - type: stack
+    items:
+      # IRL, this opens the second ASD. vatSys can show more than one, so this opens another Air window.
+      - type: button
+        text: Air
+        recipient: Eurocat Menus
+        messageType: dev.eoinmotherway.eurocatmenus.open-air-window
+      # IRL, this opens the Sup ASD, which we do not simulate. It opens a Ground window.
+      - type: button
+        text: Ground
+        recipient: Eurocat Menus
+        messageType: dev.eoinmotherway.eurocatmenus.open-ground-window
+
+  - type: button
+    text: FPL
+    recipient: Eurocat Menus
+    messageType: dev.eoinmotherway.eurocatmenus.open-flight-plan-window
+
+  # The Hold plugin will handle this message and send these events. Until then, the Hold shim in this plugin does it.
+  # Thus, the recipient is this plugin.
+  - type: toggle
+    text: HLD SET
+    recipient: Eurocat Menus
+    messageType: dev.eoinmotherway.hold.toggle-setup-window
+    activeOn: dev.eoinmotherway.hold.setup-window-opened
+    inactiveOn: dev.eoinmotherway.hold.setup-window-closed
+
+  - type: stack
+    items:
+      - type: toggle
+        text: SSTP
+        recipient: Eurocat Menus
+        messageType: dev.eoinmotherway.eurocatmenus.toggle-strip-setup-window
+        activeOn: dev.eoinmotherway.eurocatmenus.strip-setup-window-opened
+        inactiveOn: dev.eoinmotherway.eurocatmenus.strip-setup-window-closed
+      # Shows the first letter of the mode
+      - type: indicator
+        default: A
+        event: dev.eoinmotherway.eurocatmenus.strip-sort-mode-changed
+        template: "{{ mode | string.slice 0 1 }}"
+
+#  - type: button
+#    text: Lost
+
+  # The Maestro plugin will handle the open-tfms-window message. Until then, the Maestro shim in this plugin handles it.
+  # Thus, the recipient is this plugin.
+  - type: menu
+    text: TFMS
+    items:
+      - type: button
+        text: YSSY
+        recipient: Eurocat Menus
+        messageType: dev.eoinmotherway.maestro.open-tfms-window
+        payload: { icao: YSSY }
+
+      - type: button
+        text: YMML
+        recipient: Eurocat Menus
+        messageType: dev.eoinmotherway.maestro.open-tfms-window
+        payload: { icao: YMML }
+
+      - type: button
+        text: YBBN
+        recipient: Eurocat Menus
+        messageType: dev.eoinmotherway.maestro.open-tfms-window
+        payload: { icao: YBBN }
+
+      - type: button
+        text: YPPH
+        recipient: Eurocat Menus
+        messageType: dev.eoinmotherway.maestro.open-tfms-window
+        payload: { icao: YPPH }
+
+  # The CPDLC plugin will handle these messages and send these events. Until then, the CPDLC shim in this plugin does
+  # it. Thus, the recipient is this plugin.
+  - type: toggle
+    text: ADS Contract
+    recipient: Eurocat Menus
+    messageType: dev.eoinmotherway.cpdlc.toggle-ads-contract-window
+    activeOn: dev.eoinmotherway.cpdlc.ads-contract-window-opened
+    inactiveOn: dev.eoinmotherway.cpdlc.ads-contract-window-closed
+
+  - type: toggle
+    text: History CPDLC
+    recipient: Eurocat Menus
+    messageType: dev.eoinmotherway.cpdlc.toggle-history-window
+    activeOn: dev.eoinmotherway.cpdlc.history-window-opened
+    inactiveOn: dev.eoinmotherway.cpdlc.history-window-closed
+
+  # These buttons need the Tag List plugin
+  - type: toggle
+    text: Tag List
+    recipient: Tag List
+    messageType: dev.eoinmotherway.tag-list.toggle
+    activeOn: dev.eoinmotherway.tag-list.opened
+    inactiveOn: dev.eoinmotherway.tag-list.closed
+
+  - type: button
+    text: Del Tag
+    recipient: Tag List
+    messageType: dev.eoinmotherway.tag-list.remove-quick-tag
+
+  - type: button
+    text: Rad Tag
+    recipient: Tag List
+    messageType: dev.eoinmotherway.tag-list.add-quick-tag
+
+  - type: button
+    text: LATC
+    recipient: Eurocat Menus
+    messageType: dev.eoinmotherway.eurocatmenus.toggle-lateral-conflict-tool
+
+  # VATSIM-isms
+  - type: button
+    text: SELCAL
+    recipient: Eurocat Menus
+    messageType: dev.eoinmotherway.eurocatmenus.open-selcal-window
+
+  - type: menu
+    text: ATIS
+    items:
+      # The ATIS plugin will handle this message. Until then, the ATIS shim in this plugin handles it. Thus, the
+      # recipient is this plugin.
+      - type: button
+        text: Editor
+        recipient: Eurocat Menus
+        messageType: com.badvectors.atisplugin.open-atis-editor
+      - type: menu
+        text: View
+        items: builtin/atis-menu-no-editor # A separate builtin/atis-menu exists that includes the default ATIS editor.
+
+  - type: menu
+    text: MSG
+    items: builtin/messages-menu

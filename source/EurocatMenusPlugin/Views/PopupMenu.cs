@@ -10,6 +10,7 @@ namespace EurocatMenusPlugin.Views;
 /// </summary>
 /// <remarks>
 /// <list type="bullet">
+/// <item>The menu is at least as wide as the button that opens it. It can be wider.</item>
 /// <item>The button that opens the menu is a toggle button. It is on while the menu is open, thus it looks pressed.</item>
 /// <item>
 /// An item with a submenu shows a chevron. A click on the item opens its submenu, and the item looks pressed while the
@@ -33,13 +34,11 @@ static class PopupMenu
     /// <c>true</c> to keep the menu open after a click, so that more than one item can be turned on or off
     /// (for example, maps).
     /// </param>
-    /// <param name="matchTargetWidth"><c>true</c> to make the menu the same width as the button.</param>
     public static void Open(
         ToggleButton target,
         IEnumerable<PopupMenuItem> items,
         PlacementMode placement,
-        bool staysOpenOnClick = false,
-        bool matchTargetWidth = false)
+        bool staysOpenOnClick = false)
     {
         var menu = CreatePopup(target, placement);
         menu.StaysOpen = false;
@@ -50,9 +49,7 @@ static class PopupMenu
 
         var context = new MenuContext(menu, target, placement, staysOpenOnClick);
         var panel = CreatePanel(context, menu, items);
-        if (matchTargetWidth)
-            panel.Width = target.ActualWidth;
-
+        panel.MinWidth = target.ActualWidth;
         menu.Child = panel;
 
         BindTarget(target, menu);

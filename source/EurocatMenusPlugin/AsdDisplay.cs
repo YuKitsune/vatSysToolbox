@@ -6,7 +6,7 @@ namespace EurocatMenusPlugin;
 /// An air situation display (ASD) in vatSys.
 /// </summary>
 /// <remarks>
-/// The vatSys ASD control is internal. Thus, this class uses reflection to get to its public members.
+/// The vatSys ASD control is internal. This class uses reflection to get to its public members.
 /// </remarks>
 public class AsdDisplay(Control asd)
 {

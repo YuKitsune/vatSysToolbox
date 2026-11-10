@@ -40,6 +40,8 @@ public class MenuBarLayout
     /// </summary>
     public bool IsVatSysMenuVisible { get; private set; } = true;
 
+    public event EventHandler? IsVatSysMenuVisibleChanged;
+
     /// <summary>
     /// Adds the menus, and hides the vatSys menu bar.
     /// </summary>
@@ -71,6 +73,7 @@ public class MenuBarLayout
 
         _vatSysMenu.Visible = false;
         IsVatSysMenuVisible = false;
+        IsVatSysMenuVisibleChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void ToggleVatSysMenu()
@@ -93,6 +96,7 @@ public class MenuBarLayout
         _asd.SetBounds(_asd.Left, _asd.Top + offset, _asd.Width, _asd.Height - offset);
 
         IsVatSysMenuVisible = true;
+        IsVatSysMenuVisibleChanged?.Invoke(this, EventArgs.Empty);
     }
 
     void HideVatSysMenu(ElementHost topMenuHost)
@@ -104,6 +108,7 @@ public class MenuBarLayout
         _asd.SetBounds(_asd.Left, _asd.Top - offset, _asd.Width, _asd.Height + offset);
 
         IsVatSysMenuVisible = false;
+        IsVatSysMenuVisibleChanged?.Invoke(this, EventArgs.Empty);
     }
 
     static int GetHeight(FrameworkElement view)

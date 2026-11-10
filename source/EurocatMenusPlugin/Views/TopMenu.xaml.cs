@@ -30,16 +30,16 @@ public partial class TopMenu : UserControl
 
     void VelocityVectorLengthButton_Click(object sender, RoutedEventArgs e)
     {
-        PopupMenu.Open((ToggleButton)sender, _viewModel.GetVelocityVectorLengthMenuItems(), PlacementMode.Bottom, matchTargetWidth: true);
+        PopupMenu.Open((ToggleButton)sender, _viewModel.GetVelocityVectorLengthMenuItems(), PlacementMode.Bottom);
     }
 
     void ShortRouteProbeLengthButton_Click(object sender, RoutedEventArgs e)
     {
-        PopupMenu.Open((ToggleButton)sender, _viewModel.GetShortRouteProbeLengthMenuItems(), PlacementMode.Bottom, matchTargetWidth: true);
+        PopupMenu.Open((ToggleButton)sender, _viewModel.GetShortRouteProbeLengthMenuItems(), PlacementMode.Bottom);
     }
 
     void HistoryDotCountButton_Click(object sender, RoutedEventArgs e)
     {
-        PopupMenu.Open((ToggleButton)sender, _viewModel.GetHistoryDotCountMenuItems(), PlacementMode.Bottom, matchTargetWidth: true);
+        PopupMenu.Open((ToggleButton)sender, _viewModel.GetHistoryDotCountMenuItems(), PlacementMode.Bottom);
     }
 }

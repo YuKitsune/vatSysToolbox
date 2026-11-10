@@ -47,39 +47,6 @@
                 <Setter Property="Width" Value="{StaticResource ItemWidth}" />
             </Style>
 
-            <!--
-                The MSG button. While there are new messages, it flashes the same as Messages in the vatSys menu bar:
-                the background changes between the warning colour and the window colour each 500 ms.
-            -->
-            <Style x:Key="MessagesButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding HasUnreadMessages}" Value="True">
-                        <DataTrigger.EnterActions>
-                            <BeginStoryboard x:Name="FlashStoryboard">
-                                <Storyboard RepeatBehavior="Forever">
-                                    <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Background" Duration="0:0:1">
-                                        <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{toolbox:VatSysColour WindowWarning}" />
-                                        <DiscreteObjectKeyFrame KeyTime="0:0:0.5" Value="{toolbox:VatSysColour WindowBackground}" />
-                                    </ObjectAnimationUsingKeyFrames>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </DataTrigger.EnterActions>
-                        <DataTrigger.ExitActions>
-                            <StopStoryboard BeginStoryboardName="FlashStoryboard" />
-                        </DataTrigger.ExitActions>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-
-            <!--
-                A stack of items with the full height of the menu.
-                The stack has no margin, because its items have a margin. Thus, the stack is wider than a square button
-                by two margins, and its items have the same width as a square button.
-            -->
-            <Style x:Key="StackStyle" TargetType="Grid">
-                <Setter Property="Width" Value="{StaticResource ItemWidth}" />
-            </Style>
-
             <!-- A border that is only as large as its content -->
             <Style x:Key="IndicatorStyle" TargetType="Border">
                 <Setter Property="Width" Value="24" />
@@ -93,68 +60,80 @@
             <Style x:Key="GenericTextStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">
                 <Setter Property="Foreground" Value="{toolbox:VatSysColour GenericText}" />
             </Style>
+
+            <!-- The templates of the items. The bottom menu shows each item with the template of its type. -->
+
+            <DataTemplate DataType="{x:Type viewModels:ButtonViewModel}">
+                <Button Content="{Binding Text}" Command="{Binding ClickCommand}" />
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type viewModels:ToggleButtonViewModel}">
+                <ToggleButton Content="{Binding Text}"
+                              Command="{Binding ClickCommand}"
+                              IsChecked="{Binding IsChecked, Mode=OneWay}"
+                              IsEnabled="{Binding IsEnabled}" />
+            </DataTemplate>
+
+            <!--
+                While the button flashes, the background changes between the warning colour and the window colour each
+                500 ms, the same as Messages in the vatSys menu bar.
+            -->
+            <DataTemplate DataType="{x:Type viewModels:PopupButtonViewModel}">
+                <ToggleButton x:Name="Button"
+                              Content="{Binding Text}"
+                              IsEnabled="{Binding IsEnabled}"
+                              Click="PopupButton_Click" />
+                <DataTemplate.Triggers>
+                    <DataTrigger Binding="{Binding IsFlashing}" Value="True">
+                        <DataTrigger.EnterActions>
+                            <BeginStoryboard x:Name="FlashStoryboard">
+                                <Storyboard RepeatBehavior="Forever">
+                                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="Button" Storyboard.TargetProperty="Background" Duration="0:0:1">
+                                        <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{toolbox:VatSysColour WindowWarning}" />
+                                        <DiscreteObjectKeyFrame KeyTime="0:0:0.5" Value="{toolbox:VatSysColour WindowBackground}" />
+                                    </ObjectAnimationUsingKeyFrames>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </DataTrigger.EnterActions>
+                        <DataTrigger.ExitActions>
+                            <StopStoryboard BeginStoryboardName="FlashStoryboard" />
+                        </DataTrigger.ExitActions>
+                    </DataTrigger>
+                </DataTemplate.Triggers>
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type viewModels:IndicatorViewModel}">
+                <Border Style="{StaticResource IndicatorStyle}">
+                    <TextBlock Style="{StaticResource GenericTextStyle}" HorizontalAlignment="Center" Text="{Binding Text}" />
+                </Border>
+            </DataTemplate>
+
+            <!--
+                The items of a stack share the full height of the menu.
+                The stack has no margin, because its items have a margin. Thus, the stack is wider than a square button
+                by two margins, and its items have the same width as a square button.
+            -->
+            <DataTemplate DataType="{x:Type viewModels:StackViewModel}">
+                <ItemsControl ItemsSource="{Binding Items}" Width="{StaticResource ItemWidth}">
+                    <ItemsControl.Resources>
+                        <!-- The buttons in a stack fill their space -->
+                        <Style TargetType="Button" BasedOn="{StaticResource StackedButtonStyle}" />
+                        <Style TargetType="ToggleButton" BasedOn="{StaticResource StackedToggleButtonStyle}" />
+                    </ItemsControl.Resources>
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="1" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </DataTemplate>
         </ResourceDictionary>
     </UserControl.Resources>
-    <StackPanel Orientation="Horizontal" Margin="{StaticResource ItemMargin}">
-        <ToggleButton Click="SetUpButton_Click">Set Up</ToggleButton>
-        <ToggleButton Click="MapButton_Click">Map</ToggleButton>
-        <!-- IRL, this opens a window we can't simulate. Just open the built-in Info menu for simplicity -->
-        <ToggleButton Click="InfoButton_Click">Info</ToggleButton>
-        <Grid Style="{StaticResource StackStyle}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <!-- IRL, this opens the second ASD window. vatSys supports multiple, so this just opens another Air window -->
-            <Button Grid.Row="0" Style="{StaticResource StackedButtonStyle}" Command="{Binding OpenAirWindowCommand}">Air</Button>
-            <!-- IRL, this opens the Sup ASD, which we don't simulate. Open a Ground window instead -->
-            <Button Grid.Row="1" Style="{StaticResource StackedButtonStyle}" Command="{Binding OpenGroundWindowCommand}">Ground</Button>
-        </Grid>
-        <Button Command="{Binding OpenFlightPlanCommand}">FPL</Button>
-        <ToggleButton Command="{Binding ToggleHoldSetupCommand}" IsChecked="{Binding IsHoldSetupOpen, Mode=OneWay}" IsEnabled="{Binding IsHoldSetupAvailable}">HLD SET</ToggleButton>
-        <Grid Style="{StaticResource StackStyle}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <ToggleButton Grid.Row="0" Style="{StaticResource StackedToggleButtonStyle}" Command="{Binding ToggleStripSetupCommand}" IsChecked="{Binding IsStripSetupOpen, Mode=OneWay}">SSTP</ToggleButton>
-            <Border Grid.Row="1" Style="{StaticResource IndicatorStyle}">
-                <TextBlock Style="{StaticResource GenericTextStyle}" HorizontalAlignment="Center" Text="{Binding StripSortMode}" />
-            </Border>
-        </Grid>
-        <Button IsEnabled="False">Lost</Button>
-        <ToggleButton Click="TfmsButton_Click" IsEnabled="{Binding IsTfmsAvailable}">TFMS</ToggleButton>
-        
-        <!-- Traffic management window not simulated -->
-        <!-- <Button IsEnabled="False">TFC MGT</Button> -->
-        
-        <!-- Coordination Queue not simulated -->
-        <!-- <Grid Style="{StaticResource StackStyle}"> -->
-        <!--     <Grid.RowDefinitions> -->
-        <!--         <RowDefinition Height="*" /> -->
-        <!--         <RowDefinition Height="*" /> -->
-        <!--     </Grid.RowDefinitions> -->
-        <!--     <Button Grid.Row="0" Style="{StaticResource StackedButtonStyle}" IsEnabled="False">CQ</Button> -->
-        <!--     <Border Grid.Row="1" Style="{StaticResource IndicatorStyle}"> -->
-        <!--         <TextBlock Style="{StaticResource GenericTextStyle}" HorizontalAlignment="Center">0</TextBlock> -->
-        <!--     </Border> -->
-        <!-- </Grid> -->
-        
-        <ToggleButton Command="{Binding ToggleAdsContractCommand}" IsChecked="{Binding IsAdsContractOpen, Mode=OneWay}" IsEnabled="{Binding IsAdsContractAvailable}">ADS Contract</ToggleButton>
-        <ToggleButton Command="{Binding ToggleCpdlcHistoryCommand}" IsChecked="{Binding IsCpdlcHistoryOpen, Mode=OneWay}" IsEnabled="{Binding IsCpdlcHistoryAvailable}">History CPDLC</ToggleButton>
-        
-        <!-- Waypoint discrepancy not simulated -->
-        <!-- <Button IsEnabled="False">WAYP</Button> -->
-        
-        <ToggleButton Command="{Binding ToggleTagListCommand}" IsChecked="{Binding IsTagListOn, Mode=OneWay}">Tag List</ToggleButton>
-        <Button Command="{Binding RemoveQuickTagCommand}">Del Tag</Button>
-        <Button Command="{Binding AddQuickTagCommand}">Rad Tag</Button>
-        <Button Command="{Binding ToggleLateralConflictToolCommand}">LATC</Button>
-        
-        <!-- VATSIM-isms -->
-        <ToggleButton Style="{StaticResource MessagesButtonStyle}" Click="MessagesButton_Click">MSG</ToggleButton>
-        <ToggleButton Click="AtisButton_Click">ATIS</ToggleButton>
-        <Button Command="{Binding OpenSelcalCommand}">SELCAL</Button>
-
-    </StackPanel>
+    <ItemsControl ItemsSource="{Binding Items}" Margin="{StaticResource ItemMargin}">
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal" />
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+    </ItemsControl>
 </UserControl>
