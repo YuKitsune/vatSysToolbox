@@ -105,7 +105,8 @@ public class ButtonItemConfiguration : BottomMenuItemConfiguration
     public string Text { get; set; } = string.Empty;
 
     /// <summary>
-    /// The name of the plugin that receives the message. If not set, all the other plugins receive the message.
+    /// The mailbox name of the plugin that receives the message (for example, <c>dev.eoinmotherway.tag-list</c>). If
+    /// not set, all the other plugins receive the message.
     /// </summary>
     public string? Recipient { get; set; }
 

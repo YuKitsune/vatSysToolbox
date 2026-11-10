@@ -24,6 +24,11 @@ public class Plugin : IPlugin
 {
     public const string Name = "Tag List";
 
+    /// <summary>
+    /// The name that other plugins use to send messages to this plugin.
+    /// </summary>
+    public const string MailboxName = "dev.eoinmotherway.tag-list";
+
     const string WindowKey = "TagList";
     const string WindowTitle = "Tag List";
 
@@ -44,7 +49,7 @@ public class Plugin : IPlugin
 
         var serviceProvider = new ServiceCollection()
             .AddLogging()
-            .AddVatSysToolbox(Name)
+            .AddVatSysToolbox(Name, MailboxName)
             .BuildServiceProvider();
 
         _guiInvoker = serviceProvider.GetRequiredService<IGuiInvoker>();

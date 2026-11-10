@@ -19,18 +19,19 @@ public static class ServiceCollectionExtensionMethods
     /// <summary>
     /// Registers all the toolbox services.
     /// </summary>
-    /// <param name="pluginName">
-    /// The name that shows with the errors in the vatSys error window. Other plugins also use this name to send
-    /// messages to the plugin.
+    /// <param name="pluginName">The name that shows with the errors in the vatSys error window.</param>
+    /// <param name="mailboxName">
+    /// The name that other plugins use to send messages to the plugin. Use a reverse DNS name (for example,
+    /// <c>dev.example.my-plugin</c>).
     /// </param>
-    public static IServiceCollection AddVatSysToolbox(this IServiceCollection services, string pluginName)
+    public static IServiceCollection AddVatSysToolbox(this IServiceCollection services, string pluginName, string mailboxName)
     {
         return services
             .AddClock()
             .AddErrorReporter(pluginName)
             .AddWindowManager()
             .AddWorkQueue()
-            .AddPluginMessenger(pluginName);
+            .AddPluginMessenger(mailboxName);
     }
 
     /// <summary>
@@ -83,12 +84,15 @@ public static class ServiceCollectionExtensionMethods
     /// Registers <see cref="IPluginMessenger"/> and <see cref="IMessageTransport"/>.
     /// You must also register <see cref="IErrorReporter"/>.
     /// </summary>
-    /// <param name="pluginName">The name that other plugins use to send messages to the plugin.</param>
-    public static IServiceCollection AddPluginMessenger(this IServiceCollection services, string pluginName)
+    /// <param name="mailboxName">
+    /// The name that other plugins use to send messages to the plugin. Use a reverse DNS name (for example,
+    /// <c>dev.example.my-plugin</c>).
+    /// </param>
+    public static IServiceCollection AddPluginMessenger(this IServiceCollection services, string mailboxName)
     {
         services.TryAddSingleton<IMessageTransport, InProcessTransport>();
         services.TryAddSingleton<IPluginMessenger>(serviceProvider => new PluginMessenger(
-            pluginName,
+            mailboxName,
             serviceProvider.GetRequiredService<IMessageTransport>(),
             serviceProvider.GetRequiredService<IErrorReporter>(),
             serviceProvider.GetRequiredService<ILogger<PluginMessenger>>()));

@@ -23,7 +23,7 @@ namespace vatSysToolbox.Messaging;
 /// </remarks>
 public class InProcessTransport : IMessageTransport
 {
-    // Value: ConcurrentDictionary<string, SharedMailbox>. The key is the plugin name.
+    // Value: ConcurrentDictionary<string, SharedMailbox>. The key is the mailbox name.
     const string MailboxesSlotName = "vatSysToolbox.Messaging.InProcess.v1.Mailboxes";
 
     // Value: ConcurrentDictionary<string, bool>. The keys are the names of the open mailboxes. The values are not used.
@@ -43,12 +43,12 @@ public class InProcessTransport : IMessageTransport
     readonly ConcurrentDictionary<string, SharedMailbox> _mailboxes = GetOrCreateSlot<ConcurrentDictionary<string, SharedMailbox>>(MailboxesSlotName);
     readonly ConcurrentDictionary<string, bool> _openMailboxes = GetOrCreateSlot<ConcurrentDictionary<string, bool>>(OpenMailboxesSlotName);
 
-    public IMailbox OpenMailbox(string pluginName)
+    public IMailbox OpenMailbox(string mailboxName)
     {
-        if (!_openMailboxes.TryAdd(pluginName, true))
-            throw new MessagingException($"The plugin name {pluginName} is already in use.");
+        if (!_openMailboxes.TryAdd(mailboxName, true))
+            throw new MessagingException($"The mailbox {mailboxName} is already open.");
 
-        return new Mailbox(pluginName, GetOrCreateMailbox(pluginName), () => _openMailboxes.TryRemove(pluginName, out _));
+        return new Mailbox(mailboxName, GetOrCreateMailbox(mailboxName), () => _openMailboxes.TryRemove(mailboxName, out _));
     }
 
     public Task Send(Envelope envelope, CancellationToken cancellationToken)
@@ -59,26 +59,26 @@ public class InProcessTransport : IMessageTransport
             return Task.CompletedTask;
         }
 
-        foreach (var pluginName in _openMailboxes.Keys)
+        foreach (var mailboxName in _openMailboxes.Keys)
         {
-            if (pluginName != envelope.Sender)
-                Enqueue(pluginName, envelope);
+            if (mailboxName != envelope.Sender)
+                Enqueue(mailboxName, envelope);
         }
 
         return Task.CompletedTask;
     }
 
-    void Enqueue(string pluginName, Envelope envelope)
+    void Enqueue(string mailboxName, Envelope envelope)
     {
-        var mailbox = GetOrCreateMailbox(pluginName);
+        var mailbox = GetOrCreateMailbox(mailboxName);
         mailbox.Item1.Enqueue(ToSharedEnvelope(envelope));
         mailbox.Item2.Release();
     }
 
-    SharedMailbox GetOrCreateMailbox(string pluginName)
+    SharedMailbox GetOrCreateMailbox(string mailboxName)
     {
         return _mailboxes.GetOrAdd(
-            pluginName,
+            mailboxName,
             _ => Tuple.Create(new ConcurrentQueue<SharedEnvelope>(), new SemaphoreSlim(0)));
     }
 
@@ -159,18 +159,18 @@ public class InProcessTransport : IMessageTransport
             $"The envelope value {key} is a {value.GetType()}. The expected type is {typeof(T)}.");
     }
 
-    class Mailbox(string pluginName, SharedMailbox sharedMailbox, Action close) : IMailbox
+    class Mailbox(string mailboxName, SharedMailbox sharedMailbox, Action close) : IMailbox
     {
         Action? _close = close;
 
-        public string PluginName => pluginName;
+        public string MailboxName => mailboxName;
 
         public async Task<Envelope> Receive(CancellationToken cancellationToken)
         {
             // The semaphore count is the same as the number of envelopes in the queue.
             await sharedMailbox.Item2.WaitAsync(cancellationToken).ConfigureAwait(false);
             if (!sharedMailbox.Item1.TryDequeue(out var sharedEnvelope))
-                throw new MessagingException($"The mailbox for {pluginName} is empty.");
+                throw new MessagingException($"The mailbox {mailboxName} is empty.");
 
             return ToEnvelope(sharedEnvelope);
         }

@@ -9,7 +9,7 @@ public interface IMessageTransport
     /// Opens the inbound queue of a plugin. Only one plugin can open a queue with a given name.
     /// </summary>
     /// <exception cref="MessagingException">The queue is already open.</exception>
-    IMailbox OpenMailbox(string pluginName);
+    IMailbox OpenMailbox(string mailboxName);
 
     /// <summary>
     /// Adds the envelope to the inbound queue of <see cref="Envelope.Recipient"/>. If the recipient did not open its
@@ -25,7 +25,7 @@ public interface IMessageTransport
 /// </summary>
 public interface IMailbox : IDisposable
 {
-    string PluginName { get; }
+    string MailboxName { get; }
 
     /// <summary>
     /// Waits for the next envelope, and removes it from the queue.

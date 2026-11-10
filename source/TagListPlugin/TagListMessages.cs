@@ -2,7 +2,7 @@ namespace TagListPlugin;
 
 /// <summary>
 /// The messages that other plugins (for example, the buttons of the Eurocat Menus plugin) use to control the Tag List.
-/// Send these messages to the plugin with the name <see cref="Plugin.Name"/>. The plugin ignores the payload.
+/// Send these messages to the mailbox <see cref="Plugin.MailboxName"/>. The plugin ignores the payload.
 /// </summary>
 public static class TagListMessages
 {

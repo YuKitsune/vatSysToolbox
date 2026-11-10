@@ -24,6 +24,11 @@ public class Plugin : IPlugin
     public const string Name = "Eurocat Menus";
 #endif
 
+    /// <summary>
+    /// The name that other plugins use to send messages to this plugin.
+    /// </summary>
+    public const string MailboxName = "dev.eoinmotherway.eurocatmenus";
+
     static readonly TimeSpan DoubleAltPressInterval = TimeSpan.FromSeconds(1);
 
     readonly IServiceProvider _serviceProvider;
@@ -36,7 +41,7 @@ public class Plugin : IPlugin
 
         _serviceProvider = new ServiceCollection()
             .AddLogging()
-            .AddVatSysToolbox(Name)
+            .AddVatSysToolbox(Name, MailboxName)
             .BuildServiceProvider();
 
         var errorReporter = _serviceProvider.GetRequiredService<IErrorReporter>();

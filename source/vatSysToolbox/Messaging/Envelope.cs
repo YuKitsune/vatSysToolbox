@@ -11,7 +11,8 @@ public enum EnvelopeKind
 /// The data that a <see cref="IMessageTransport"/> moves between plugins.
 /// </summary>
 /// <param name="Id">The unique identifier of the envelope.</param>
-/// <param name="Recipient">The name of the plugin that receives the envelope. If <c>null</c>, all plugins receive the envelope.</param>
+/// <param name="Sender">The mailbox name of the plugin that sends the envelope.</param>
+/// <param name="Recipient">The mailbox name of the plugin that receives the envelope. If <c>null</c>, all plugins receive the envelope.</param>
 /// <param name="CorrelationId">For a <see cref="EnvelopeKind.Reply"/>, the <paramref name="Id"/> of the request.</param>
 /// <param name="Error">For a <see cref="EnvelopeKind.Reply"/>, the error message if the recipient could not handle the request.</param>
 public sealed record Envelope(
