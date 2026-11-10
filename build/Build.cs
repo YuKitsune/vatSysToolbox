@@ -56,15 +56,9 @@ class Build : FalloutBuild
     AbsolutePath BuildOutputDirectory => TemporaryDirectory / "build";
     AbsolutePath PackageOutputDirectory => TemporaryDirectory / "package";
 
-    // Plugin paths
-    const string ReleasePluginName = "EurocatMenusPlugin";
-    const string DebugPluginName = "EurocatMenusPlugin - Debug";
-    const string PluginAssemblyFileName = "EurocatMenusPlugin.dll";
-    string PluginName => Configuration == Configuration.Debug ? DebugPluginName : ReleasePluginName;
-    AbsolutePath PluginProjectPath => RootDirectory / "source" / "EurocatMenusPlugin" / "EurocatMenusPlugin.csproj";
-    AbsolutePath PluginBuildOutputDirectory => TemporaryDirectory / "build-plugin";
-    AbsolutePath PluginPackageDirectory => TemporaryDirectory / "package-plugin";
-    AbsolutePath PluginZipPath => TemporaryDirectory / $"EurocatMenusPlugin.{GetSemanticVersion()}.zip";
+    // The plugins. Each name is the name of the project directory, the project, and the assembly.
+    static readonly string[] Plugins = ["EurocatMenusPlugin", "TagListPlugin"];
+    const string HarmonyAssemblyFileName = "0Harmony.dll";
 
     // vatSys paths
     [Parameter("Path to the vatSys installation")]
@@ -170,125 +164,114 @@ class Build : FalloutBuild
         });
 
     Target CompilePlugin => _ => _
-        .Description("Compiles the Eurocat Menus plugin")
+        .Description("Compiles the plugins")
         .DependsOn(DownloadVatSys)
         .Executes(() =>
         {
             var version = GetSemanticVersion();
-            Log.Information(
-                "Building plugin version {Version} with configuration {Configuration} to {OutputDirectory}",
-                version,
-                Configuration,
-                PluginBuildOutputDirectory);
+            foreach (var plugin in Plugins)
+            {
+                var outputDirectory = GetPluginBuildOutputDirectory(plugin);
+                Log.Information(
+                    "Building {Plugin} version {Version} with configuration {Configuration} to {OutputDirectory}",
+                    plugin,
+                    version,
+                    Configuration,
+                    outputDirectory);
 
-            DotNetTasks.DotNetBuild(s => s
-                .SetProjectFile(PluginProjectPath)
-                .SetConfiguration(Configuration)
-                .SetOutputDirectory(PluginBuildOutputDirectory)
-                .SetVersion(version)
-                .SetAssemblyVersion(GitVersion.MajorMinorPatch)
-                .SetFileVersion(GitVersion.MajorMinorPatch)
-                .SetInformationalVersion(version)
-                .SetProperty("VatSysPath", VatSysExePath.Parent.Parent));
+                DotNetTasks.DotNetBuild(s => s
+                    .SetProjectFile(RootDirectory / "source" / plugin / $"{plugin}.csproj")
+                    .SetConfiguration(Configuration)
+                    .SetOutputDirectory(outputDirectory)
+                    .SetVersion(version)
+                    .SetAssemblyVersion(GitVersion.MajorMinorPatch)
+                    .SetFileVersion(GitVersion.MajorMinorPatch)
+                    .SetInformationalVersion(version)
+                    .SetProperty("VatSysPath", VatSysExePath.Parent.Parent));
+            }
         });
 
     Target RepackPlugin => _ => _
-        .Description("Merges the plugin dependencies (including the toolbox) into the plugin assembly with ILRepack.")
+        .Description("Merges the dependencies (including the toolbox) into each plugin assembly with ILRepack.")
         .DependsOn(CompilePlugin)
         .Executes(() =>
         {
-            var mainAssembly = PluginBuildOutputDirectory / PluginAssemblyFileName;
-            if (!mainAssembly.FileExists())
-                throw new Exception($"Main assembly not found: {mainAssembly}");
-
-            var assembliesToMerge = PluginBuildOutputDirectory
-                .GlobFiles("*.dll")
-                .Where(a => a != mainAssembly)
-                .ToArray();
-
-            if (assembliesToMerge.Length == 0)
-            {
-                Log.Information("No assemblies found to repack, skipping");
-                return;
-            }
-
-            var settings = new ILRepackSettings()
-                .SetAssemblies([mainAssembly.ToString(), ..assembliesToMerge.Select(a => a.ToString())])
-                .SetInternalize(false)
-                .SetParallel(true)
-                .SetOutput(mainAssembly.ToString())
-                .SetLib(PluginBuildOutputDirectory.ToString());
-
-            Log.Information("Repacking {Count} assemblies into {MainAssembly}", assembliesToMerge.Length, mainAssembly);
-            foreach (var assembly in assembliesToMerge)
-                Log.Information("  - {Assembly}", assembly.Name);
-
-            ILRepackTasks.ILRepack(settings);
-
-            foreach (var assembly in assembliesToMerge)
-                assembly.DeleteFile();
+            foreach (var plugin in Plugins)
+                RepackPluginAssembly(plugin);
         });
 
     Target Uninstall => _ => _
-        .Description("Uninstalls the plugin from the specified profile.")
+        .Description("Uninstalls the plugins from the specified profile.")
         .Requires(() => ProfileName)
         .Executes(() =>
         {
             var pluginsDirectory = GetVatSysPluginsDirectory(ProfileName);
-            AbsolutePath[] pluginDirectories =
-            [
-                pluginsDirectory / DebugPluginName,
-                pluginsDirectory / ReleasePluginName
-            ];
-
-            foreach (var pluginDirectory in pluginDirectories)
+            foreach (var plugin in Plugins)
             {
-                pluginDirectory.DeleteDirectory();
-                Log.Information("Plugin uninstalled from {Directory}", pluginDirectory);
+                AbsolutePath[] pluginDirectories =
+                [
+                    pluginsDirectory / GetPluginDirectoryName(plugin, Configuration.Debug),
+                    pluginsDirectory / GetPluginDirectoryName(plugin, Configuration.Release)
+                ];
+
+                foreach (var pluginDirectory in pluginDirectories)
+                {
+                    pluginDirectory.DeleteDirectory();
+                    Log.Information("Plugin uninstalled from {Directory}", pluginDirectory);
+                }
             }
         });
 
     Target Install => _ => _
-        .Description("Installs the plugin to the specified profile.")
+        .Description("Installs the plugins to the specified profile.")
         .Requires(() => ProfileName)
         .DependsOn(RepackPlugin)
         .DependsOn(Uninstall)
         .Executes(() =>
         {
             var pluginsDirectory = GetVatSysPluginsDirectory(ProfileName);
-            Log.Information("Installing plugin to {TargetDirectory}", pluginsDirectory);
+            Log.Information("Installing plugins to {TargetDirectory}", pluginsDirectory);
 
             if (!pluginsDirectory.Exists())
                 pluginsDirectory.CreateDirectory();
 
-            var pluginDirectory = pluginsDirectory / PluginName;
-            pluginDirectory.CreateOrCleanDirectory();
-            foreach (var absolutePath in PluginBuildOutputDirectory.GetFiles())
+            foreach (var plugin in Plugins)
             {
-                absolutePath.CopyToDirectory(pluginDirectory, ExistsPolicy.MergeAndOverwrite);
-            }
+                var pluginDirectory = pluginsDirectory / GetPluginDirectoryName(plugin, Configuration);
+                pluginDirectory.CreateOrCleanDirectory();
+                foreach (var absolutePath in GetPluginBuildOutputDirectory(plugin).GetFiles())
+                {
+                    absolutePath.CopyToDirectory(pluginDirectory, ExistsPolicy.MergeAndOverwrite);
+                }
 
-            Log.Information("Plugin installed to {PluginDirectory}", pluginDirectory);
+                Log.Information("Plugin installed to {PluginDirectory}", pluginDirectory);
+            }
         });
 
     Target PackagePlugin => _ => _
-        .Description("Bundles the plugin into a zip archive.")
+        .Description("Bundles each plugin into its own zip archive.")
         .DependsOn(RepackPlugin)
         .Requires(() => Configuration == Configuration.Release)
         .Executes(() =>
         {
-            PluginPackageDirectory.CreateOrCleanDirectory();
-
-            foreach (var absolutePath in PluginBuildOutputDirectory.GetFiles().Where(f => f.Extension != ".pdb"))
+            foreach (var plugin in Plugins)
             {
-                absolutePath.CopyToDirectory(PluginPackageDirectory, ExistsPolicy.MergeAndOverwrite);
+                var packageDirectory = GetPluginPackageDirectory(plugin);
+                var zipPath = GetPluginZipPath(plugin);
+                packageDirectory.CreateOrCleanDirectory();
+
+                var files = GetPluginBuildOutputDirectory(plugin).GetFiles().Where(f => f.Extension != ".pdb");
+                foreach (var absolutePath in files)
+                {
+                    absolutePath.CopyToDirectory(packageDirectory, ExistsPolicy.MergeAndOverwrite);
+                }
+
+                if (zipPath.FileExists())
+                    zipPath.DeleteFile();
+
+                Log.Information("Packaging {OutputDirectory} to {ZipPath}", packageDirectory, zipPath);
+                packageDirectory.ZipTo(zipPath);
             }
-
-            if (PluginZipPath.FileExists())
-                PluginZipPath.DeleteFile();
-
-            Log.Information("Packaging {OutputDirectory} to {ZipPath}", PluginPackageDirectory, PluginZipPath);
-            PluginPackageDirectory.ZipTo(PluginZipPath);
         });
 
     Target Publish => _ => _
@@ -312,7 +295,7 @@ class Build : FalloutBuild
         });
 
     Target Release => _ => _
-        .Description("Creates a GitHub release with the NuGet package and the Eurocat Menus plugin attached.")
+        .Description("Creates a GitHub release with the NuGet package and the plugins attached.")
         .DependsOn(Pack, PackagePlugin)
         .Requires(() => GitHubToken)
         .Requires(() => GitRepository)
@@ -358,17 +341,70 @@ class Build : FalloutBuild
                 Log.Information("Package asset uploaded: {AssetUrl}", asset.BrowserDownloadUrl);
             }
 
-            using var pluginZipStream = File.OpenRead(PluginZipPath);
-            var pluginAssetUpload = new ReleaseAssetUpload
+            foreach (var plugin in Plugins)
             {
-                FileName = PluginZipPath.Name,
-                ContentType = "application/zip",
-                RawData = pluginZipStream
-            };
+                var zipPath = GetPluginZipPath(plugin);
+                using var pluginZipStream = File.OpenRead(zipPath);
+                var pluginAssetUpload = new ReleaseAssetUpload
+                {
+                    FileName = zipPath.Name,
+                    ContentType = "application/zip",
+                    RawData = pluginZipStream
+                };
 
-            var pluginAsset = await githubClient.Repository.Release.UploadAsset(release, pluginAssetUpload);
-            Log.Information("Plugin asset uploaded: {AssetUrl}", pluginAsset.BrowserDownloadUrl);
+                var pluginAsset = await githubClient.Repository.Release.UploadAsset(release, pluginAssetUpload);
+                Log.Information("Plugin asset uploaded: {AssetUrl}", pluginAsset.BrowserDownloadUrl);
+            }
         });
+
+    void RepackPluginAssembly(string plugin)
+    {
+        var outputDirectory = GetPluginBuildOutputDirectory(plugin);
+        var mainAssembly = outputDirectory / $"{plugin}.dll";
+        if (!mainAssembly.FileExists())
+            throw new Exception($"Main assembly not found: {mainAssembly}");
+
+        // Harmony stays a separate file. vatSys loads only one copy of it, and the plugins that use Harmony share it.
+        var assembliesToMerge = outputDirectory
+            .GlobFiles("*.dll")
+            .Where(a => a != mainAssembly && a.Name != HarmonyAssemblyFileName)
+            .ToArray();
+
+        if (assembliesToMerge.Length == 0)
+        {
+            Log.Information("No assemblies found to repack for {Plugin}, skipping", plugin);
+            return;
+        }
+
+        var settings = new ILRepackSettings()
+            .SetAssemblies([mainAssembly.ToString(), ..assembliesToMerge.Select(a => a.ToString())])
+            .SetInternalize(false)
+            .SetParallel(true)
+            .SetOutput(mainAssembly.ToString())
+            .SetLib(outputDirectory.ToString());
+
+        Log.Information("Repacking {Count} assemblies into {MainAssembly}", assembliesToMerge.Length, mainAssembly);
+        foreach (var assembly in assembliesToMerge)
+            Log.Information("  - {Assembly}", assembly.Name);
+
+        ILRepackTasks.ILRepack(settings);
+
+        foreach (var assembly in assembliesToMerge)
+            assembly.DeleteFile();
+    }
+
+    // Each plugin has its own directories, so that each plugin has its own binary and zip archive
+    AbsolutePath GetPluginBuildOutputDirectory(string plugin) => TemporaryDirectory / "build-plugin" / plugin;
+
+    AbsolutePath GetPluginPackageDirectory(string plugin) => TemporaryDirectory / "package-plugin" / plugin;
+
+    AbsolutePath GetPluginZipPath(string plugin) => TemporaryDirectory / $"{plugin}.{GetSemanticVersion()}.zip";
+
+    // The Debug and the Release plugins have different directories, so that both can be installed
+    static string GetPluginDirectoryName(string plugin, Configuration configuration)
+    {
+        return configuration == Configuration.Debug ? $"{plugin} - Debug" : plugin;
+    }
 
     static AbsolutePath GetVatSysPluginsDirectory(string profileName)
     {

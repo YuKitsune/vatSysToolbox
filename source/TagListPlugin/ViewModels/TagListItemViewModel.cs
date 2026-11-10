@@ -2,10 +2,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using vatsys;
 
-namespace EurocatMenusPlugin.ViewModels;
+namespace TagListPlugin.ViewModels;
 
 /// <summary>
-/// A strip in the Tag List for one quick tag.
+/// A strip in the Tag List for one quick tag. <see cref="TagListViewModel"/> gives it the vatSys events of its quick
+/// tag.
 /// </summary>
 public partial class TagListItemViewModel : ObservableObject
 {
@@ -15,7 +16,7 @@ public partial class TagListItemViewModel : ObservableObject
     [ObservableProperty] bool isEditingGlobalOps;
     [ObservableProperty] string globalOpsEditValue = string.Empty;
 
-    // A strip with fixed text, for the XAML designer and for the size of the Tag List
+    // A strip with fixed text, for the XAML designer
     public TagListItemViewModel(string aircraftId, string codeAndLevel, string globalOps)
     {
         DisplayAircraftId = aircraftId.PadRight(8);
@@ -26,19 +27,21 @@ public partial class TagListItemViewModel : ObservableObject
     public TagListItemViewModel(QuickTag quickTag)
     {
         QuickTag = quickTag;
-        Refresh();
+        DisplayAircraftId = quickTag.Callsign.PadRight(8);
+        SetGlobalOps(quickTag.LabelData);
+        SetAltitude(quickTag.CoupledTrack?.CorrectedAltitude ?? -1);
     }
 
     public QuickTag QuickTag { get; } = null!;
 
-    /// <summary>
-    /// Reads the quick tag again.
-    /// </summary>
-    public void Refresh()
+    public void SetGlobalOps(string globalOps)
     {
-        DisplayAircraftId = QuickTag.Callsign.PadRight(8);
-        DisplayCodeAndLevel = $" A{FormatCode(QuickTag.AssignedSSRCode)} {FormatLevel(QuickTag.CoupledTrack.CorrectedAltitude)} ";
-        GlobalOps = QuickTag.LabelData;
+        GlobalOps = globalOps;
+    }
+
+    public void SetAltitude(int altitude)
+    {
+        DisplayCodeAndLevel = $" A{FormatCode(QuickTag.AssignedSSRCode)} {FormatLevel(altitude)} ";
     }
 
     // vatSys keeps the SSR code as a number, and shows it in octal

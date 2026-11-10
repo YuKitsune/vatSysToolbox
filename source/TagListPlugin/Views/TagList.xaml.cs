@@ -1,9 +1,9 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using EurocatMenusPlugin.ViewModels;
+using TagListPlugin.ViewModels;
 
-namespace EurocatMenusPlugin.Views;
+namespace TagListPlugin.Views;
 
 public partial class TagList : UserControl
 {
@@ -14,34 +14,6 @@ public partial class TagList : UserControl
         InitializeComponent();
         DataContext = viewModel;
         _viewModel = viewModel;
-
-        // The text has the same length as the text of a real strip, so that the sample strip has the same size
-        SampleStrip.Content = new TagListItemViewModel(string.Empty, " A0000 000 ", string.Empty);
-    }
-
-    /// <summary>
-    /// Gets the size that shows all the strips, with no space on the right of the strips.
-    /// </summary>
-    public Size MeasureContent()
-    {
-        Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-        return DesiredSize;
-    }
-
-    /// <summary>
-    /// Gets the size that shows one strip. This size does not change when strips are added or removed.
-    /// </summary>
-    public Size MeasureOneStrip()
-    {
-        var contentSize = MeasureContent();
-
-        // The border and the scroll bar around the strips
-        var frameWidth = contentSize.Width - StripList.DesiredSize.Width;
-        var frameHeight = contentSize.Height - StripList.DesiredSize.Height;
-
-        return new Size(
-            frameWidth + SampleStrip.DesiredSize.Width,
-            frameHeight + SampleStrip.DesiredSize.Height);
     }
 
     void Acid_MouseDown(object sender, MouseButtonEventArgs e)

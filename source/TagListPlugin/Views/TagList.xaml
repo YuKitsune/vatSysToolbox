@@ -1,9 +1,9 @@
-<UserControl x:Class="EurocatMenusPlugin.Views.TagList"
+<UserControl x:Class="TagListPlugin.Views.TagList"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:viewModels="clr-namespace:EurocatMenusPlugin.ViewModels"
+             xmlns:viewModels="clr-namespace:TagListPlugin.ViewModels"
              xmlns:toolbox="clr-namespace:vatSysToolbox;assembly=vatSysToolbox"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=viewModels:TagListViewModel}"
@@ -99,27 +99,13 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Grid>
-        <ScrollViewer Style="{StaticResource CustomScrollViewerStyle}">
-            <ItemsControl x:Name="StripList" ItemsSource="{Binding Items}" ItemTemplate="{StaticResource StripTemplate}">
-                <ItemsControl.ItemContainerStyle>
-                    <Style>
-                        <Setter Property="FrameworkElement.Margin" Value="2" />
-                    </Style>
-                </ItemsControl.ItemContainerStyle>
-            </ItemsControl>
-        </ScrollViewer>
-
-        <!--
-            A strip that is not shown. The window uses its size to get its minimum size, also when the list is empty.
-            A canvas does not give a size to its parent, so the strip does not change the layout. The strip is hidden,
-            and not collapsed, so that it has a size.
-        -->
-        <Canvas>
-            <ContentPresenter x:Name="SampleStrip"
-                              ContentTemplate="{StaticResource StripTemplate}"
-                              Margin="2"
-                              Visibility="Hidden" />
-        </Canvas>
-    </Grid>
+    <ScrollViewer Style="{StaticResource CustomScrollViewerStyle}">
+        <ItemsControl ItemsSource="{Binding Items}" ItemTemplate="{StaticResource StripTemplate}">
+            <ItemsControl.ItemContainerStyle>
+                <Style>
+                    <Setter Property="FrameworkElement.Margin" Value="2" />
+                </Style>
+            </ItemsControl.ItemContainerStyle>
+        </ItemsControl>
+    </ScrollViewer>
 </UserControl>
