@@ -127,7 +127,7 @@ public class Plugin : IPlugin
         _guiInvoker.InvokeOnGUI(_ =>
         {
             // The window manager knows if the window is open
-            if (_windowManager.TryGetWindow(WindowKey, out _))
+            if (_windowManager.TryGetWindow(WindowKey, out var _))
                 _windowManager.CloseWindow(WindowKey);
             else
                 OpenTagList();
