@@ -88,6 +88,17 @@ windowManager.FocusOrCreateWindow(
 
 The view receives an `IWindowHandle`. Use it to close or focus the window, or to know when the window closes or moves.
 
+Use `PopupForm` to show a WPF view in a small popup at the mouse cursor. The popup has no border or title bar, and it closes when the user clicks outside it. Show it on the UI thread:
+
+```csharp
+guiInvoker.InvokeOnGUI(mainForm =>
+{
+    var view = new MyPopupView();
+    var form = new PopupForm(view);
+    MMI.EnsureWindowVisible(form);
+    form.Show(mainForm);
+});
+```
 ### Styles and controls
 
 Add the styles to the resources of your view:
