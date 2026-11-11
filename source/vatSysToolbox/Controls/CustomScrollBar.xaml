@@ -6,6 +6,7 @@
              xmlns:controls="clr-namespace:vatSysToolbox.Controls"
              xmlns:local="clr-namespace:vatSysToolbox"
              mc:Ignorable="d" 
+             d:DesignHeight="80"
              Loaded="UserControl_Loaded">
     
     <!-- Single beveled border containing all scrollbar elements -->
