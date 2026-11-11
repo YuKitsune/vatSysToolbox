@@ -16,24 +16,26 @@
         <Border Background="{local:VatSysColour WindowButtonSelected}" Padding="1">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="14"/>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="14"/>
                 </Grid.RowDefinitions>
 
                 <!--
-                    Scroll up button area. The buttons are square, the same as in vatSys. The chevrons are as wide
-                    as the face of the thumb (the thumb, less its margin and its bevel).
+                    Scroll up button area. The sizes and the positions are the same as in vatSys. With the padding and
+                    the margin of the track, each button is 16 x 16. The chevrons are 13 x 13, 2 pixels from the
+                    top and the left of the up button, and 1 pixel from the bottom of the down button.
                 -->
                 <controls:Chevron
                     Grid.Row="0"
                     x:Name="PART_ScrollUpButton"
-                    Height="{Binding ActualWidth, RelativeSource={RelativeSource Self}}"
+                    Width="13"
+                    Height="13"
+                    Margin="1,1,0,0"
                     Direction="Up"
-                    BevelWidth="1"
                     Foreground="{local:VatSysColour WindowBackground}"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center" />
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top" />
 
                 <!-- Scroll track area -->
                 <Grid Grid.Row="1" x:Name="PART_Track" Background="Transparent" Margin="0,1,0,1">
@@ -55,13 +57,14 @@
                 <controls:Chevron
                     Grid.Row="2"
                     x:Name="PART_ScrollDownButton"
-                    Height="{Binding ActualWidth, RelativeSource={RelativeSource Self}}"
+                    Width="13"
+                    Height="13"
+                    Margin="1,0,0,0"
                     Background="Transparent"
                     Direction="Down"
-                    BevelWidth="1"
                     Foreground="{local:VatSysColour WindowBackground}"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center" />
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Bottom" />
             </Grid>
         </Border>
     </controls:BeveledBorder>
