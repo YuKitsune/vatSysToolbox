@@ -13,17 +13,22 @@ public class PopupForm : Form
 {
     bool _isClosing;
 
-    public PopupForm(FrameworkElement child)
+    public IWindowHandle WindowHandle { get; }
+
+    public PopupForm(Func<IWindowHandle, FrameworkElement> createView)
     {
         FormBorderStyle = FormBorderStyle.None;
         ShowInTaskbar = false;
         StartPosition = FormStartPosition.Manual;
         Location = Cursor.Position;
 
+        WindowHandle = new PopupWindowHandle(this);
+        var view = createView(WindowHandle);
+
         // A Canvas measures its child with no size limit. The view then always has its natural size, and SizeChanged
         // occurs when WPF has done the layout of the view.
         var canvas = new Canvas();
-        canvas.Children.Add(child);
+        canvas.Children.Add(view);
 
         var elementHost = new ElementHost
         {
@@ -32,9 +37,9 @@ public class PopupForm : Form
         };
         Controls.Add(elementHost);
 
-        child.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
-        ResizeToContent(child.DesiredSize);
-        child.SizeChanged += (_, e) => ResizeToContent(e.NewSize);
+        view.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
+        ResizeToContent(view.DesiredSize);
+        view.SizeChanged += (_, e) => ResizeToContent(e.NewSize);
     }
 
     void ResizeToContent(System.Windows.Size contentSize)
@@ -57,5 +62,31 @@ public class PopupForm : Form
 
         if (!_isClosing && !IsDisposed)
             Close();
+    }
+
+    class PopupWindowHandle : IWindowHandle
+    {
+        readonly PopupForm _form;
+
+        public PopupWindowHandle(PopupForm form)
+        {
+            _form = form;
+            _form.Shown += (_, _) => Shown?.Invoke(this, EventArgs.Empty);
+            _form.FormClosed += (_, _) => Closed?.Invoke(this, EventArgs.Empty);
+            _form.Move += (_, _) => Moved?.Invoke(this, EventArgs.Empty);
+        }
+
+        public event EventHandler? Shown;
+        public event EventHandler? Closed;
+        public event EventHandler? Moved;
+
+        public void Focus() => _form.Activate();
+
+        // The popup can close before the view model calls this method (for example, when the user clicks outside it)
+        public void Close()
+        {
+            if (!_form._isClosing && !_form.IsDisposed)
+                _form.Close();
+        }
     }
 }

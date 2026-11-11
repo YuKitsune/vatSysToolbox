@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Forms;
+using vatsys;
 
 namespace vatSysToolbox.Windows;
 
@@ -65,6 +66,19 @@ public class WindowManager(IGuiInvoker guiInvoker)
 
                 CreateWindow(mainForm, key, title, createView, sizeToContent, canClose, canMinimise, size, configureForm);
             }
+        });
+    }
+
+    /// <summary>
+    /// Opens a <see cref="PopupForm"/> at the mouse cursor.
+    /// </summary>
+    public void ShowPopup(Func<IWindowHandle, FrameworkElement> createView)
+    {
+        guiInvoker.InvokeOnGUI(mainForm =>
+        {
+            var form = new PopupForm(createView);
+            MMI.EnsureWindowVisible(form);
+            form.Show(mainForm);
         });
     }
 

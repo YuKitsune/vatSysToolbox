@@ -87,18 +87,12 @@ windowManager.FocusOrCreateWindow(
 - `TryCreateWindow` does nothing if the window is already open.
 - `CloseWindow` closes the window.
 
-The view receives an `IWindowHandle`. Use it to close or focus the window, or to know when the window closes or moves.
+The view receives an `IWindowHandle`. Use it to close or focus the window, or to know when the window shows, closes, or moves. WPF controls in the window can get the keyboard focus only after the `Shown` event.
 
-Use `PopupForm` to show a WPF view in a small popup at the mouse cursor. The popup has no border or title bar, and it closes when the user clicks outside it. Show it on the UI thread:
+Use `ShowPopup` to show a WPF view in a small popup at the mouse cursor. The popup has no border or title bar, and it closes when the user clicks outside it. Use the `IWindowHandle` to close the popup from the view or the view model.
 
 ```csharp
-guiInvoker.InvokeOnGUI(mainForm =>
-{
-    var view = new MyPopupView();
-    var form = new PopupForm(view);
-    MMI.EnsureWindowVisible(form);
-    form.Show(mainForm);
-});
+windowManager.ShowPopup(windowHandle => new MyPopupView(new MyPopupViewModel(windowHandle)));
 ```
 
 ### Styles and controls
