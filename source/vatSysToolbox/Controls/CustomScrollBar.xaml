@@ -22,20 +22,19 @@
                 </Grid.RowDefinitions>
 
                 <!--
-                    Scroll up button area. The sizes and the positions are the same as in vatSys. With the padding and
-                    the margin of the track, each button is 16 x 16. The chevrons are 13 x 13, 2 pixels from the
-                    top and the left of the up button, and 1 pixel from the bottom of the down button.
+                    Scroll up button area. With the padding and the margin of the track, each button is 16 x 16, the
+                    same as in vatSys. The chevrons are 12 x 12, at the center of the button, with 2 pixels on each
+                    side. (vatSys uses 13 x 13 chevrons, 1 pixel to the right of the center.)
                 -->
                 <controls:Chevron
                     Grid.Row="0"
                     x:Name="PART_ScrollUpButton"
-                    Width="13"
-                    Height="13"
-                    Margin="1,1,0,0"
+                    Width="12"
+                    Height="12"
                     Direction="Up"
                     Foreground="{local:VatSysColour WindowBackground}"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Top" />
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center" />
 
                 <!-- Scroll track area -->
                 <Grid Grid.Row="1" x:Name="PART_Track" Background="Transparent" Margin="0,1,0,1">
@@ -57,14 +56,13 @@
                 <controls:Chevron
                     Grid.Row="2"
                     x:Name="PART_ScrollDownButton"
-                    Width="13"
-                    Height="13"
-                    Margin="1,0,0,0"
+                    Width="12"
+                    Height="12"
                     Background="Transparent"
                     Direction="Down"
                     Foreground="{local:VatSysColour WindowBackground}"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Bottom" />
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center" />
             </Grid>
         </Border>
     </controls:BeveledBorder>
