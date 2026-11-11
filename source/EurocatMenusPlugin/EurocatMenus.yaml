@@ -167,10 +167,6 @@ bottomMenu:
 #  - type: button
 #    text: Lost
 
-  - type: menu
-    text: TFC MGT
-    items: builtin/arrival-list-menu
-
   # The Maestro plugin will handle the open-tfms-window message. Until then, the Maestro shim in this plugin handles it.
   # Thus, the recipient is this plugin.
   - type: menu
@@ -199,6 +195,10 @@ bottomMenu:
         recipient: dev.eoinmotherway.eurocatmenus
         messageType: dev.eoinmotherway.maestro.open-tfms-window
         payload: { icao: YPPH }
+
+  - type: menu
+    text: TFC MGT
+    items: builtin/arrival-list-menu
 
   # The CPDLC plugin will handle these messages and send these events. Until then, the CPDLC shim in this plugin does
   # it. Thus, the recipient is this plugin.
