@@ -21,9 +21,8 @@
                 </Grid.RowDefinitions>
 
                 <!--
-                    Scroll up button area. The buttons are square, the same as in vatSys. The chevrons fill the
-                    button, less the margin and the bevel of the thumb. Thus, the chevrons are as wide as the face of
-                    the thumb.
+                    Scroll up button area. The buttons are square, the same as in vatSys. The chevrons are as wide
+                    as the face of the thumb (the thumb, less its margin and its bevel).
                 -->
                 <Border
                     Grid.Row="0"
@@ -32,11 +31,12 @@
                     Background="Transparent">
                     <controls:Chevron
                         Direction="Up"
-                        Width="Auto"
-                        Height="Auto"
-                        Margin="3"
+                        Width="10"
+                        Height="10"
                         BevelWidth="1"
-                        Foreground="{local:VatSysColour WindowBackground}" />
+                        Foreground="{local:VatSysColour WindowBackground}"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center" />
                 </Border>
 
                 <!-- Scroll track area -->
@@ -64,11 +64,12 @@
                     Background="Transparent">
                     <controls:Chevron
                         Direction="Down"
-                        Width="Auto"
-                        Height="Auto"
-                        Margin="3"
+                        Width="10"
+                        Height="10"
                         BevelWidth="1"
-                        Foreground="{local:VatSysColour WindowBackground}" />
+                        Foreground="{local:VatSysColour WindowBackground}"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center" />
                 </Border>
             </Grid>
         </Border>
