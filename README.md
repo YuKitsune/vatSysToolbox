@@ -64,10 +64,10 @@ Register the toolbox services with `Microsoft.Extensions.DependencyInjection`. Y
 ```csharp
 var services = new ServiceCollection()
     .AddLogging()
-    .AddVatSysToolbox("MyPlugin");
+    .AddVatSysToolbox("My Plugin", "dev.example.my-plugin");
 ```
 
-The plugin name shows with the errors in the vatSys error window. Other plugins also use this name to send messages to your plugin.
+The plugin name shows with the errors in the vatSys error window. Other plugins use the mailbox name to send messages to your plugin. Use a reverse DNS name for the mailbox name.
 
 To use a different implementation of a service, register it before you call `AddVatSysToolbox`. You can also register each service with its own method (`AddClock`, `AddErrorReporter`, `AddWindowManager`, `AddWorkQueue`, and `AddPluginMessenger`).
 
