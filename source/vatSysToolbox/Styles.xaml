@@ -150,9 +150,13 @@
                             <ScrollViewer x:Name="PART_ContentHost" />
                         </controls:BeveledBorder>
 
-                        <!-- vatSys draws this outline over the border of a text field that has the keyboard focus -->
+                        <!--
+                            vatSys draws this outline around a text field that has the keyboard focus. The negative
+                            margin puts the outline outside the text field, so that it does not cover the bevel.
+                        -->
                         <Border
                             x:Name="FocusOutline"
+                            Margin="-2"
                             BorderThickness="2"
                             BorderBrush="{local:VatSysColour HighlightedText}"
                             IsHitTestVisible="False"

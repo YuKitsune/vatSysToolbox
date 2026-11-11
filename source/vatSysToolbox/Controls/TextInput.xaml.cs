@@ -30,6 +30,19 @@ public partial class TextInput : UserControl
         set => SetValue(DigitsOnlyProperty, value);
     }
 
+    public static readonly DependencyProperty CapturesCursorProperty =
+        DependencyProperty.Register(nameof(CapturesCursor), typeof(bool), typeof(TextInput), new PropertyMetadata(false));
+
+    /// <summary>
+    /// If <c>true</c>, the mouse cursor stays in the text box while the text box has the keyboard focus. See
+    /// <see cref="CursorCapture"/>.
+    /// </summary>
+    public bool CapturesCursor
+    {
+        get => (bool)GetValue(CapturesCursorProperty);
+        set => SetValue(CapturesCursorProperty, value);
+    }
+
     public static readonly DependencyProperty ValueProperty =
         DependencyProperty.Register(nameof(Value), typeof(string), typeof(TextInput), new PropertyMetadata(""));
 

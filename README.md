@@ -99,6 +99,7 @@ guiInvoker.InvokeOnGUI(mainForm =>
     form.Show(mainForm);
 });
 ```
+
 ### Styles and controls
 
 Add the styles to the resources of your view:
@@ -118,6 +119,13 @@ Use the `VatSysColour` markup extension to get a colour from the vatSys profile:
 `VatSysFont` gives the font of the vatSys windows. `Bevel` gives the brushes and the sizes of the vatSys bevels.
 
 The toolbox also contains these controls: `BeveledBorder`, `BeveledLine`, `Chevron`, `CustomScrollBar`, and `TextInput`.
+
+To keep the mouse cursor in a text box while the text box has the keyboard focus, set `CursorCapture.IsEnabled` on a `TextBox`, or `CapturesCursor` on a `TextInput`. The cursor moves to the center of the text box. Enter, Escape, or a middle-click releases the cursor.
+
+```xml
+<TextBox controls:CursorCapture.IsEnabled="True" />
+<controls:TextInput CapturesCursor="True" />
+```
 
 ### Error reporting
 
