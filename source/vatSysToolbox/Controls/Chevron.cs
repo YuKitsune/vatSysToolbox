@@ -29,10 +29,21 @@ public class Chevron : Control
         set => SetValue(DirectionProperty, value);
     }
 
+    /// <remarks>
+    /// Use an odd width and an odd height. Then the points of the chevron are on the center of a pixel, and they reach
+    /// the edges of the control.
+    /// </remarks>
     public Chevron()
     {
-        Width = 8;
-        Height = 8;
+        Width = 9;
+        Height = 9;
+
+        // vatSys draws its arrows with no anti-aliasing. With anti-aliasing, a pixel that the point covers only a
+        // little is almost transparent. Then the points do not appear to reach the edges of the control.
+        RenderOptions.SetEdgeMode(this, EdgeMode.Aliased);
+
+        // Put the control on full pixels, so that the points are on the center of a pixel
+        UseLayoutRounding = true;
     }
 
     protected override void OnRender(DrawingContext dc)

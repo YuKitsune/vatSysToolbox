@@ -28,7 +28,7 @@
                     Background="Transparent">
                     <controls:Chevron
                         Direction="Up"
-                        Width="12"
+                        Width="11"
                         Foreground="{local:VatSysColour WindowBackground}"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center" />
@@ -59,7 +59,7 @@
                     Background="Transparent">
                     <controls:Chevron
                         Direction="Down"
-                        Width="12"
+                        Width="11"
                         Foreground="{local:VatSysColour WindowBackground}"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center" />
