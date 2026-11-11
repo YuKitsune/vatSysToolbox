@@ -13,7 +13,7 @@
     <controls:BeveledBorder
         BevelType="Sunken"
         BorderThickness="{x:Static controls:Bevel.BorderThickness}">
-        <Border Background="{local:VatSysColour WindowButtonSelected}">
+        <Border Background="{local:VatSysColour WindowButtonSelected}" Padding="1">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -25,30 +25,24 @@
                     Scroll up button area. The buttons are square, the same as in vatSys. The chevrons are as wide
                     as the face of the thumb (the thumb, less its margin and its bevel).
                 -->
-                <Border
+                <controls:Chevron
                     Grid.Row="0"
                     x:Name="PART_ScrollUpButton"
                     Height="{Binding ActualWidth, RelativeSource={RelativeSource Self}}"
-                    Background="Transparent">
-                    <controls:Chevron
-                        Direction="Up"
-                        Width="10"
-                        Height="10"
-                        BevelWidth="1"
-                        Foreground="{local:VatSysColour WindowBackground}"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center" />
-                </Border>
+                    Direction="Up"
+                    BevelWidth="1"
+                    Foreground="{local:VatSysColour WindowBackground}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center" />
 
                 <!-- Scroll track area -->
-                <Grid Grid.Row="1" x:Name="PART_Track" Background="Transparent">
+                <Grid Grid.Row="1" x:Name="PART_Track" Background="Transparent" Margin="0,1,0,1">
                     <!-- Scroll thumb with gray background for beveling -->
                     <Border
                         x:Name="PART_Thumb"
                         Background="{local:VatSysColour WindowBackground}"
                         Height="20"
-                        VerticalAlignment="Top"
-                        Margin="1">
+                        VerticalAlignment="Top">
                         <controls:BeveledBorder
                             BevelType="Raised"
                             BorderThickness="{x:Static controls:Bevel.BorderThickness}">
@@ -58,20 +52,16 @@
                 </Grid>
 
                 <!-- Scroll down button area -->
-                <Border
+                <controls:Chevron
                     Grid.Row="2"
                     x:Name="PART_ScrollDownButton"
                     Height="{Binding ActualWidth, RelativeSource={RelativeSource Self}}"
-                    Background="Transparent">
-                    <controls:Chevron
-                        Direction="Down"
-                        Width="10"
-                        Height="10"
-                        BevelWidth="1"
-                        Foreground="{local:VatSysColour WindowBackground}"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center" />
-                </Border>
+                    Background="Transparent"
+                    Direction="Down"
+                    BevelWidth="1"
+                    Foreground="{local:VatSysColour WindowBackground}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center" />
             </Grid>
         </Border>
     </controls:BeveledBorder>
