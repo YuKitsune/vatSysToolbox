@@ -109,7 +109,6 @@ public class Plugin : IPlugin
             // The shims do the work of other plugins until those plugins handle their own messages. They subscribe to
             // their messages, thus make them before the messenger starts.
             _ = new CpdlcShim(vatSysMenu, menuEvents, messenger, vatSysMessenger, guiInvoker);
-            _ = new HoldShim(vatSysMenu, menuEvents, messenger, vatSysMessenger, guiInvoker);
             _ = new MaestroShim(vatSysMenu, messenger, guiInvoker);
             _ = new AtisShim(vatSysMenu, messenger, guiInvoker);
 

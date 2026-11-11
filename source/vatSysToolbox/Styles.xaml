@@ -526,7 +526,7 @@
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="21"/>
                         </Grid.ColumnDefinitions>
 
                         <!-- Content area with sunken border -->
@@ -583,7 +583,7 @@
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="21"/>
                         </Grid.ColumnDefinitions>
 
                         <!-- Content area with sunken border -->

@@ -28,6 +28,9 @@
 #                         builtin/atis-menu-no-editor  The items of View: Request, and the online ATIS stations.
 #                         builtin/messages-menu        The vatSys Messages menu. The button flashes while there are
 #                                                      new messages.
+#                         builtin/arrival-list-menu    The vatSys Windows, Arrival List menu. New opens an arrival
+#                                                      list for an ICAO code. The other items are the open arrival
+#                                                      lists.
 #                       In a submenu, the messages menu does not flash.
 #                staysOpenOnClick  Optional. If true, the popup menu stays open after a click on an item, so that more
 #                                  than one item can be turned on or off (for example, maps). The default is false. A
@@ -54,8 +57,6 @@
 #       and when vatSys changes the mode.
 #     dev.eoinmotherway.eurocatmenus.default-menu-shown, dev.eoinmotherway.eurocatmenus.default-menu-hidden
 #     dev.eoinmotherway.eurocatmenus.full-screen-enabled, dev.eoinmotherway.eurocatmenus.full-screen-disabled
-#   The Hold plugin will send these events. Until then, the Hold shim in this plugin sends them:
-#     dev.eoinmotherway.hold.setup-window-opened, dev.eoinmotherway.hold.setup-window-closed
 #   The CPDLC plugin will send these events. Until then, the CPDLC shim in this plugin sends them:
 #     dev.eoinmotherway.cpdlc.setup-window-opened, dev.eoinmotherway.cpdlc.setup-window-closed
 #     dev.eoinmotherway.cpdlc.ads-contract-window-opened, dev.eoinmotherway.cpdlc.ads-contract-window-closed
@@ -141,11 +142,10 @@ bottomMenu:
     recipient: dev.eoinmotherway.eurocatmenus
     messageType: dev.eoinmotherway.eurocatmenus.open-flight-plan-window
 
-  # The Hold plugin will handle this message and send these events. Until then, the Hold shim in this plugin does it.
-  # Thus, the recipient is this plugin.
+  # This button needs the Hold plugin
   - type: toggle
     text: HLD SET
-    recipient: dev.eoinmotherway.eurocatmenus
+    recipient: dev.eoinmotherway.hold
     messageType: dev.eoinmotherway.hold.toggle-setup-window
     activeOn: dev.eoinmotherway.hold.setup-window-opened
     inactiveOn: dev.eoinmotherway.hold.setup-window-closed
@@ -166,6 +166,10 @@ bottomMenu:
 
 #  - type: button
 #    text: Lost
+
+  - type: menu
+    text: TFC MGT
+    items: builtin/arrival-list-menu
 
   # The Maestro plugin will handle the open-tfms-window message. Until then, the Maestro shim in this plugin handles it.
   # Thus, the recipient is this plugin.

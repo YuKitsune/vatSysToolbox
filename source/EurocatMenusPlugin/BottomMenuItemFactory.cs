@@ -30,6 +30,8 @@ public class BottomMenuItemFactory(
     const string AtisRequestItem = "requestToolStripMenuItem";
     const string MessagesItem = "messagesToolStripMenuItem";
     const string SendMessageItem = "sendToolStripMenuItem";
+    const string ArrivalListItem = "sequenceToolStripMenuItem";
+    const string ArrivalListNewItem = "openNewToolStripMenuItem";
 
     // In the vatSys ATIS menu, the online ATIS stations come after this separator
     const string AtisStationsSeparator = "toolStripSeparator4";
@@ -118,14 +120,16 @@ public class BottomMenuItemFactory(
                 return () => infoItems;
             }
 
-            // The online ATIS stations, the private message recipients, and the unread messages change. Thus, get these
-            // items each time that the menu opens.
+            // The online ATIS stations, the private message recipients, the unread messages, and the open arrival lists
+            // change. Thus, get these items each time that the menu opens.
             case "atis-menu":
                 return () => GetAtisMenuItems(includeEditor: true);
             case "atis-menu-no-editor":
                 return () => GetAtisMenuItems(includeEditor: false);
             case "messages-menu":
                 return GetMessagesMenuItems;
+            case "arrival-list-menu":
+                return GetArrivalListMenuItems;
 
             default:
                 throw new InvalidOperationException(
@@ -178,6 +182,29 @@ public class BottomMenuItemFactory(
                     isEnabled: atisEditorItem is not null),
                 new PopupMenuItem("View", children: [requestItem, ..stationItems])
             ];
+        }
+        catch (Exception ex)
+        {
+            errorReporter.ReportError(ex);
+            return [];
+        }
+    }
+
+    // The same items as the vatSys Windows, Arrival List menu: New, and the arrival lists that are open
+    IReadOnlyList<PopupMenuItem> GetArrivalListMenuItems()
+    {
+        try
+        {
+            // In vatSys, Open New has a submenu with a text field for the ICAO code. Here, New opens the text box at
+            // once.
+            var newItem = vatSysMenu.GetTextInputItem(
+                vatSysMenu.GetItem(ArrivalListNewItem),
+                "New...",
+                "Arrival List");
+
+            return vatSysMenu.GetPopupMenuItems(
+                vatSysMenu.GetItem(ArrivalListItem),
+                new Dictionary<string, PopupMenuItem> { [ArrivalListNewItem] = newItem });
         }
         catch (Exception ex)
         {
