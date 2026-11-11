@@ -19,6 +19,7 @@ vatSys Toolbox contains the code that many vatSys plugins need. It has these fea
 - **Styles and controls:** WPF styles and controls inherit the style defined in the loaded vatSys profile.
 - **Workload management:** Background work and queue abstractions.
 - **Messages between plugins:** Send messages, requests, and broadcasts to other plugins in the same vatSys process.
+- **MediatR:** Handle the messages from other plugins with MediatR (in the `vatSysToolbox.MediatR` package).
 - **Configuration:** Find configuration files in the vatSys profile.
 - **DPI awareness:** Make sure that WPF content in vatSys has the correct scale.
 
@@ -182,6 +183,53 @@ var sequence = message.Deserialize<Sequence>(json, messagePack);
 ```
 
 If a plugin receives a direct message or a request that it has no handler for, it shows an error in the vatSys error window. The requester receives a `MessagingException`.
+
+#### MediatR
+
+The `vatSysToolbox.MediatR` package sends the messages and the requests from other plugins to MediatR handlers. Add the package to your plugin project:
+
+```shell
+dotnet add package vatSysToolbox.MediatR
+```
+
+Then connect each message type to a notification or a request:
+
+```csharp
+var json = new JsonMessageSerializer();
+
+// All the INotificationHandler<SequenceUpdatedNotification> handlers receive each message
+messenger.PublishNotifications<SequenceUpdatedNotification>("dev.example.other-plugin.sequence-updated", mediator, json);
+
+// The IRequestHandler<GetSequenceRequest, Sequence> handler gives the reply to each request
+messenger.SendRequests<GetSequenceRequest, Sequence>("dev.example.my-plugin.get-sequence", mediator, json);
+
+messenger.Start();
+```
+
+You can also put the message type on the handler with an attribute, and connect all the handlers in an assembly:
+
+```csharp
+[PluginMessageHandler("dev.example.other-plugin.sequence-updated")]
+public class SequenceUpdatedHandler : INotificationHandler<SequenceUpdatedNotification>
+{
+    public Task Handle(SequenceUpdatedNotification notification, CancellationToken cancellationToken) { ... }
+}
+
+[PluginMessageHandler("dev.example.my-plugin.get-sequence")]
+public class GetSequenceHandler : IRequestHandler<GetSequenceRequest, Sequence>
+{
+    public Task<Sequence> Handle(GetSequenceRequest request, CancellationToken cancellationToken) { ... }
+}
+
+messenger.SubscribeHandlers(typeof(Plugin).Assembly, mediator, json);
+messenger.Start();
+```
+
+MediatR publishes a notification to all the handlers of its class. Thus, all the handlers of the notification receive the messages, also the handlers that do not have the attribute.
+
+The serializer converts the payload to the notification or the request, and the response to the reply. The handlers run on the thread of the messenger. Use `IGuiInvoker` to change the UI from a handler.
+
+The package uses MediatR 12. Merge MediatR into your plugin assembly too.
 
 ### Configuration
 

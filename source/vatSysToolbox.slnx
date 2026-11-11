@@ -2,6 +2,7 @@
   <Project Path="EurocatMenusPlugin\EurocatMenusPlugin.csproj" />
   <Project Path="TagListPlugin\TagListPlugin.csproj" />
   <Project Path="vatSysToolbox/vatSysToolbox.csproj" />
+  <Project Path="vatSysToolbox.MediatR/vatSysToolbox.MediatR.csproj" />
   <Project Path="../build/_build.csproj">
     <Build Project="false" />
   </Project>

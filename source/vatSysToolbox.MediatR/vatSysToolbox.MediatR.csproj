@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+
+    <Version>0.0.0</Version>
+    <Metadata Condition="'$(BuildMetadata)' != ''">+$(BuildMetadata)</Metadata>
+    <AssemblyVersion>$(Version)</AssemblyVersion>
+    <FileVersion>$(Version)</FileVersion>
+    <InformationalVersion>$(Version)$(Metadata)</InformationalVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>vatSysToolbox.MediatR</PackageId>
+    <Title>vatSys Toolbox MediatR</Title>
+    <Authors>Eoin Motherway</Authors>
+    <Description>Handles the messages of the vatSys Toolbox messenger with MediatR.</Description>
+    <PackageTags>vatsys;vatsim;plugin;mediatr</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/YuKitsune/vatSysToolbox</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/YuKitsune/vatSysToolbox</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- MediatR 13 and later need a commercial licence for some uses -->
+    <PackageReference Include="MediatR" Version="12.4.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\vatSysToolbox\vatSysToolbox.csproj" />
+  </ItemGroup>
+
+</Project>

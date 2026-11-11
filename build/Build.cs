@@ -49,7 +49,8 @@ class Build : FalloutBuild
     [GitRepository]
     readonly GitRepository GitRepository;
 
-    AbsolutePath ProjectPath => RootDirectory / "source" / "vatSysToolbox" / "vatSysToolbox.csproj";
+    // The toolbox and its companion libraries. Each name is the name of the project directory and the project.
+    static readonly string[] Libraries = ["vatSysToolbox", "vatSysToolbox.MediatR"];
     AbsolutePath BuildOutputDirectory => TemporaryDirectory / "build";
     AbsolutePath PackageOutputDirectory => TemporaryDirectory / "package";
 
@@ -117,7 +118,7 @@ class Build : FalloutBuild
         });
 
     Target Compile => _ => _
-        .Description("Compiles the toolbox")
+        .Description("Compiles the toolbox and its companion libraries")
         .DependsOn(DownloadVatSys)
         .Executes(() =>
         {
@@ -128,19 +129,22 @@ class Build : FalloutBuild
                 Configuration,
                 BuildOutputDirectory);
 
-            DotNetTasks.DotNetBuild(s => s
-                .SetProjectFile(ProjectPath)
-                .SetConfiguration(Configuration)
-                .SetOutputDirectory(BuildOutputDirectory)
-                .SetVersion(version)
-                .SetAssemblyVersion(GetMajorMinorPatch())
-                .SetFileVersion(GetMajorMinorPatch())
-                .SetInformationalVersion(version)
-                .SetProperty("VatSysPath", VatSysExePath.Parent.Parent));
+            foreach (var library in Libraries)
+            {
+                DotNetTasks.DotNetBuild(s => s
+                    .SetProjectFile(GetLibraryProjectPath(library))
+                    .SetConfiguration(Configuration)
+                    .SetOutputDirectory(BuildOutputDirectory)
+                    .SetVersion(version)
+                    .SetAssemblyVersion(GetMajorMinorPatch())
+                    .SetFileVersion(GetMajorMinorPatch())
+                    .SetInformationalVersion(version)
+                    .SetProperty("VatSysPath", VatSysExePath.Parent.Parent));
+            }
         });
 
     Target Pack => _ => _
-        .Description("Creates the NuGet package for the toolbox.")
+        .Description("Creates the NuGet packages for the toolbox and its companion libraries.")
         .DependsOn(DownloadVatSys)
         .Requires(() => Configuration == Configuration.Release)
         .Executes(() =>
@@ -149,15 +153,18 @@ class Build : FalloutBuild
             PackageOutputDirectory.CreateOrCleanDirectory();
 
             Log.Information("Packing version {Version} to {OutputDirectory}", version, PackageOutputDirectory);
-            DotNetTasks.DotNetPack(s => s
-                .SetProject(ProjectPath)
-                .SetConfiguration(Configuration)
-                .SetOutputDirectory(PackageOutputDirectory)
-                .SetVersion(version)
-                .SetAssemblyVersion(GetMajorMinorPatch())
-                .SetFileVersion(GetMajorMinorPatch())
-                .SetInformationalVersion(version)
-                .SetProperty("VatSysPath", VatSysExePath.Parent.Parent));
+            foreach (var library in Libraries)
+            {
+                DotNetTasks.DotNetPack(s => s
+                    .SetProject(GetLibraryProjectPath(library))
+                    .SetConfiguration(Configuration)
+                    .SetOutputDirectory(PackageOutputDirectory)
+                    .SetVersion(version)
+                    .SetAssemblyVersion(GetMajorMinorPatch())
+                    .SetFileVersion(GetMajorMinorPatch())
+                    .SetInformationalVersion(version)
+                    .SetProperty("VatSysPath", VatSysExePath.Parent.Parent));
+            }
         });
 
     Target CompilePlugin => _ => _
@@ -272,7 +279,7 @@ class Build : FalloutBuild
         });
 
     Target Publish => _ => _
-        .Description("Pushes the NuGet package to the GitHub Packages feed.")
+        .Description("Pushes the NuGet packages to the GitHub Packages feed.")
         .DependsOn(Pack)
         .Requires(() => GitHubToken)
         .Requires(() => GitRepository)
@@ -292,7 +299,7 @@ class Build : FalloutBuild
         });
 
     Target Release => _ => _
-        .Description("Creates a GitHub release with the NuGet package and the plugins attached.")
+        .Description("Creates a GitHub release with the NuGet packages and the plugins attached.")
         .DependsOn(Pack, PackagePlugin)
         .Requires(() => GitHubToken)
         .Requires(() => GitRepository)
@@ -392,6 +399,8 @@ class Build : FalloutBuild
 
     // Each plugin has its own directories, so that each plugin has its own binary and zip archive
     AbsolutePath GetPluginBuildOutputDirectory(string plugin) => TemporaryDirectory / "build-plugin" / plugin;
+
+    AbsolutePath GetLibraryProjectPath(string library) => RootDirectory / "source" / library / $"{library}.csproj";
 
     AbsolutePath GetPluginPackageDirectory(string plugin) => TemporaryDirectory / "package-plugin" / plugin;
 
