@@ -31,6 +31,9 @@ public class Plugin : IPlugin
 
     static readonly TimeSpan DoubleAltPressInterval = TimeSpan.FromSeconds(1);
 
+    // The text of the item in the vatSys Settings menu that shows the menus again
+    const string ShowMenusItemText = "Eurocat Menus";
+
     readonly IServiceProvider _serviceProvider;
 
     string IPlugin.Name => Name;
@@ -136,7 +139,32 @@ public class Plugin : IPlugin
             });
 
             Application.AddMessageFilter(doubleAltPressFilter);
+
+            AddShowMenusItem(menuBar, errorReporter);
         });
+    }
+
+    // When the menus are hidden, the vatSys menu bar shows. This item shows the menus again.
+    static void AddShowMenusItem(MenuBarLayout menuBar, IErrorReporter errorReporter)
+    {
+        var item = new ToolStripMenuItem(ShowMenusItemText);
+        item.Click += (_, _) =>
+        {
+            // An exception that is not caught on the UI thread stops vatSys.
+            try
+            {
+                menuBar.ShowMenus();
+            }
+            catch (Exception ex)
+            {
+                errorReporter.ReportError(ex, "Cannot show the menus");
+            }
+        };
+
+        MMI.AddCustomMenuItem(new CustomToolStripMenuItem(
+            CustomToolStripMenuItemWindowType.Main,
+            CustomToolStripMenuItemCategory.Settings,
+            item));
     }
 
     // If the configuration cannot be read, the bottom menu has no items

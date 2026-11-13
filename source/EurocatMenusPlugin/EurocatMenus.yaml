@@ -70,6 +70,9 @@
 #     dev.eoinmotherway.eurocatmenus.open-keyboard-settings
 #     dev.eoinmotherway.eurocatmenus.open-restricted-area-window
 #     dev.eoinmotherway.eurocatmenus.toggle-default-menu
+#     dev.eoinmotherway.eurocatmenus.hide-menus  Hides the menus of this plugin, and shows the vatSys menu bar. To show
+#                                                the menus again, use Settings, Eurocat Menus in the vatSys menu bar.
+#     dev.eoinmotherway.eurocatmenus.show-menus
 #     dev.eoinmotherway.eurocatmenus.open-air-window
 #     dev.eoinmotherway.eurocatmenus.open-ground-window
 #     dev.eoinmotherway.eurocatmenus.open-flight-plan-window
@@ -112,6 +115,10 @@ bottomMenu:
         messageType: dev.eoinmotherway.eurocatmenus.toggle-default-menu
         activeOn: dev.eoinmotherway.eurocatmenus.default-menu-shown
         inactiveOn: dev.eoinmotherway.eurocatmenus.default-menu-hidden
+      - type: button
+        text: Hide Eurocat Menus
+        recipient: dev.eoinmotherway.eurocatmenus
+        messageType: dev.eoinmotherway.eurocatmenus.hide-menus
 
   - type: menu
     text: Map

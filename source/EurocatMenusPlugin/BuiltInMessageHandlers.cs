@@ -17,6 +17,8 @@ public class BuiltInMessageHandlers
     const string OpenKeyboardSettingsMessage = "dev.eoinmotherway.eurocatmenus.open-keyboard-settings";
     const string OpenRestrictedAreaWindowMessage = "dev.eoinmotherway.eurocatmenus.open-restricted-area-window";
     const string ToggleDefaultMenuMessage = "dev.eoinmotherway.eurocatmenus.toggle-default-menu";
+    const string HideMenusMessage = "dev.eoinmotherway.eurocatmenus.hide-menus";
+    const string ShowMenusMessage = "dev.eoinmotherway.eurocatmenus.show-menus";
     const string OpenAirWindowMessage = "dev.eoinmotherway.eurocatmenus.open-air-window";
     const string OpenGroundWindowMessage = "dev.eoinmotherway.eurocatmenus.open-ground-window";
     const string OpenFlightPlanWindowMessage = "dev.eoinmotherway.eurocatmenus.open-flight-plan-window";
@@ -55,6 +57,8 @@ public class BuiltInMessageHandlers
         Handle(OpenKeyboardSettingsMessage, () => vatSysMenu.Click(KeyboardSettingsItem));
         Handle(OpenRestrictedAreaWindowMessage, () => vatSysMenu.Click(RestrictedAreasItem));
         Handle(ToggleDefaultMenuMessage, menuBarLayout.ToggleVatSysMenu);
+        Handle(HideMenusMessage, menuBarLayout.HideMenus);
+        Handle(ShowMenusMessage, menuBarLayout.ShowMenus);
         Handle(OpenAirWindowMessage, () => vatSysMenu.Click(AirWindowItem));
         Handle(OpenGroundWindowMessage, () => vatSysMenu.Click(GroundWindowItem));
         Handle(OpenFlightPlanWindowMessage, () => vatSysMenu.Click(FlightPlanItem));
