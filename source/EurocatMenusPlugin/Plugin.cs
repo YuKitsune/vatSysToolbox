@@ -34,6 +34,9 @@ public class Plugin : IPlugin
     // The text of the item in the vatSys Settings menu that shows the menus again
     const string ShowMenusItemText = "Eurocat Menus";
 
+    // The key of the vatSys main form in Application.OpenForms
+    const string VatSysMainFormKey = "MainForm";
+
     readonly IServiceProvider _serviceProvider;
 
     string IPlugin.Name => Name;
@@ -65,7 +68,16 @@ public class Plugin : IPlugin
     void OnFirstIdle(object sender, EventArgs e)
     {
         Application.Idle -= OnFirstIdle;
-        ReplaceMenuBar();
+
+        // An exception that is not caught on the UI thread stops vatSys.
+        try
+        {
+            ReplaceMenuBar();
+        }
+        catch (Exception ex)
+        {
+            _serviceProvider.GetRequiredService<IErrorReporter>().ReportError(ex, "Cannot replace the vatSys menu bar");
+        }
     }
 
     void ReplaceMenuBar()
@@ -76,72 +88,73 @@ public class Plugin : IPlugin
         var messenger = _serviceProvider.GetRequiredService<IPluginMessenger>();
         var configuration = LoadConfiguration(errorReporter);
 
-        // The message filter must be added on the UI thread, because it only receives the messages of that thread.
-        guiInvoker.InvokeOnGUI(mainForm =>
+        // vatSys raises Application.Idle on the UI thread. The message filter must be added on the UI thread, because it
+        // only receives the messages of that thread.
+        var mainForm = Application.OpenForms[VatSysMainFormKey]
+            ?? throw new InvalidOperationException("Cannot find the vatSys main form");
+
+        var vatSysMenu = new VatSysMenu(
+            mainForm.MainMenuStrip ?? throw new InvalidOperationException("Cannot find the vatSys menu bar"),
+            errorReporter);
+        var vatSysInternals = new VatSysInternals(mainForm);
+        var menuBar = new MenuBarLayout(mainForm);
+
+        var menuEvents = new MenuEvents(messenger, guiInvoker, errorReporter);
+
+        // Make this before the menus are added, so that it sends the event when the vatSys menu bar is hidden
+        var builtInEvents = new BuiltInEvents(menuEvents, menuBar, guiInvoker);
+
+        var vatSysMessenger = WeakReferenceMessenger.Default;
+        var topMenuViewModel = new TopMenuViewModel(
+            vatSysMenu,
+            vatSysInternals,
+            clock,
+            vatSysMessenger,
+            guiInvoker,
+            errorReporter);
+
+        // The toggle buttons subscribe to their events. Thus, start the messenger after the items are made.
+        var bottomMenuItemFactory = new BottomMenuItemFactory(
+            vatSysMenu,
+            vatSysInternals,
+            menuEvents,
+            messenger,
+            errorReporter);
+        var bottomMenuItems = bottomMenuItemFactory.CreateItems(configuration.BottomMenu);
+        var bottomMenuViewModel = new BottomMenuViewModel(bottomMenuItems);
+
+        // The shims do the work of other plugins until those plugins handle their own messages. They subscribe to
+        // their messages, thus make them before the messenger starts.
+        _ = new CpdlcShim(vatSysMenu, menuEvents, messenger, vatSysMessenger, guiInvoker);
+        _ = new MaestroShim(vatSysMenu, messenger, guiInvoker);
+        _ = new AtisShim(vatSysMenu, messenger, guiInvoker);
+
+        // The built-in message handlers, the Strip Setup window, and full screen also subscribe to their messages
+        _ = new BuiltInMessageHandlers(vatSysMenu, menuBar, messenger, guiInvoker);
+        _ = new StripSetupWindow(vatSysMenu, menuEvents, messenger, vatSysMessenger, guiInvoker);
+        _ = new FullScreenMode(mainForm, menuEvents, messenger, guiInvoker);
+
+        messenger.Start();
+        builtInEvents.SendCurrentState();
+
+        menuBar.AddMenus(new TopMenu(topMenuViewModel), new BottomMenu(bottomMenuViewModel));
+
+        var doubleAltPressFilter = new DoubleAltPressFilter(clock, DoubleAltPressInterval, () =>
         {
-            var vatSysMenu = new VatSysMenu(
-                mainForm.MainMenuStrip ?? throw new InvalidOperationException("Cannot find the vatSys menu bar"),
-                errorReporter);
-            var vatSysInternals = new VatSysInternals(mainForm);
-            var menuBar = new MenuBarLayout(mainForm);
-
-            var menuEvents = new MenuEvents(messenger, guiInvoker, errorReporter);
-
-            // Make this before the menus are added, so that it sends the event when the vatSys menu bar is hidden
-            var builtInEvents = new BuiltInEvents(menuEvents, menuBar, guiInvoker);
-
-            var vatSysMessenger = WeakReferenceMessenger.Default;
-            var topMenuViewModel = new TopMenuViewModel(
-                vatSysMenu,
-                vatSysInternals,
-                clock,
-                vatSysMessenger,
-                guiInvoker,
-                errorReporter);
-
-            // The toggle buttons subscribe to their events. Thus, start the messenger after the items are made.
-            var bottomMenuItemFactory = new BottomMenuItemFactory(
-                vatSysMenu,
-                vatSysInternals,
-                menuEvents,
-                messenger,
-                errorReporter);
-            var bottomMenuItems = bottomMenuItemFactory.CreateItems(configuration.BottomMenu);
-            var bottomMenuViewModel = new BottomMenuViewModel(bottomMenuItems);
-
-            // The shims do the work of other plugins until those plugins handle their own messages. They subscribe to
-            // their messages, thus make them before the messenger starts.
-            _ = new CpdlcShim(vatSysMenu, menuEvents, messenger, vatSysMessenger, guiInvoker);
-            _ = new MaestroShim(vatSysMenu, messenger, guiInvoker);
-            _ = new AtisShim(vatSysMenu, messenger, guiInvoker);
-
-            // The built-in message handlers, the Strip Setup window, and full screen also subscribe to their messages
-            _ = new BuiltInMessageHandlers(vatSysMenu, menuBar, messenger, guiInvoker);
-            _ = new StripSetupWindow(vatSysMenu, menuEvents, messenger, vatSysMessenger, guiInvoker);
-            _ = new FullScreenMode(mainForm, menuEvents, messenger, guiInvoker);
-
-            messenger.Start();
-            builtInEvents.SendCurrentState();
-
-            menuBar.AddMenus(new TopMenu(topMenuViewModel), new BottomMenu(bottomMenuViewModel));
-
-            var doubleAltPressFilter = new DoubleAltPressFilter(clock, DoubleAltPressInterval, () =>
+            // An exception that is not caught on the UI thread stops vatSys.
+            try
             {
-                // An exception that is not caught on the UI thread stops vatSys.
-                try
-                {
-                    menuBar.ToggleVatSysMenu();
-                }
-                catch (Exception ex)
-                {
-                    errorReporter.ReportError(ex, "Cannot show or hide the vatSys menu bar");
-                }
-            });
-
-            Application.AddMessageFilter(doubleAltPressFilter);
-
-            AddShowMenusItem(menuBar, errorReporter);
+                menuBar.ToggleVatSysMenu();
+            }
+            catch (Exception ex)
+            {
+                errorReporter.ReportError(ex, "Cannot show or hide the vatSys menu bar");
+            }
         });
+
+        Application.AddMessageFilter(doubleAltPressFilter);
+
+        AddShowMenusItem(menuBar, errorReporter);
     }
 
     // When the menus are hidden, the vatSys menu bar shows. This item shows the menus again.

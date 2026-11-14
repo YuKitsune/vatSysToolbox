@@ -221,7 +221,7 @@ messenger.Start();
 
 MediatR publishes a notification to all the handlers of its class. Thus, all the handlers of the notification receive the messages, also the handlers that do not have the attribute.
 
-The serializer converts the payload to the notification or the request, and the response to the reply. The handlers run on the thread of the messenger. Use `IGuiInvoker` to change the UI from a handler.
+The serializer converts the payload to the notification or the request, and the response to the reply. The handlers run on the thread of the messenger. Use `IGuiInvoker` to change the UI from a handler (see [The UI thread](#the-ui-thread)).
 
 The package uses MediatR 12. Merge MediatR into your plugin assembly too.
 
@@ -242,6 +242,32 @@ var configurationFilePath = ConfigurationLocator.LocateConfigurationFile(this, "
 ### DPI awareness
 
 WPF content in vatSys has the correct scale only if Windows runs vatSys as a DPI-unaware application. Call `DpiAwareness.EnsureDpiAwareness()` when your plugin starts. This method sets the Windows compatibility setting for `vatSys.exe`. If the setting changes, the method restarts vatSys.
+
+### The UI thread
+
+vatSys and all the plugins use one UI thread. `IGuiInvoker` does an action on that thread. Do not use `IGuiInvoker` unless you must.
+
+You must use `IGuiInvoker` only if both of these conditions are true:
+
+1. The code can run on a thread that is not the UI thread. For example:
+   - `OnFDRUpdate` and `OnRadarTrackUpdate`
+   - The `Network` events
+   - The plugin messenger handlers and the MediatR handlers
+   - `WorkQueue`, `Task.Run`, `System.Timers.Timer`, and code after `ConfigureAwait(false)`
+   - Some vatSys events, for example `MMI.SelectedTrackChanged`. These can occur on any thread.
+2. The code changes something that must change on the UI thread:
+   - A WinForms form or control, or a WPF element. For example, it makes, shows, or closes a window.
+   - The state that a WPF view binds to. For example, a view model property or collection.
+   - A vatSys menu item, or something that is only for the UI thread, such as a message filter.
+
+Do not use `IGuiInvoker` in these cases:
+
+- **The code always runs on the UI thread.** For example: WinForms and WPF event handlers, menu item clicks, form events, `Application.Idle`, and a `DispatcherTimer`. On the UI thread the action runs immediately, so the call does nothing. Call the code directly, and catch the exceptions, because an exception that is not caught on the UI thread stops vatSys.
+- **The code does not change the UI.** For example, it reads or changes plugin data, or it sends a message.
+- **A method that you call already goes to the UI thread.** For example, `WindowManager` opens and closes windows on the UI thread.
+- **The UI does not change.** Do the checks on the background thread first. For example, if a window shows one aircraft, do not post the updates of the other aircraft.
+
+From a thread that is not the UI thread, each call posts one message to the UI thread. A thread can have a maximum of 10,000 posted messages. If the queue becomes full, the WPF content in vatSys can stop until vatSys restarts. Thus, do not call `IGuiInvoker` for each radar track update or each flight plan update.
 
 ## Building
 

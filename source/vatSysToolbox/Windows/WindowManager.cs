@@ -57,6 +57,14 @@ public class WindowManager(IGuiInvoker guiInvoker)
         Size? size = null,
         Action<VatSysForm>? configureForm = null)
     {
+        // Callers can call this method often (for example, each time the data changes). Do not post to the UI thread
+        // if the window is open.
+        lock (_gate)
+        {
+            if (_forms.ContainsKey(key))
+                return;
+        }
+
         guiInvoker.InvokeOnGUI(mainForm =>
         {
             lock (_gate)
@@ -99,6 +107,13 @@ public class WindowManager(IGuiInvoker guiInvoker)
 
     public void CloseWindow(string key)
     {
+        // Do not post to the UI thread if the window is not open
+        lock (_gate)
+        {
+            if (!_forms.ContainsKey(key))
+                return;
+        }
+
         guiInvoker.InvokeOnGUI(_ =>
         {
             VatSysForm? form;

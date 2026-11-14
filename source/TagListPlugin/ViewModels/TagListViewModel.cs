@@ -47,9 +47,15 @@ public partial class TagListViewModel : ObservableObject
             this,
             (viewModel, message) => viewModel.OnGui(() =>
                 viewModel.FindItem(message.QuickTag)?.SetGlobalOps(message.QuickTag.LabelData)));
+        // vatSys sends this event for all the radar tracks at each radar update. Most tracks have no quick tag. Do not
+        // post these to the UI thread.
         messenger.Register<TagListViewModel, RadarTrackAltitudeChangedMessage>(
             this,
-            (viewModel, message) => viewModel.OnGui(() => viewModel.SetAltitude(message.RadarTrack)));
+            (viewModel, message) =>
+            {
+                if (message.RadarTrack.QuickTag is not null)
+                    viewModel.OnGui(() => viewModel.SetAltitude(message.RadarTrack));
+            });
 
         foreach (var quickTag in RDP.QuickTags)
         {
@@ -80,9 +86,10 @@ public partial class TagListViewModel : ObservableObject
     // code). Thus, find the item from the quick tag of the radar track.
     void SetAltitude(RDP.RadarTrack radarTrack)
     {
+        // vatSys can remove the quick tag before this runs on the UI thread
         if (radarTrack.QuickTag is null)
             return;
-        
+
         FindItem(radarTrack.QuickTag)?.SetAltitude(radarTrack.CorrectedAltitude);
     }
 

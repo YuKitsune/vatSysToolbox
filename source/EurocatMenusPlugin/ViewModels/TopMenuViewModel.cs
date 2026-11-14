@@ -144,33 +144,40 @@ public partial class TopMenuViewModel : ObservableObject
         _guiInvoker = guiInvoker;
         _errorReporter = errorReporter;
 
+        // vatSys updates its clock on the UI thread. VatSysPatches reports the exceptions.
         vatSysMessenger.Register<TopMenuViewModel, ClockUpdatedMessage>(
             this,
-            (viewModel, _) => viewModel.OnGui(viewModel.RefreshTime));
+            (viewModel, _) => viewModel.RefreshTime());
+
+        // vatSys can change the display settings on any thread
         vatSysMessenger.Register<TopMenuViewModel, DisplaySettingsChangedMessage>(
             this,
             (viewModel, _) => viewModel.OnGui(viewModel.RefreshDisplaySettings));
 
-        // The second ASD changes when an Air window opens, closes, or is activated
+        // The second ASD changes when an Air window opens, closes, or is activated. The form events occur on the UI
+        // thread. VatSysPatches reports the exceptions.
         vatSysMessenger.Register<TopMenuViewModel, WindowChangedMessage>(
             this,
-            (viewModel, _) => viewModel.OnGui(viewModel.RefreshSecondWindow));
+            (viewModel, _) => viewModel.RefreshSecondWindow());
         vatSysMessenger.Register<TopMenuViewModel, WindowClosedMessage>(
             this,
-            (viewModel, _) => viewModel.OnGui(viewModel.RefreshSecondWindow));
+            (viewModel, _) => viewModel.RefreshSecondWindow());
 
+        // vatSys raises the network events on the network thread
         Network.Connected += (_, _) => OnGui(RefreshConnection);
         Network.Disconnected += (_, _) => OnGui(RefreshConnection);
+
+        // vatSys can change the sectors on any thread
         MMI.SectorsControlledChanged += (_, _) => OnGui(RefreshSectors);
 
-        // The short route probe uses the settings of the selected aircraft
+        // The short route probe uses the settings of the selected aircraft. vatSys raises these events on any thread.
         MMI.SelectedTrackChanged += (_, _) => OnGui(RefreshFunctionalStates);
         MMI.QuickLookAllChanged += (_, _) => OnGui(RefreshFunctionalStates);
 
-        // vatSys shows these states in its menu bar
-        vatSysMenu.GetItem(PositionDisplayItem).TextChanged += (_, _) => OnGui(RefreshPositionName);
+        // vatSys shows these states in its menu bar. vatSys changes these menu items only on the UI thread.
+        vatSysMenu.GetItem(PositionDisplayItem).TextChanged += (_, _) => Run(RefreshPositionName);
         vatSysMenu.GetItem(AutomaticVisibilityCentersItem).CheckedChanged +=
-            (_, _) => OnGui(RefreshVisibilityCentersMode);
+            (_, _) => Run(RefreshVisibilityCentersMode);
 
         Refresh();
     }
@@ -296,7 +303,8 @@ public partial class TopMenuViewModel : ObservableObject
         RefreshTime();
     }
 
-    // vatSys sends the events on its own threads
+    // Use this only for the events that vatSys can raise on a thread that is not the UI thread. The view binds to the
+    // properties.
     void OnGui(Action action) => _guiInvoker.InvokeOnGUI(_ => action());
 
     void RefreshConnection()

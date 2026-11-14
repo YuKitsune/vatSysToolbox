@@ -32,6 +32,9 @@ public class Plugin : IPlugin
     const string WindowKey = "TagList";
     const string WindowTitle = "Tag List";
 
+    // The key of the vatSys main form in Application.OpenForms
+    const string VatSysMainFormKey = "MainForm";
+
     // The messages that the plugin sends have no data
     static readonly MessageContent EmptyContent = new("application/json", "{}"u8.ToArray());
 
@@ -58,12 +61,17 @@ public class Plugin : IPlugin
         _windowManager = serviceProvider.GetRequiredService<WindowManager>();
 
         _tagListMenuItem = AddMenuItem("Tag List", ToggleTagList);
-        AddMenuItem("Rad Tag", AddQuickTag);
-        AddMenuItem("Del Tag", RemoveQuickTag);
+        AddMenuItem("Rad Tag", () => QuickTagHelpers.OpenQuickTagWindow(FindMainForm()));
+        AddMenuItem("Del Tag", QuickTagHelpers.RemoveSelectedQuickTag);
 
         HandleMessage(TagListMessages.Toggle, ToggleTagList);
-        HandleMessage(TagListMessages.AddQuickTag, AddQuickTag);
-        HandleMessage(TagListMessages.RemoveQuickTag, RemoveQuickTag);
+        HandleMessage(TagListMessages.RemoveQuickTag, QuickTagHelpers.RemoveSelectedQuickTag);
+
+        // The Quick Tag window is a WinForms form. A form must be made and shown on the UI thread.
+        HandleMessage(
+            TagListMessages.AddQuickTag,
+            () => _guiInvoker.InvokeOnGUI(QuickTagHelpers.OpenQuickTagWindow));
+
         _messenger.Start();
 
         // vatSys does not send events for the quick tags and the radar tracks. Thus, the patches send the events.
@@ -99,11 +107,22 @@ public class Plugin : IPlugin
             canMinimise: false);
     }
 
-    // Adds an item to the vatSys Tools menu
-    static ToolStripMenuItem AddMenuItem(string text, Action click)
+    // Adds an item to the vatSys Tools menu. The click occurs on the UI thread.
+    ToolStripMenuItem AddMenuItem(string text, Action click)
     {
         var item = new ToolStripMenuItem(text);
-        item.Click += (_, _) => click();
+        item.Click += (_, _) =>
+        {
+            // An exception that is not caught on the UI thread stops vatSys.
+            try
+            {
+                click();
+            }
+            catch (Exception ex)
+            {
+                _errorReporter.ReportError(ex);
+            }
+        };
 
         MMI.AddCustomMenuItem(new CustomToolStripMenuItem(
             CustomToolStripMenuItemWindowType.Main,
@@ -113,7 +132,7 @@ public class Plugin : IPlugin
         return item;
     }
 
-    // The messenger receives the messages on a background thread. The actions go to the UI thread themselves.
+    // The messenger receives the messages on a background thread, and reports the exceptions
     void HandleMessage(string type, Action action)
     {
         _messenger.Subscribe(type, (_, _) =>
@@ -123,20 +142,15 @@ public class Plugin : IPlugin
         });
     }
 
-    // These actions can come from a menu item on the UI thread, or from a message on a background thread. The GUI
-    // invoker does the action on the UI thread, and reports the exceptions, because an exception that is not caught on
-    // the UI thread stops vatSys.
-
+    // This action can come from a menu item on the UI thread, or from a message on a background thread. The window
+    // manager opens and closes the window on the UI thread.
     void ToggleTagList()
     {
-        _guiInvoker.InvokeOnGUI(_ =>
-        {
-            // The window manager knows if the window is open
-            if (_windowManager.TryGetWindow(WindowKey, out var _))
-                _windowManager.CloseWindow(WindowKey);
-            else
-                OpenTagList();
-        });
+        // The window manager knows if the window is open
+        if (_windowManager.TryGetWindow(WindowKey, out var _))
+            _windowManager.CloseWindow(WindowKey);
+        else
+            OpenTagList();
     }
 
     // Shows the state in the Tools menu, and tells the other plugins
@@ -146,9 +160,11 @@ public class Plugin : IPlugin
         _ = SendState(isOpen ? TagListMessages.Opened : TagListMessages.Closed);
     }
 
-    void AddQuickTag() => _guiInvoker.InvokeOnGUI(QuickTagHelpers.OpenQuickTagWindow);
-
-    void RemoveQuickTag() => _guiInvoker.InvokeOnGUI(_ => QuickTagHelpers.RemoveSelectedQuickTag());
+    static Form FindMainForm()
+    {
+        return System.Windows.Forms.Application.OpenForms[VatSysMainFormKey]
+            ?? throw new InvalidOperationException("Cannot find the vatSys main form");
+    }
 
     // Tells the other plugins (for example, the Tag List button of the Eurocat Menus plugin) that the Tag List is shown
     // or hidden
