@@ -7,7 +7,7 @@
     <!-- The styles of the popup menus. PopupMenu adds this dictionary to each menu. -->
 
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="/vatSysToolbox;component/Styles.xaml" />
+        <toolbox:SharedResourceDictionary Source="/vatSysToolbox;component/Styles.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
     <!-- The background of a menu or a submenu. The menu has no border, so the buttons fill it. -->

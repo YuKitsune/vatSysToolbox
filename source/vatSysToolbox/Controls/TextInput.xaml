@@ -12,7 +12,7 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/vatSysToolbox;component/Styles.xaml" />
+                <local:SharedResourceDictionary Source="/vatSysToolbox;component/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
             
             <Style x:Key="TextBoxStyle" TargetType="TextBox">

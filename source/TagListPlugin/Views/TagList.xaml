@@ -14,7 +14,7 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/vatSysToolbox;component/Styles.xaml" />
+                <toolbox:SharedResourceDictionary Source="/vatSysToolbox;component/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <Style x:Key="StripTextStyle" TargetType="TextBlock" BasedOn="{StaticResource TextBaseStyle}">

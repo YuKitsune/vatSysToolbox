@@ -57,6 +57,9 @@
 #       and when vatSys changes the mode.
 #     dev.eoinmotherway.eurocatmenus.default-menu-shown, dev.eoinmotherway.eurocatmenus.default-menu-hidden
 #     dev.eoinmotherway.eurocatmenus.full-screen-enabled, dev.eoinmotherway.eurocatmenus.full-screen-disabled
+#     dev.eoinmotherway.eurocatmenus.eurocat-flight-plan-window-enabled,
+#     dev.eoinmotherway.eurocatmenus.eurocat-flight-plan-window-disabled
+#       This plugin sends one of them when it starts, and when the selection of the Flight Plan Window changes.
 #   The CPDLC plugin will send these events. Until then, the CPDLC shim in this plugin sends them:
 #     dev.eoinmotherway.cpdlc.setup-window-opened, dev.eoinmotherway.cpdlc.setup-window-closed
 #     dev.eoinmotherway.cpdlc.ads-contract-window-opened, dev.eoinmotherway.cpdlc.ads-contract-window-closed
@@ -76,6 +79,9 @@
 #     dev.eoinmotherway.eurocatmenus.open-air-window
 #     dev.eoinmotherway.eurocatmenus.open-ground-window
 #     dev.eoinmotherway.eurocatmenus.open-flight-plan-window
+#     dev.eoinmotherway.eurocatmenus.toggle-eurocat-flight-plan-window  Selects the Flight Plan Window of this plugin,
+#                                                                       or the vatSys window. The window that is open
+#                                                                       does not change.
 #     dev.eoinmotherway.eurocatmenus.toggle-strip-setup-window
 #     dev.eoinmotherway.eurocatmenus.toggle-full-screen
 #     dev.eoinmotherway.eurocatmenus.toggle-lateral-conflict-tool
@@ -123,6 +129,13 @@ bottomMenu:
         messageType: dev.eoinmotherway.eurocatmenus.toggle-default-menu
         activeOn: dev.eoinmotherway.eurocatmenus.default-menu-shown
         inactiveOn: dev.eoinmotherway.eurocatmenus.default-menu-hidden
+      # With the check mark, the Flight Plan Window of this plugin opens. With no check mark, the vatSys window opens.
+      - type: toggle
+        text: Eurocat FPL Window
+        recipient: dev.eoinmotherway.eurocatmenus
+        messageType: dev.eoinmotherway.eurocatmenus.toggle-eurocat-flight-plan-window
+        activeOn: dev.eoinmotherway.eurocatmenus.eurocat-flight-plan-window-enabled
+        inactiveOn: dev.eoinmotherway.eurocatmenus.eurocat-flight-plan-window-disabled
       - type: button
         text: Hide Eurocat Menus
         recipient: dev.eoinmotherway.eurocatmenus

@@ -139,9 +139,16 @@ Add the styles to the resources of your view:
 
 ```xml
 <UserControl.Resources>
-    <ResourceDictionary Source="/vatSysToolbox;component/Styles.xaml" />
+    <ResourceDictionary>
+        <ResourceDictionary.MergedDictionaries>
+            <toolbox:SharedResourceDictionary Source="/vatSysToolbox;component/Styles.xaml" />
+        </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
 </UserControl.Resources>
 ```
+
+`SharedResourceDictionary` loads the styles one time, and shares them between all the views. A normal `ResourceDictionary`
+parses the styles again for each view, which makes a window or a popup slow to open.
 
 Use the `VatSysColour` markup extension to get a colour from the vatSys profile:
 

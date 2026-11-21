@@ -16,7 +16,7 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/vatSysToolbox;component/Styles.xaml" />
+                <toolbox:SharedResourceDictionary Source="/vatSysToolbox;component/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <Thickness x:Key="ItemMargin">2</Thickness>
